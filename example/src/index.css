@@ -1,0 +1,18 @@
+*,
+*::before,
+*::after { box-sizing: inherit; }
+
+html {
+  box-sizing: border-box;
+
+  /* force scroll bar, so there's no ui-jank when opening/closing menu on windows */
+  overflow-y: scroll;
+}
+
+body {
+  color: var(--color-gray-90);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-base-400);
+  line-height: 1.7;
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@kaliber/forms",
+  "version": "0.0.1",
+  "main": "src/index.js",
+  "repository": "http://github.com/kaliberjs/forms",
+  "license": "MIT",
+  "private": false
+}
