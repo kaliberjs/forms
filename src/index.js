@@ -1,3 +1,5 @@
+import isEqual from 'react-fast-compare'
+
 function createStore(initialValues) {
   let state = initialValues
   let listeners = new Set()
@@ -18,6 +20,55 @@ function createStore(initialValues) {
   }
 }
 
+export function useForm({ initialValues, fields, onSubmit }) {
+  const initialValuesRef = React.useRef()
+  const fieldsRef = React.useRef()
+  const formFieldsRef = React.useRef()
+
+  if (!isEqual(initialValuesRef.current, initialValues) || !isEqual(fieldsRef.current, fields)
+  ) {
+    initialValuesRef.current = initialValues
+    fieldsRef.current = fields
+    formFieldsRef.current = createFormFields(initialValues, fields)
+  }
+
+  const submit = React.useCallback(handleSubmit, [formFieldsRef.current, onSubmit])
+  const reset = React.useCallback(handleReset, [formFieldsRef.current])
+
+  return { fields: formFieldsRef.current, submit, reset }
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    Object.values(formFieldsRef).forEach(
+      ({ store }) => store.update(x => deriveFieldState({ ...x, isSubmitted: true }))
+    )
+    onSubmit(getFormState(formFieldsRef))
+  }
+
+  function handleReset() {
+    Object.values(formFieldsRef).forEach(
+      ({ store, initialFieldState }) => store.update(
+        x => deriveFieldState(initialFieldState)
+      )
+    )
+  }
+}
+
+export function useFormField(field) {
+  const { id, name, store, initialFieldState, eventHandlers } = field
+  const [fieldState, setFieldState] = React.useState(initialFieldState)
+
+  React.useEffect(
+    () => {
+      setFieldState(store.getValue())
+      return store.subscribe(x => { setFieldState(x) })
+    },
+    [store]
+  )
+
+  return { id, name, state: fieldState, eventHandlers }
+}
+
 export function useFormState(fields) {
   const [formState, setFormState] = React.useState(() => getFormState(fields))
 
@@ -25,22 +76,16 @@ export function useFormState(fields) {
     () => {
       return Object.entries(fields).reduce(
         (unsubscribePrevious, [name, field]) => {
-          const unsubscribe = field.subscribe(({ error, value }) => {
+          const unsubscribe = field.store.subscribe(({ error, value }) => {
             setFormState(({ values, errors }) => {
               const newFormState = {
-                values: {
-                  ...values,
-                  [name]: value,
-                },
-                errors: {
-                  ...errors,
-                  [name]: error,
-                }
+                values: { ...values, [name]: value },
+                errors: { ...errors, [name]: error }
               }
 
               return {
                 ...newFormState,
-                hasErrors: Object.values(newFormState.errors).some(Boolean)
+                invalid: Object.values(newFormState.errors).some(Boolean)
               }
             })
           })
@@ -58,88 +103,81 @@ export function useFormState(fields) {
   return formState
 }
 
-export function useForm(form) {
-  const fields = objectFromEntries(
-    Object.entries(form.fields).map(
-      ([name, [field, meta]]) => {
-        const value = form.initialValues[name]
-        const initialFieldState = {
-          value,
-          error: validate(value),
-          isSubmitted: false,
-          isVisited: false,
-          hasFocus: false,
-          showError: false,
-        }
+function createFormFields(initialValues, fields) {
+  return objectFromEntries(
+    Object.entries(fields).map(
+      ([name, field]) => {
+        const initialValue = initialValues[name]
+        if (initialValue === undefined) console.warn(`Field ${name} has no initial value, this might cause a react error about controlled/uncontrolled components`)
+
+        const validate = createValidate(field)
+        const initialFieldState = deriveFieldState({
+          value: initialValue,
+          error: validate(initialValue),
+        })
         const store = createStore(initialFieldState)
-        const { subscribe, update } = store
         const fieldInfo = {
           id: name,
           name,
-          subscribe,
           eventHandlers: {
             onBlur() {
-              update(x => updateFieldState({ ...x, isVisited: true, hasFocus: false }))
+              store.update(x => deriveFieldState({ ...x, isVisited: true, hasFocus: false }))
             },
             onFocus() {
-              update(x => updateFieldState({ ...x, hasFocus: true }))
+              store.update(x => deriveFieldState({ ...x, hasFocus: true }))
             },
             onChange(eOrValue) {
               const value = eOrValue && eOrValue.target
                 ? eOrValue.target.value
                 : eOrValue
 
-              update(x => updateFieldState({ ...x, value, error: validate(value) }))
+              store.update(x => deriveFieldState({ ...x, value, error: validate(value) }))
             },
           },
           initialFieldState,
-          meta,
           store,
         }
 
         return [name, fieldInfo]
-
-        function validate(value) {
-          return (
-            field.required && !value ? 'required' :
-            field.validate ? validate(value) :
-            null
-          )
-        }
       }
     )
   )
-
-  /** @type {[typeof fields, typeof handleSubmit, typeof reset]} */
-  const result = [fields, handleSubmit, reset]
-  return result
-
-  function handleSubmit(e) {
-    e.preventDefault()
-    Object.values(fields).forEach(({ store }) => store.update(x => updateFieldState({ ...x, isSubmitted: true })))
-    form.onSubmit(getFormState(fields))
-  }
-
-  function reset() {
-    Object.values(fields).forEach(({ store }) => store.update(x => updateFieldState({ ...x, isSubmitted: false })))
-  }
 }
 
-function updateFieldState(state) {
-  const { error, isSubmitted, isVisited, hasFocus } = state
+function createValidate(field) {
+  const validate = (Array.isArray(field) ? field : [field.validate])
+    .filter(Boolean)
+    .map(x => x.validate || x)
+  return [].concat(validate).reduce(
+    (result, f) => value => result(value) || f(value),
+    () => {}
+  )
+}
+
+function deriveFieldState(state) {
+  const {
+    error,
+    isSubmitted = false,
+    isVisited = false,
+    hasFocus = false
+  } = state
 
   return {
     ...state,
+    isSubmitted,
+    isVisited,
+    hasFocus,
+    invalid: !!error,
     showError: !!error && !hasFocus && (isVisited || isSubmitted)
   }
 }
 
 function getFormState(fields) {
   return Object.entries(fields).reduce(
-    ({ hasErrors, values, errors }, [name, field]) => {
+    ({ invalid, values, errors }, [name, field]) => {
       const { value, error } = field.store.getValue()
       return {
-        hasErrors: hasErrors || !!error,
+        invalid: invalid || !!error,
         errors: {
           ...errors,
           [name]: error,
@@ -151,27 +189,11 @@ function getFormState(fields) {
       }
     },
     {
-      hasErrors: false,
+      invalid: false,
       errors: {},
       values: {},
     }
   )
-}
-
-export function useFormField(field) {
-  const { id, name, subscribe, initialFieldState, eventHandlers, meta } = field
-  const [fieldState, setFieldState] = React.useState(initialFieldState)
-  const { value, error, showError } = fieldState
-
-  React.useEffect(
-    () => { return subscribe(x => { setFieldState(x) })},
-    [subscribe]
-  )
-
-  return [
-    { id, name, value, error, showError, eventHandlers },
-    meta,
-  ]
 }
 
 function objectFromEntries(entries) {

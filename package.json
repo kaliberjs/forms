@@ -4,5 +4,8 @@
   "main": "src/index.js",
   "repository": "http://github.com/kaliberjs/forms",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "dependencies": {
+    "react-fast-compare": "^2.0.4"
+  }
 }
