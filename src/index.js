@@ -13,6 +13,7 @@ function createStore(initialValues) {
       if (typeof f !== 'function') throw new Error('update requires a function to update the state')
       state = f(state)
       listeners.forEach(f => { f(state) })
+      return state
     },
     getValue() {
       return state
@@ -21,9 +22,9 @@ function createStore(initialValues) {
 }
 
 export function useForm({ initialValues, fields, onSubmit }) {
-  const initialValuesRef = React.useRef()
-  const fieldsRef = React.useRef()
-  const formFieldsRef = React.useRef()
+  const initialValuesRef = React.useRef(null)
+  const fieldsRef = React.useRef(null)
+  const formFieldsRef = React.useRef(null)
 
   if (!isEqual(initialValuesRef.current, initialValues) || !isEqual(fieldsRef.current, fields)
   ) {
@@ -47,11 +48,20 @@ export function useForm({ initialValues, fields, onSubmit }) {
 
   function handleReset() {
     Object.values(formFieldsRef).forEach(
-      ({ store, initialFieldState }) => store.update(
-        x => deriveFieldState(initialFieldState)
-      )
+      ({ store, initialFieldState }) => store.update(_ => initialFieldState)
     )
   }
+}
+
+export function useFormState(fields) {
+  const [formState, setFormState] = React.useState(() => getFormState(fields))
+
+  React.useEffect(
+    () => subscribeToAll(fields, setFormState),
+    [fields]
+  )
+
+  return formState
 }
 
 export function useFormField(field) {
@@ -69,89 +79,187 @@ export function useFormField(field) {
   return { id, name, state: fieldState, eventHandlers }
 }
 
-export function useFormState(fields) {
-  const [formState, setFormState] = React.useState(() => getFormState(fields))
+function subscribeToAll(fields, update) {
+  return Object.values(fields).reduce(
+    (unsubscribePrevious, field) => {
+      const unsubscribe = field.store.subscribe(_ => update(getFormState(fields)))
+      return () => {
+        unsubscribePrevious()
+        unsubscribe()
+      }
+    },
+    () => {}
+  )
+}
+
+function createFormFields(initialValues, fields, namePrefix = '') {
+  return mapValues(fields, (field, name) => {
+    return getFieldInfo(`${namePrefix}${name}`, field, initialValues[name])
+  })
+}
+
+function getFieldInfo(name, field, initialValue) {
+  const { type, ...normalizedField } = normalize(field)
+
+  return ({
+    basic: getBasicFieldInfo,
+    array: getArrayFieldInfo,
+  }[type] || unknownType)({ name, initialValue, field: normalizedField })
+
+  function unknownType() {
+    console.error(`Unknown type '${type}'`)
+  }
+}
+
+function getArrayFieldInfo({ name, initialValue = [], field }) {
+  console.log(name, initialValue, field)
+  function createFormFieldsAt(initialValue, i) {
+    const namePrefix = `${name}[${i}].`
+    return createFormFields(initialValue, field.fields, namePrefix) // rename .field to .form
+  }
+  const initialFieldsValue = initialValue.map(createFormFieldsAt)
+  const initialFieldState = deriveFieldState({
+    value: initialFieldsValue,
+    error: field.validate(initialValue),
+  })
+  const arrayStore = createStore(initialFieldState)
+  const store = {
+    update(f) {
+      return arrayStore.update(x => {
+        const update = f(x)
+        if (update.value !== x.value) throw new Error(`Forbidden value update of ${name}`)
+        // propagate isSubmitted
+        x.value.forEach(fields =>
+          Object.values(fields).forEach(({ store }) =>
+            store.update(x => deriveFieldState({ ...x, isSubmitted: update.isSubmitted }))
+          )
+        )
+        return update
+      })
+    },
+    getValue() {
+      const { value: arrayStoreValue, ...x } = arrayStore.getValue()
+      const { value, error, invalid } = arrayStoreValue.map(getFormState).reduce(
+        ({ value, error, invalid }, formState) => ({
+          value: [...value, formState.values],
+          error: [...error, formState.errors],
+          invalid: invalid || formState.invalid,
+        }),
+        { value: [], error: [], invalid: false }
+      )
+      return { ...x, value, error, invalid }
+    },
+    subscribe(f) {
+      let unsubscribeFromChildren = subscribeToChildren()
+      const unsubscribe = arrayStore.subscribe(_ => {
+        // things have changed, resubscribe
+        unsubscribeFromChildren()
+        unsubscribeFromChildren = subscribeToChildren()
+        f(store.getValue())
+      })
+
+      return () => {
+        unsubscribeFromChildren()
+        unsubscribe()
+      }
+
+      function subscribeToChildren() {
+        return arrayStore.getValue().value.reduce(
+          (unsubscribePrevious, fields) => {
+            const unsubscribe = subscribeToAll(fields, _ => f(store.getValue()))
+            return () => {
+              unsubscribePrevious()
+              unsubscribe()
+            }
+          },
+          () => {}
+        )
+      }
+    }
+  }
+
+  return {
+    id: name,
+    name,
+    initialFieldState,
+    store,
+    arrayStore,
+    helpers: {
+      add(initialValue) {
+        arrayStore.update(x =>
+          deriveFieldState({
+            ...x,
+            value: [...x.value, createFormFieldsAt(initialValue, x.value.length)]
+          })
+        )
+      }
+    }
+  }
+}
+
+export function useArrayFormField(field) {
+  const { id, name, helpers, arrayStore, initialFieldState, eventHandlers } = field
+  const [fieldState, setFieldState] = React.useState(initialFieldState)
 
   React.useEffect(
     () => {
-      return Object.entries(fields).reduce(
-        (unsubscribePrevious, [name, field]) => {
-          const unsubscribe = field.store.subscribe(({ error, value }) => {
-            setFormState(({ values, errors }) => {
-              const newFormState = {
-                values: { ...values, [name]: value },
-                errors: { ...errors, [name]: error }
-              }
-
-              return {
-                ...newFormState,
-                invalid: Object.values(newFormState.errors).some(Boolean)
-              }
-            })
-          })
-          return () => {
-            unsubscribePrevious()
-            unsubscribe()
-          }
-        },
-        () => {}
-      )
+      setFieldState(arrayStore.getValue())
+      return arrayStore.subscribe(x => { setFieldState(x) })
     },
-    [fields]
+    [arrayStore]
   )
 
-  return formState
+  return { id, name, state: fieldState, helpers }
 }
 
-function createFormFields(initialValues, fields) {
-  return objectFromEntries(
-    Object.entries(fields).map(
-      ([name, field]) => {
-        const initialValue = initialValues[name]
-        if (initialValue === undefined) console.warn(`Field ${name} has no initial value, this might cause a react error about controlled/uncontrolled components`)
+function getBasicFieldInfo({ name, initialValue, field }) {
+  const initialFieldState = deriveFieldState({
+    value: initialValue,
+    error: field.validate(initialValue),
+  })
+  const store = createStore(initialFieldState)
 
-        const validate = createValidate(field)
-        const initialFieldState = deriveFieldState({
-          value: initialValue,
-          error: validate(initialValue),
-        })
-        const store = createStore(initialFieldState)
-        const fieldInfo = {
-          id: name,
-          name,
-          eventHandlers: {
-            onBlur() {
-              store.update(x => deriveFieldState({ ...x, isVisited: true, hasFocus: false }))
-            },
-            onFocus() {
-              store.update(x => deriveFieldState({ ...x, hasFocus: true }))
-            },
-            onChange(eOrValue) {
-              const value = eOrValue && eOrValue.target
-                ? eOrValue.target.value
-                : eOrValue
+  return {
+    id: name,
+    name,
+    initialFieldState,
+    store,
+    eventHandlers: {
+      onBlur() {
+        store.update(x => deriveFieldState({ ...x, hasFocus: false }))
+      },
+      onFocus() {
+        store.update(x => deriveFieldState({ ...x, hasFocus: true, isVisited: true }))
+      },
+      onChange(eOrValue) {
+        const value = eOrValue && eOrValue.target
+          ? eOrValue.target.value
+          : eOrValue
 
-              store.update(x => deriveFieldState({ ...x, value, error: validate(value) }))
-            },
-          },
-          initialFieldState,
-          store,
-        }
+        store.update(x => deriveFieldState({ ...x, value, error: field.validate(value) }))
+      },
+    },
+  }
+}
 
-        return [name, fieldInfo]
-      }
+function normalize(field) {
+  const { validate = [], ...withType } = (
+    Array.isArray(field) ? { type: 'basic', validate: field } :
+    !field.type ? { ...field, type: 'basic' } :
+    field
+  )
+
+  const withValidate = {
+    ...withType,
+    validate: [].concat(validate).reduce(
+      (previous, next) => x => previous(x) || (
+        next.validate ? next.validate(x) : next(x)
+      ),
+      () => {}
     )
-  )
-}
+  }
 
-function createValidate(field) {
-  const validate = (Array.isArray(field) ? field : [field.validate])
-    .filter(Boolean)
-    .map(x => x.validate || x)
-  return [].concat(validate).reduce(
-    (result, f) => value => result(value) || f(value),
-    () => {}
-  )
+  return withValidate
 }
 
 function deriveFieldState(state) {
@@ -175,9 +283,9 @@ function deriveFieldState(state) {
 function getFormState(fields) {
   return Object.entries(fields).reduce(
     ({ invalid, values, errors }, [name, field]) => {
-      const { value, error } = field.store.getValue()
+      const { value, error, invalid: fieldInvalid } = field.store.getValue()
       return {
-        invalid: invalid || !!error,
+        invalid: invalid || fieldInvalid,
         errors: {
           ...errors,
           [name]: error,
@@ -196,9 +304,9 @@ function getFormState(fields) {
   )
 }
 
-function objectFromEntries(entries) {
-  return entries.reduce(
-    (result, [k, v]) => (result[k] = v, result),
+function mapValues(o, f) {
+  return Object.entries(o).reduce(
+    (result, [k, v]) => (result[k] = f(v, k), result),
     {}
   )
 }

@@ -1,4 +1,4 @@
-import { useForm, useFormField, useFormState } from '@kaliber/forms'
+import { useForm, useFormField, useFormState, useArrayFormField } from '@kaliber/forms'
 
 export default function App() {
 
@@ -7,7 +7,9 @@ export default function App() {
   )
 }
 function object(fields) { return { type: 'object', fields } }
-function array(field) { return { type: 'array', field } }
+function array(validateOrFields, fields) {
+  return { type: 'array', fields: fields || validateOrFields, validate: fields && validateOrFields }
+}
 function message(id, ...params) {
   return { id, params }
 }
@@ -25,21 +27,26 @@ function MyForm() {
   const { fields, submit } = useForm({
     initialValues: {
       name: 'Test',
+      age: '',
+      friends: [{ name: 'Fred' }],
     },
     fields: {
       name: [required, minLength(3)],
       nickname: {},
       age: [number, min(18)],
-      address: object({
-        street: required,
-        city: required,
+      // address: object({
+      //   street: required,
+      //   city: required,
+      // }),
+      friends: array(minLength(1), {
+        name: required,
       }),
-      friends: array({
+      otherFriends: array({
         name: required,
       }),
       books: {
         type: 'array',
-        field: {
+        fields: {
           name: required,
           author: optional,
         }
@@ -55,9 +62,28 @@ function MyForm() {
       <form onSubmit={submit}>
         <TextInput field={fields.name} label='Name' />
         <NumberInput field={fields.age} label='Leeftijd' />
+        <ArrayField field={fields.friends} render={({ id, fields }) => (
+          <div key={id}>
+            <TextInput key={fields.name.id} field={fields.name} label='Friend name' />
+          </div>
+        )} />
         <FormValues {...{ fields }} />
       </form>
     </>
+  )
+}
+
+function ArrayField({ field, render }) {
+  const { id, state: { value, error, showError }, helpers } = useArrayFormField(field)
+
+  console.log(`[${id}] render array field`)
+
+  return (
+    <div {...{ id }}>
+      {value.map((fields, i) => render({ id: i, fields, helpers }))}
+      <button type='button' onClick={_ => helpers.add({})}>+</button>
+      {showError && <p>{JSON.stringify(error)}</p>}
+    </div>
   )
 }
 
@@ -68,7 +94,6 @@ function FormValues({ fields }) {
 
 function TextInput({ field, label }) {
   const { name, state, eventHandlers } = useFormField(field)
-
   return <InputBase {...{ name, label, state, eventHandlers }} />
 }
 
@@ -86,15 +111,18 @@ function NumberInput({ field, label }) {
 }
 
 function InputBase({ type = 'text', name, label, state, eventHandlers }) {
-  const { value, invalid, error, showError, isVisited } = state
+  const { value, invalid, error, showError } = state
+  console.log(`[${name}] render ${type} field`)
   return (
     <>
       <label htmlFor={name}>{label}</label>
       <input
         id={name}
-        {...{ type, value }}
+        value={value === undefined ? '' : value}
+        {...{ type }}
         {...eventHandlers}
-      />{isVisited && !invalid && '✓'}
+      />{!invalid && '✓'}
+      <br />
       {showError && <p>{JSON.stringify(error)}</p>}
     </>
   )

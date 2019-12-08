@@ -16,3 +16,8 @@ body {
   font-weight: var(--font-weight-base-400);
   line-height: 1.7;
 }
+
+pre {
+  font-size: 11px;
+  line-height: 1;
+}
