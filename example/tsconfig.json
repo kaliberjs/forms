@@ -5,6 +5,7 @@
   "include": ["./src/**/*", "./types/**/*", "./node_modules/@kaliber/**/*"],
   "compilerOptions": {
     "moduleResolution": "node",
+    "target": "ESNext",
     "resolveJsonModule": true,
     "preserveSymlinks": true,
     "allowSyntheticDefaultImports": true,

@@ -7,8 +7,16 @@ export default function App() {
   )
 }
 function object(fields) { return { type: 'object', fields } }
-function array(validateOrFields, fields) {
-  return { type: 'array', fields: fields || validateOrFields, validate: fields && validateOrFields }
+/**
+ * @template A
+ * @template B
+ *
+ * @type {(fieldsOrValidate: A, fields: B | void) => forms.Choose<A, B, { type: 'array', fields: A, validate: undefined }, { type: 'array', fields: B, validate: A }>}
+ */
+function array(fieldsOrValidate, fields = undefined) {
+  return /** @type {forms.Choose<A, B, { type: 'array', fields: A, validate: undefined }, { type: 'array', fields: B, validate: A }>} */ (
+    { type: 'array', fields: fields || fieldsOrValidate, validate: fields && fieldsOrValidate }
+  )
 }
 function message(id, ...params) {
   return { id, params }
@@ -24,11 +32,18 @@ function min(min) {
 }
 
 function MyForm() {
+  const z1 = array(minLength(1), {
+    name: required,
+  })
+  const z2 = array({
+    name: required,
+  })
   const { fields, submit } = useForm({
     initialValues: {
       name: 'Test',
       age: '',
       friends: [{ name: 'Fred' }],
+      // test: '',
     },
     fields: {
       name: [required, minLength(3)],
@@ -44,6 +59,7 @@ function MyForm() {
       otherFriends: array({
         name: required,
       }),
+
       books: {
         type: 'array',
         fields: {
@@ -52,7 +68,10 @@ function MyForm() {
         }
       }
     },
-    onSubmit: x => console.log(x)
+    onSubmit: x => {
+      const z = x.friends
+      z.forEach(x => x.name)
+    }
   })
 
   console.log('MyForm render, is that ok?')
@@ -67,6 +86,7 @@ function MyForm() {
             <TextInput key={fields.name.id} field={fields.name} label='Friend name' />
           </div>
         )} />
+        <button type='submit'>submit</button>
         <FormValues {...{ fields }} />
       </form>
     </>
