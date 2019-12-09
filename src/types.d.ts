@@ -1,29 +1,45 @@
 declare namespace forms {
   export type Fields = { [name:string]: Field }
-  export type Field = ArrayField | ValidationArray | BasicField | EmptyField
+  export type Field = ArrayField | BasicField | ValidationArray
+  export type NormalizedField = NormalizedBasicField | NormalizedArrayField
 
   export type ValuesOf<T extends Fields> = { [K in keyof T]: ValueOf<T[K]> }
-  export type ValueOf<T> =
+  export type ValueOf<T extends Field> =
     T extends ArrayField ? Array<ValuesOf<T['fields']>> :
     T extends BasicField ? any :
-    T extends ValidationArray ? any :
-    T extends EmptyField ? any :
+    T extends Validate ? any :
     never
 
-  export type Choose<A, B, NoB, Both> =
-    B extends IsAny<B> ? NoB :
-    Both
+  export type If<X, Condition, Then> =
+    X extends Condition ? Then : never
+
+  export type IfAny<A, Then> =
+    A extends IsAny<A> ? Then : never
+  export type IfNotAny<A, Then> =
+    A extends IsAny<A> ? never : Then
+
+  export type ExpandRecursively<T> = T extends object
+    ? (
+      T extends infer O ? { [K in keyof O]: ExpandRecursively<O[K]> } : never
+    )
+    : (
+      T extends infer O ? O : never
+    )
 
   type IsAny<A> =
     unknown extends A ? (A extends unknown ? A : never) : never
 
-  type Validate = ValidationArray | ValidationObject | ValidationFunction
+  export type Validate = ValidationArray | ValidationObject | ValidationFunction
   type ValidationFunction = (x: any) => ValidationResults
-  type ValidationObject = { validate: ValidationFunction | undefined }
+  type ValidationObject = { validate: ValidationFunction }
   type ValidationArray = Array<ValidationObject | ValidationFunction>
-  type EmptyField = {}
-  type BasicField = { type: 'basic', validate?: Validate }
-  type ArrayField = { type: 'array', validate?: Validate, fields: Fields }
+  export type BasicField = { validate?: Validate }
+  export type ArrayField = { type: 'array', validate?: Validate, fields: Fields }
+
+  type NormalizedBasicField = { type: 'basic', validation: ValidationFunction }
+  type NormalizedArrayField = { type: 'array', validation: ValidationFunction, fields: NormalizedFields }
+
+  type NormalizedFields = { [name: string]: NormalizedField }
 
   type ValidationResults = { id: string, params: Array<any> }
 

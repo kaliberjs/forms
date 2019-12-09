@@ -7,14 +7,24 @@ export default function App() {
   )
 }
 function object(fields) { return { type: 'object', fields } }
+// /**
+//  * @template A
+//  * @template B
+//  *
+//  * @type {(fieldsOrValidate: A, fields: B | undefined) => forms.IfAny<B, { type: 'array', fields: A, validate: undefined }> | forms.IfNotAny<B, { type: 'array', fields: B, validate: A }>}
+//  */
 /**
- * @template A
- * @template B
- *
- * @type {(fieldsOrValidate: A, fields: B | void) => forms.Choose<A, B, { type: 'array', fields: A, validate: undefined }, { type: 'array', fields: B, validate: A }>}
+ * @typedef {[forms.Fields]} OptionA
+ * @typedef {[forms.Validate, forms.Fields]} OptionB
  */
-function array(fieldsOrValidate, fields = undefined) {
-  return /** @type {forms.Choose<A, B, { type: 'array', fields: A, validate: undefined }, { type: 'array', fields: B, validate: A }>} */ (
+/**
+ * @template {OptionA | OptionB} T
+ * @param {T} args
+ *
+ * @returns {forms.If<T, OptionA, { type: 'array', fields: T[0], validate: undefined }> | forms.If<T, OptionB, { type: 'array', fields: T[1], validate: T[0] }>}
+ */
+function array(...[fieldsOrValidate, fields]) {
+  return /** @type {forms.If<T, OptionA, { type: 'array', fields: T[0], validate: undefined }> | forms.If<T, OptionB, { type: 'array', fields: T[1], validate: T[0] }>}  */ (
     { type: 'array', fields: fields || fieldsOrValidate, validate: fields && fieldsOrValidate }
   )
 }
@@ -38,6 +48,9 @@ function MyForm() {
   const z2 = array({
     name: required,
   })
+  const other2 = {
+    type: 'string'
+  }
   const { fields, submit } = useForm({
     initialValues: {
       name: 'Test',
@@ -46,8 +59,11 @@ function MyForm() {
       // test: '',
     },
     fields: {
+      // other2,
+      // test: { type: 'test '},
+      other: {},
       name: [required, minLength(3)],
-      nickname: {},
+      nickname: [],
       age: [number, min(18)],
       // address: object({
       //   street: required,
@@ -71,6 +87,8 @@ function MyForm() {
     onSubmit: x => {
       const z = x.friends
       z.forEach(x => x.name)
+      x.other
+      x.nickname
     }
   })
 
