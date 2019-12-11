@@ -29,12 +29,17 @@ function createState(initialValues) {
 
 /**
  * @template {forms.Fields} X
- * @param {{ initialValues: Partial<forms.ValuesOf<X>>, fields: X, onSubmit: (formValues: forms.ExpandRecursively<forms.ValuesOf<X>>) => void }} props
+ *  // initialValues: forms.ExpandRecursively<Partial<forms.ValuesOf<X>>>,
+ * @param {{
+ *  initialValues: Partial<forms.ValuesOf<X>>,
+ *  fields: X,
+ *  onSubmit: (formstate: forms.FormState<X>) => void
+ * }} props
  */
 export function useForm({ initialValues, fields, onSubmit }) {
   const initialValuesRef = React.useRef(/** @type {Partial<forms.ValuesOf<X>>} */ (null))
   const fieldsRef = React.useRef(/** @type {X} */ (null))
-  const formFieldsRef = React.useRef(null)
+  const formFieldsRef = React.useRef(/** @type {forms.FormFieldsInfo<X>} */ (null))
 
   if (!isEqual(initialValuesRef.current, initialValues) || !isEqual(fieldsRef.current, fields)
   ) {
@@ -51,7 +56,7 @@ export function useForm({ initialValues, fields, onSubmit }) {
   function handleSubmit(e) {
     e.preventDefault()
     Object.values(formFieldsRef.current).forEach(
-      ({ store }) => store.update(x => deriveFieldState({ ...x, isSubmitted: true }))
+      x => x.state.setSubmitted(true)
     )
     onSubmit(getFormState(formFieldsRef.current))
   }
@@ -74,9 +79,10 @@ export function useFormState(fields) {
   return formState
 }
 
+/** @param {forms.BasicFieldInfo} field */
 export function useFormField(field) {
-  const { id, name, state, initialFieldState, eventHandlers } = field
-  const [fieldState, setFieldState] = React.useState(initialFieldState)
+  const { name, state, eventHandlers } = field
+  const [fieldState, setFieldState] = React.useState(state.initial)
 
   React.useEffect(
     () => {
@@ -86,7 +92,7 @@ export function useFormField(field) {
     [state]
   )
 
-  return { id, name, state: fieldState, eventHandlers }
+  return { name, state: fieldState, eventHandlers }
 }
 
 function subscribeToAll(fields, update) {
@@ -120,14 +126,16 @@ function createFormFields(initialValues, fields, namePrefix = '') {
  * @param {any} initialValue
  */
 function getFieldInfo(name, field, initialValue) {
-  const { type, ...normalizedField } = field
+  return (
+    isArrayField(field) ? getArrayFieldInfo({ name, field, initialValue }) :
+    isBasicField(field) ? getBasicFieldInfo({ name, field, initialValue }) :
+    throwError(`Did you turn off typescript type checking?`)
+  )
 
-  const constructors = {
-    basic: getBasicFieldInfo,
-    array: getArrayFieldInfo,
-  }
-  const constructor = constructors[type]
-  return constructor({ name, initialValue, field: normalizedField })
+  /** @param {forms.NormalizedField} x @returns {x is forms.NormalizedArrayField} */
+  function isArrayField(x) { return x.type === 'array' }
+  /** @param {forms.NormalizedField} x @returns {x is forms.NormalizedBasicField} */
+  function isBasicField(x) { return x.type === 'basic' }
 }
 
 /**
@@ -137,16 +145,13 @@ function getFieldInfo(name, field, initialValue) {
  * @param {forms.NormalizedArrayField} props.field
  */
 function getArrayFieldInfo({ name, initialValue = [], field }) {
-  function createFormFieldsAt(initialValue, i) {
-    const namePrefix = `${name}[${i}].`
-    return createFormFields(initialValue, field.fields, namePrefix)
-  }
   const initialFieldsValue = initialValue.map(createFormFieldsAt)
   const initialFieldState = deriveFieldState({
     value: initialFieldsValue,
-    error: field.validation(initialValue),
+    error: field.validate(initialValue),
   })
   const state = createState(initialFieldState)
+
   const store = {
     getValue() {
       const { value: arrayStoreValue, ...x } = state.getValue()
@@ -193,11 +198,16 @@ function getArrayFieldInfo({ name, initialValue = [], field }) {
     id: name,
     name,
     // initialFieldState,
-    setSubmitted(isSubmitted) {
-      const { value } = state.update(x => updateState(x, { isSubmitted }))
-      value.forEach(fields => {
-        fields.forEach(x => x.setSubmitted(isSubmitted))
-      })
+    get value() {
+
+    },
+    state: {
+      setSubmitted(isSubmitted) {
+        const { value } = state.update(x => updateState(x, { isSubmitted }))
+        value.forEach(fields => {
+          fields.forEach(x => x.setSubmitted(isSubmitted))
+        })
+      },
     },
     helpers: {
       add(initialValue) {
@@ -211,6 +221,11 @@ function getArrayFieldInfo({ name, initialValue = [], field }) {
     }
   }
   return x
+
+  function createFormFieldsAt(initialValue, i) {
+    const namePrefix = `${name}[${i}].`
+    return createFormFields(initialValue, field.fields, namePrefix)
+  }
 }
 
 function updateState(fieldState, update) {
@@ -237,7 +252,7 @@ export function useArrayFormField(field) {
  * @param {object} props
  * @param {string} props.name
  * @param {any} props.initialValue
- * @param {forms.BasicField} props.field
+ * @param {forms.NormalizedBasicField} props.field
  */
 function getBasicFieldInfo({ name, initialValue, field }) {
   const initialFieldState = deriveFieldState({
@@ -247,9 +262,11 @@ function getBasicFieldInfo({ name, initialValue, field }) {
   const state = createState(initialFieldState)
 
   return {
-    id: name,
     name,
     initialFieldState,
+    get value() {
+      return state.current
+    },
     state: {
       get current() {
         return state.current
@@ -287,26 +304,26 @@ function normalize(field) {
   return (
     isValidationArray(field) ? convertValidationArray(field) :
     isArrayField(field) ? convertArrayField(field) :
-    convertToBasicField(field)
+    convertSimpleField(field)
   )
 
   /** @param {forms.Field} x @returns {x is forms.ValidationArray} */
   function isValidationArray(x) { return x instanceof Array }
   /** @param {forms.ValidationArray} x @returns {forms.NormalizedBasicField} */
   function convertValidationArray(x) {
-    return { type: 'basic', validation: toValidationFunction(x) }
+    return { type: 'basic', validate: toValidationFunction(x) }
   }
 
   /** @param {forms.Field} x @returns {x is forms.ArrayField } */
   function isArrayField(x) { return 'type' in x && x.type === 'array' }
   /** @param {forms.ArrayField} x @returns {forms.NormalizedArrayField} */
   function convertArrayField(x) {
-    return { type: 'array', validation: toValidationFunction(x.validate), fields: mapValues(x.fields, normalize) }
+    return { type: 'array', validate: toValidationFunction(x.validate), fields: x.fields }
   }
 
-  /** @param {forms.BasicField} x @returns {forms.NormalizedBasicField} */
-  function convertToBasicField(x) {
-    return { type: 'basic', validation: toValidationFunction(x.validate) }
+  /** @param {forms.SimpleField} x @returns {forms.NormalizedBasicField} */
+  function convertSimpleField(x) {
+    return { type: 'basic', validate: toValidationFunction(x.validate) }
   }
 
   /** @param {forms.Validate} x @returns {forms.ValidationFunction} */
@@ -327,10 +344,10 @@ function normalize(field) {
 
 /**
  * @template T
- * @template {{ value: T, error: any, isSubmitted?: boolean, isVisited?: boolean, hasFocus?: boolean }} S
+ * @template {{ error: forms.ValidationResult, value: T } & Partial<forms.FieldState<T>>} S
  * @param {S} state
  *
- * @returns {S & { invalid: boolean, showError: boolean, isSubmitted: boolean, isVisited: boolean, hasFocus: boolean }}
+ * @returns {S & forms.FieldState<T>}
  */
 function deriveFieldState(state) {
   const {
@@ -350,10 +367,22 @@ function deriveFieldState(state) {
   }
 }
 
+/**
+ * @template {forms.Fields} X
+ * @param {forms.FormFieldsInfo<X>} fields
+ */
 function getFormState(fields) {
+  /** @type {forms.FormState<X>} */
+  const emptyFormState = {
+    invalid: false,
+    errors: /** @type {forms.FormState<X>['errors']} */ ({}),
+    values: /** @type {forms.FormState<X>['values']} */ ({}),
+  }
   return Object.entries(fields).reduce(
     ({ invalid, values, errors }, [name, field]) => {
-      const { value, error, invalid: fieldInvalid } = field.state.current
+      const { value, error, invalid: fieldInvalid } = field.value instanceof Array
+        ? { value: field.value.map(x => x.values), error: field.value.map(x => x.errors), invalid: field.value.some(x => x.invalid) }
+        : field.value
       return {
         invalid: invalid || fieldInvalid,
         errors: {
@@ -366,11 +395,7 @@ function getFormState(fields) {
         },
       }
     },
-    {
-      invalid: false,
-      errors: {},
-      values: {},
-    }
+    emptyFormState
   )
 }
 
@@ -390,3 +415,6 @@ function mapValues(o, f) {
     /** @type {{ [K in keyof O]: T }} */ ({})
   )
 }
+
+/** @returns {void} */
+function throwError(e) { throw new Error(e) }

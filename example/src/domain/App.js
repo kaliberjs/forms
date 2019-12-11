@@ -84,7 +84,10 @@ function MyForm() {
         }
       }
     },
-    onSubmit: x => {
+    onSubmit: y => {
+      const a = expand(y)
+      y.errors.books
+      const x = y.values
       const z = x.friends
       z.forEach(x => x.name)
       x.other
@@ -165,3 +168,6 @@ function InputBase({ type = 'text', name, label, state, eventHandlers }) {
     </>
   )
 }
+
+/** @template X @param {X} x @returns {forms.ExpandRecursively<X>} */
+function expand(x) { return x }
