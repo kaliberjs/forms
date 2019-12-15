@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ln -sf -T ../example/node_modules/react/ ../node_modules/react
+ln -sf -T ../../../ ./node_modules/@kaliber/forms
