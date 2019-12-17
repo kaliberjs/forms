@@ -12,7 +12,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   const internalState = deriveFieldState({
     value: fields,
-    error: field.validate(fields),
+    error: field.validate && field.validate(fields),
   })
 
   return {
@@ -95,7 +95,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 function createBasicFormField({ name, initialValue, field }) {
   const initialFieldState = deriveFieldState({
     value: initialValue,
-    error: field.validate(initialValue),
+    error: field.validate && field.validate(initialValue),
   })
   const internalState = createState(initialFieldState)
 
@@ -132,7 +132,7 @@ function createBasicFormField({ name, initialValue, field }) {
           ? eOrValue.target.value
           : eOrValue
 
-        internalState.update(x => updateState(x, { value, error: field.validate(value) }))
+        internalState.update(x => updateState(x, { value, error: field.validate && field.validate(value) }))
       },
     },
   }
@@ -142,7 +142,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
   const initialFields = initialValue.map(createFormFieldsAt)
   const initialState = deriveFieldState({
     value: initialFields,
-    error: field.validate(initialFields),
+    error: field.validate && field.validate(initialFields),
   })
   const internalState = createState(initialState)
 
@@ -182,7 +182,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
           return deriveFieldState({
             ...x,
             value: fieldsValue,
-            error: field.validate(fieldsValue),
+            error: field.validate && field.validate(fieldsValue),
           })
         })
       },
@@ -192,7 +192,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
           return deriveFieldState({
             ...x,
             value: fieldsValue,
-            error: field.validate(fieldsValue)
+            error: field.validate && field.validate(fieldsValue)
           })
         })
       }
