@@ -1,6 +1,7 @@
 import isEqual from 'react-fast-compare'
 import { createObjectFormField } from './fields'
 import { normalize } from './normalize'
+import * as snapshot from './snapshot'
 
 export function useForm({ fields, initialValues, onSubmit }) {
   const initialValuesRef = React.useRef(null)
@@ -25,7 +26,7 @@ export function useForm({ fields, initialValues, onSubmit }) {
   function handleSubmit(e) {
     e.preventDefault()
     formRef.current.setSubmitted(true)
-    onSubmit(formRef.current.value.current)
+    onSubmit(snapshot.get(formRef.current))
   }
 
   function handleReset() {
@@ -34,11 +35,11 @@ export function useForm({ fields, initialValues, onSubmit }) {
 }
 
 function useFieldState(state) {
-  const [fieldState, setFieldState] = React.useState(() => state.current)
+  const [fieldState, setFieldState] = React.useState(state.get)
 
   React.useEffect(
     () => {
-      setFieldState(state.current)
+      setFieldState(state.get())
       return state.subscribe(setFieldState)
     },
     [state]
@@ -48,7 +49,14 @@ function useFieldState(state) {
 }
 
 export function useFieldValue(field) {
-  return useFieldState(field.value)
+  const state = React.useMemo(
+    () => ({
+      get() { return snapshot.get(field) },
+      subscribe(f) { return snapshot.subscribe(field, f) }
+    }),
+    [field]
+  )
+  return useFieldState(state)
 }
 
 export function useFormField(field) {

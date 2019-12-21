@@ -13,7 +13,7 @@ export function createState(initialValues) {
       listeners.forEach(f => { f(state) })
       return state
     },
-    get current() {
+    get() {
       return state
     },
   }

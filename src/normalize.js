@@ -15,9 +15,6 @@ export function normalize(field) {
     return x instanceof Array &&
       { type: 'basic', validate: toValidationFunction(x) }
   }
-  function convertSimpleField(x) {
-    return { type: 'basic', validate: toValidationFunction(x.validate) }
-  }
   function convertArrayField(x) {
     return 'type' in x && x.type === 'array' &&
       { type: 'array', validate: toValidationFunction(x.validate), fields: x.fields }
@@ -25,6 +22,9 @@ export function normalize(field) {
   function convertObjectField(x) {
     return 'type' in x && x.type === 'object' &&
       { type: 'object', validate: toValidationFunction(x.validate), fields: x.fields }
+  }
+  function convertSimpleField(x) {
+    return { type: 'basic', validate: toValidationFunction(x.validate) }
   }
 
   function toValidationFunction(x = []) {
