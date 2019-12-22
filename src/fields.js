@@ -1,5 +1,5 @@
 import { normalize } from './normalize'
-import { createState } from './state'
+import { createState, subscribeToAll } from './state'
 
 const constructors = {
   basic: createBasicFormField,
@@ -9,26 +9,47 @@ const constructors = {
 
 export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
-  const fields = createFormFields(initialValue, field.fields, name && `${name}.`)
+  const children = createFormFields(initialValue, field.fields, name && `${name}.`)
 
   const initialState = deriveFieldState({
-    value: fields,
-    error: field.validate && field.validate(fields),
+    value: children,
+    error: field.validate && field.validate(initialValue),
   })
 
   const internalState = createState(initialState)
 
+  const value = {
+    get() {
+      return Object.entries(children).reduce(
+        (result, [name, child]) => ({ ...result, [name]: child.value.get() }),
+        {}
+      )
+    },
+    subscribe(f) {
+      const children = internalState.get().value
+      return subscribeToAll(Object.values(children).map(x => x.value), _ => f(value.get()))
+    },
+  }
+
+  if (field.validate) {
+    value.subscribe(value => {
+      internalState.update(x => updateState(x, { error: field.validate(value) }))
+    })
+  }
+
   return {
     type: 'object',
     name,
-    fields,
+    fields: children,
     setSubmitted(isSubmitted) {
-      const { value: fields } = internalState.update(x => updateState(x, { isSubmitted }))
-      Object.values(fields).forEach(x => x.setSubmitted(isSubmitted))
+      const { value: children } = internalState.update(x => updateState(x, { isSubmitted }))
+      Object.values(children).forEach(x => x.setSubmitted(isSubmitted))
     },
     reset() {
-      Object.values(fields).forEach(x => x.reset())
+      const { value: children } = internalState.update(x => updateState(x, initialState))
+      Object.values(children).forEach(x => x.reset())
     },
+    value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
   }
 
@@ -46,12 +67,40 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 }
 
 function createArrayFormField({ name, initialValue = [], field }) {
-  const initialFields = initialValue.map(createFormFieldsAt)
+  const initialChildren = initialValue.map(createFormFieldsAt)
   const initialState = deriveFieldState({
-    value: initialFields,
-    error: field.validate && field.validate(initialFields),
+    value: initialChildren,
+    error: field.validate && field.validate(initialValue),
   })
   const internalState = createState(initialState)
+
+  const value = {
+    get() {
+      const children = internalState.get().value
+      return children.map(child => child.value.get())
+    },
+    subscribe(f) {
+      const children = internalState.get().value
+      let unsubscribeChildren = subscribeToAll(children.map(x => x.value), _ => f(value.get()))
+      let unsubscribe = internalState.subscribe(({ value: newChildren }, { value: oldChildren }) => {
+        if (newChildren === oldChildren) return
+        unsubscribeChildren()
+        unsubscribeChildren = subscribeToAll(newChildren.map(x => x.value), _ => f(value.get()))
+        f(value.get())
+      })
+
+      return () => {
+        unsubscribeChildren()
+        unsubscribe()
+      }
+    },
+  }
+
+  if (field.validate) {
+    value.subscribe(value => {
+      internalState.update(x => updateState(x, { error: field.validate(value) }))
+    })
+  }
 
   return {
     type: 'array',
@@ -64,26 +113,21 @@ function createArrayFormField({ name, initialValue = [], field }) {
       const { value: fields } = internalState.update(x => initialState)
       fields.forEach(field => { field.reset() })
     },
+    value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
     helpers: {
       add(initialValue) {
         internalState.update(x => {
-          const fieldsValue = [...x.value, createFormFieldsAt(initialValue, x.value.length)]
-          return deriveFieldState({
-            ...x,
-            value: fieldsValue,
-            error: field.validate && field.validate(fieldsValue),
-          })
+          const children = x.value
+          const newChildren = [...children, createFormFieldsAt(initialValue, children.length)]
+          return updateState(x, { value: newChildren })
         })
       },
       remove(entry) {
         internalState.update(x => {
-          const fieldsValue = x.value.filter(x => x !== entry)
-          return deriveFieldState({
-            ...x,
-            value: fieldsValue,
-            error: field.validate && field.validate(fieldsValue)
-          })
+          const children = x.value
+          const newChildren = children.filter(x => x !== entry)
+          return updateState(x, { value: newChildren })
         })
       }
     }
@@ -105,6 +149,22 @@ function createBasicFormField({ name, initialValue, field }) {
   })
   const internalState = createState(initialFieldState)
 
+  const value = {
+    get() { return internalState.get().value },
+    subscribe(f) {
+      return internalState.subscribe(({ value: newValue }, { value: oldValue }) => {
+        if (newValue === oldValue) return
+        f(newValue, oldValue)
+      })
+    },
+  }
+
+  if (field.validate) {
+    value.subscribe(value => {
+      internalState.update(x => updateState(x, { error: field.validate(value) }))
+    })
+  }
+
   return {
     type: 'basic',
     name,
@@ -114,6 +174,7 @@ function createBasicFormField({ name, initialValue, field }) {
     reset() {
       internalState.update(x => initialFieldState)
     },
+    value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
     eventHandlers: {
       onBlur() {
@@ -127,7 +188,7 @@ function createBasicFormField({ name, initialValue, field }) {
           ? eOrValue.target.value
           : eOrValue
 
-        internalState.update(x => updateState(x, { value, error: field.validate && field.validate(value) }))
+        internalState.update(x => updateState(x, { value }))
       },
     },
   }

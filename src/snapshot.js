@@ -1,3 +1,5 @@
+import { subscribeToAll } from './state'
+
 export function get(field) {
   return {
     'object': getForObject,
@@ -61,17 +63,10 @@ function getForBasic(field) {
 }
 
 function subscribeForObject(field, f) {
-  const unsubscribe = field.state.subscribe(_ => f(getForObject(field)))
-  const unsubscribeForChildren = Object.values(field.fields).reduce(
-    (unsubscribePrevious, child) => {
-      const unsubscribe = subscribe(child, _ => f(getForObject(field)))
-      return () => {
-        unsubscribePrevious()
-        unsubscribe()
-      }
-    },
-    () => {}
-  )
+  const { value: fields } = field.state.get()
+  const notify = _ => f(getForObject(field))
+  const unsubscribe = field.state.subscribe(notify)
+  const unsubscribeForChildren = subscribeToAll(Object.values(fields), notify, subscribe)
   return () => {
     unsubscribe()
     unsubscribeForChildren()
@@ -80,28 +75,16 @@ function subscribeForObject(field, f) {
 
 function subscribeForArray(field, f) {
   const { value: children } = field.state.get()
-  let unsubscribeForChildren = subscribeToChildren(children, f)
+  const notify = _ => f(getForArray(field))
+  let unsubscribeForChildren = subscribeToAll(children, notify, subscribe)
   const unsubscribe = field.state.subscribe(({ value: children }) => {
     unsubscribeForChildren()
+    unsubscribeForChildren = subscribeToAll(children, notify, subscribe)
     f(getForArray(field))
-    unsubscribeForChildren = subscribeToChildren(children, f)
   })
   return () => {
     unsubscribeForChildren()
     unsubscribe()
-  }
-
-  function subscribeToChildren(children, f) {
-    return children.reduce(
-      (unsubscribePrevious, child) => {
-        const unsubscribe = subscribe(child, _ => f(getForArray(field)))
-        return () => {
-          unsubscribePrevious()
-          unsubscribe()
-        }
-      },
-      () => {}
-    )
   }
 }
 
