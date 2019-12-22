@@ -63,29 +63,21 @@ function getForBasic(field) {
 }
 
 function subscribeForObject(field, f) {
-  const { value: fields } = field.state.get()
-  const notify = _ => f(getForObject(field))
-  const unsubscribe = field.state.subscribe(notify)
-  const unsubscribeForChildren = subscribeToAll(Object.values(fields), notify, subscribe)
-  return () => {
-    unsubscribe()
-    unsubscribeForChildren()
-  }
+  return subscribeToAll({
+    state: field.state,
+    childrenFromState: x => Object.values(x.value),
+    notify: _ => f(getForObject(field)),
+    subscribeToChild: subscribe,
+  })
 }
 
 function subscribeForArray(field, f) {
-  const { value: children } = field.state.get()
-  const notify = _ => f(getForArray(field))
-  let unsubscribeForChildren = subscribeToAll(children, notify, subscribe)
-  const unsubscribe = field.state.subscribe(({ value: children }) => {
-    unsubscribeForChildren()
-    unsubscribeForChildren = subscribeToAll(children, notify, subscribe)
-    f(getForArray(field))
+  return subscribeToAll({
+    state: field.state,
+    childrenFromState: x => x.value,
+    notify: _ => f(getForArray(field)),
+    subscribeToChild: subscribe,
   })
-  return () => {
-    unsubscribeForChildren()
-    unsubscribe()
-  }
 }
 
 function subscribeForBasic(field, f) {

@@ -20,10 +20,36 @@ export function createState(initialState) {
   }
 }
 
-export function subscribeToAll(array, f, subscribe = (x, f) => x.subscribe(f)) {
+export function subscribeToAll({
+  state,
+  childrenFromState,
+  notify,
+  subscribeToChild,
+  onlyNotifyOnChildChange = false,
+}) {
+  const children = childrenFromState(state.get())
+  let unsubscribeChildren = subscribeToChildren(children, notify, subscribeToChild)
+  const unsubscribe = state.subscribe((newState, oldState) => {
+    const [newChildren, oldChildren] = [childrenFromState(newState), childrenFromState(oldState)]
+    const childrenChanged = newChildren !== oldChildren
+    if (childrenChanged) {
+      unsubscribeChildren()
+      unsubscribeChildren = subscribeToChildren(newChildren, notify, subscribeToChild)
+    }
+    if (onlyNotifyOnChildChange && !childrenChanged) return
+    notify(newState, oldState)
+  })
+
+  return () => {
+    unsubscribeChildren()
+    unsubscribe()
+  }
+}
+
+function subscribeToChildren(array, f, subscribeToChild) {
   return array.reduce(
     (unsubscribePrevious, x) => {
-      const unsubscribe = subscribe(x, f)
+      const unsubscribe = subscribeToChild(x, f)
 
       return () => {
         unsubscribePrevious(),

@@ -9,10 +9,10 @@ const constructors = {
 
 export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
-  const children = createFormFields(initialValue, field.fields, name && `${name}.`)
+  const fields = createFormFields(initialValue, field.fields, name && `${name}.`)
 
   const initialState = deriveFieldState({
-    value: children,
+    value: fields,
     error: field.validate && field.validate(initialValue),
   })
 
@@ -20,14 +20,20 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   const value = {
     get() {
-      return Object.entries(children).reduce(
+      const fields = internalState.get().value
+      return Object.entries(fields).reduce(
         (result, [name, child]) => ({ ...result, [name]: child.value.get() }),
         {}
       )
     },
     subscribe(f) {
-      const children = internalState.get().value
-      return subscribeToAll(Object.values(children).map(x => x.value), _ => f(value.get()))
+      return subscribeToAll({
+        state: internalState,
+        childrenFromState: x => Object.values(x.value),
+        notify: _ => f(value.get()),
+        subscribeToChild: (x, f) => x.value.subscribe(f),
+        onlyNotifyOnChildChange: true,
+      })
     },
   }
 
@@ -40,14 +46,14 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   return {
     type: 'object',
     name,
-    fields: children,
+    fields,
     setSubmitted(isSubmitted) {
-      const { value: children } = internalState.update(x => updateState(x, { isSubmitted }))
-      Object.values(children).forEach(x => x.setSubmitted(isSubmitted))
+      const { value: fields } = internalState.update(x => updateState(x, { isSubmitted }))
+      Object.values(fields).forEach(x => x.setSubmitted(isSubmitted))
     },
     reset() {
-      const { value: children } = internalState.update(x => updateState(x, initialState))
-      Object.values(children).forEach(x => x.reset())
+      const { value: fields } = internalState.update(x => updateState(x, initialState))
+      Object.values(fields).forEach(x => x.reset())
     },
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
@@ -80,19 +86,13 @@ function createArrayFormField({ name, initialValue = [], field }) {
       return children.map(child => child.value.get())
     },
     subscribe(f) {
-      const children = internalState.get().value
-      let unsubscribeChildren = subscribeToAll(children.map(x => x.value), _ => f(value.get()))
-      let unsubscribe = internalState.subscribe(({ value: newChildren }, { value: oldChildren }) => {
-        if (newChildren === oldChildren) return
-        unsubscribeChildren()
-        unsubscribeChildren = subscribeToAll(newChildren.map(x => x.value), _ => f(value.get()))
-        f(value.get())
+      return subscribeToAll({
+        state: internalState,
+        childrenFromState: x => x.value,
+        notify:_ => f(value.get()),
+        subscribeToChild: (x, f) => x.value.subscribe(f),
+        onlyNotifyOnChildChange: true,
       })
-
-      return () => {
-        unsubscribeChildren()
-        unsubscribe()
-      }
     },
   }
 
