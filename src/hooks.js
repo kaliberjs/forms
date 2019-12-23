@@ -5,13 +5,10 @@ import * as snapshot from './snapshot'
 
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit }) {
   const initialValuesRef = React.useRef(null)
-  const fieldsRef = React.useRef(null)
   const formRef = React.useRef(null)
 
-  if (!isEqual(initialValuesRef.current, initialValues) || !isEqual(fieldsRef.current, fields)
-  ) {
+  if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues
-    fieldsRef.current = fields
     formRef.current = createObjectFormField({
       initialValue: initialValues,
       field: normalize({ type: 'object', fields, validate })
