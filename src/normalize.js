@@ -30,7 +30,7 @@ export function normalize(field) {
   function toValidationFunction(x = []) {
     return [].concat(x).reduce(
       (previous, next) => {
-        const combined = previous && next && (x => previous(x) || next(x))
+        const combined = previous && next && ((...args) => previous(...args) || next(...args))
         return combined || next || previous
       },
       null
