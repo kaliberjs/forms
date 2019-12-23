@@ -120,13 +120,13 @@ function createArrayFormField({ name, initialValue = [], field }) {
       add(initialValue) {
         internalState.update(x => {
           const newChildren = [...x.children, createFormFieldsAt(initialValue, x.children.length)]
-          return updateState(x, { value: newChildren })
+          return updateState(x, { children: newChildren })
         })
       },
       remove(entry) {
         internalState.update(x => {
           const newChildren = x.children.filter(x => x !== entry)
-          return updateState(x, { value: newChildren })
+          return updateState(x, { children: newChildren })
         })
       }
     }

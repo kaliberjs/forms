@@ -80,8 +80,8 @@ function ArrayField({ field, render }) {
 
   return (
     <div>
-      {children.map((field, i) => render({
-        id: i,
+      {children.map(field => render({
+        id: field.name,
         fields: field.fields,
         remove: () => { helpers.remove(field) }
       }))}
