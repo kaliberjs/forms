@@ -3,7 +3,7 @@ import { createObjectFormField } from './fields'
 import { normalize } from './normalize'
 import * as snapshot from './snapshot'
 
-export function useForm({ fields, initialValues, onSubmit }) {
+export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit }) {
   const initialValuesRef = React.useRef(null)
   const fieldsRef = React.useRef(null)
   const formRef = React.useRef(null)
@@ -14,7 +14,7 @@ export function useForm({ fields, initialValues, onSubmit }) {
     fieldsRef.current = fields
     formRef.current = createObjectFormField({
       initialValue: initialValues,
-      field: normalize({ type: 'object', fields })
+      field: normalize({ type: 'object', fields, validate })
     })
   }
 

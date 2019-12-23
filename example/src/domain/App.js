@@ -74,13 +74,13 @@ function MyForm() {
 }
 
 function ArrayField({ field, render }) {
-  const { name, state: { value, error, showError }, helpers } = useArrayFormField(field)
+  const { name, state: { children, error, showError }, helpers } = useArrayFormField(field)
 
   console.log(`[${name}] render array field`)
 
   return (
     <div>
-      {value.map((field, i) => render({
+      {children.map((field, i) => render({
         id: i,
         fields: field.fields,
         remove: () => { helpers.remove(field) }

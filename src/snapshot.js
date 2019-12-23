@@ -17,43 +17,43 @@ export function subscribe(field, f) {
 }
 
 function getForObject(field) {
-  const { error, invalid } = field.state.get()
-  const { fieldsInvalid, fieldErrors, fieldValues } =  Object.entries(field.fields).reduce(
-    ({ fieldsInvalid, fieldValues, fieldErrors }, [name, field]) => {
-      const { value, error, invalid } = get(field)
+  const { fields, error, invalid } = field.state.get()
+  const { childrenInvalid, childErrors, childValues } =  Object.entries(fields).reduce(
+    ({ childrenInvalid, childValues, childErrors }, [name, child]) => {
+      const { value, error, invalid } = get(child)
       return {
-        fieldsInvalid: fieldsInvalid || invalid,
-        fieldErrors: { ...fieldErrors, [name]: error },
-        fieldValues: { ...fieldValues, [name]: value },
+        childrenInvalid: childrenInvalid || invalid,
+        childErrors: { ...childErrors, [name]: error },
+        childValues: { ...childValues, [name]: value },
       }
     },
-    { fieldsInvalid: false, fieldErrors: {}, fieldValues: {} }
+    { childrenInvalid: false, childErrors: {}, childValues: {} }
   )
 
   return {
-    invalid: invalid || fieldsInvalid,
-    value: fieldValues,
-    error: { field: error, fields: fieldErrors },
+    invalid: invalid || childrenInvalid,
+    value: childValues,
+    error: { self: error, children: childErrors },
   }
 }
 
 function getForArray(field) {
-  const { value: arrayFields, error, invalid } = field.state.get()
-  const { fieldValues, fieldErrors, fieldsInvalid } = arrayFields.reduce(
-    ({ fieldValues, fieldErrors, fieldsInvalid }, field) => {
-      const { value, error, invalid} = get(field)
+  const { children, error, invalid } = field.state.get()
+  const { childrenInvalid, childValues, childErrors } = children.reduce(
+    ({ childrenInvalid, childValues, childErrors }, child) => {
+      const { value, error, invalid} = get(child)
       return {
-        fieldValues: [...fieldValues, value],
-        fieldErrors: [...fieldErrors, error],
-        fieldsInvalid: fieldsInvalid || invalid,
+        childrenInvalid: childrenInvalid || invalid,
+        childValues: [...childValues, value],
+        childErrors: [...childErrors, error],
       }
     },
-    { fieldValues: [], fieldErrors: [], fieldsInvalid: false }
+    { childrenInvalid: false, childValues: [], childErrors: [] }
   )
   return {
-    value: fieldValues,
-    error: { field: error, fields: fieldErrors },
-    invalid: invalid || fieldsInvalid
+    invalid: invalid || childrenInvalid,
+    value: childValues,
+    error: { self: error, children: childErrors },
   }
 }
 
@@ -65,7 +65,7 @@ function getForBasic(field) {
 function subscribeForObject(field, f) {
   return subscribeToAll({
     state: field.state,
-    childrenFromState: x => Object.values(x.value),
+    childrenFromState: x => x.children,
     notify: _ => f(getForObject(field)),
     subscribeToChild: subscribe,
   })
@@ -74,7 +74,7 @@ function subscribeForObject(field, f) {
 function subscribeForArray(field, f) {
   return subscribeToAll({
     state: field.state,
-    childrenFromState: x => x.value,
+    childrenFromState: x => x.children,
     notify: _ => f(getForArray(field)),
     subscribeToChild: subscribe,
   })

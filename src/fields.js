@@ -12,7 +12,8 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   const fields = createFormFields(initialValue, field.fields, name && `${name}.`)
 
   const initialState = deriveFieldState({
-    value: fields,
+    fields,
+    children: Object.values(fields),
     error: field.validate && field.validate(initialValue),
   })
 
@@ -20,7 +21,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   const value = {
     get() {
-      const fields = internalState.get().value
+      const { fields } = internalState.get()
       return Object.entries(fields).reduce(
         (result, [name, child]) => ({ ...result, [name]: child.value.get() }),
         {}
@@ -29,7 +30,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     subscribe(f) {
       return subscribeToAll({
         state: internalState,
-        childrenFromState: x => Object.values(x.value),
+        childrenFromState: x => x.children,
         notify: _ => f(value.get()),
         subscribeToChild: (x, f) => x.value.subscribe(f),
         onlyNotifyOnChildChange: true,
@@ -48,12 +49,12 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     name,
     fields,
     setSubmitted(isSubmitted) {
-      const { value: fields } = internalState.update(x => updateState(x, { isSubmitted }))
-      Object.values(fields).forEach(x => x.setSubmitted(isSubmitted))
+      const { children } = internalState.update(x => updateState(x, { isSubmitted }))
+      children.forEach(x => x.setSubmitted(isSubmitted))
     },
     reset() {
-      const { value: fields } = internalState.update(x => updateState(x, initialState))
-      Object.values(fields).forEach(x => x.reset())
+      const { children } = internalState.update(x => updateState(x, initialState))
+      children.forEach(x => x.reset())
     },
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
@@ -75,20 +76,20 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 function createArrayFormField({ name, initialValue = [], field }) {
   const initialChildren = initialValue.map(createFormFieldsAt)
   const initialState = deriveFieldState({
-    value: initialChildren,
+    children: initialChildren,
     error: field.validate && field.validate(initialValue),
   })
   const internalState = createState(initialState)
 
   const value = {
     get() {
-      const children = internalState.get().value
+      const { children } = internalState.get()
       return children.map(child => child.value.get())
     },
     subscribe(f) {
       return subscribeToAll({
         state: internalState,
-        childrenFromState: x => x.value,
+        childrenFromState: x => x.children,
         notify:_ => f(value.get()),
         subscribeToChild: (x, f) => x.value.subscribe(f),
         onlyNotifyOnChildChange: true,
@@ -106,27 +107,25 @@ function createArrayFormField({ name, initialValue = [], field }) {
     type: 'array',
     name,
     setSubmitted(isSubmitted) {
-      const { value: fields } = internalState.update(x => updateState(x, { isSubmitted }))
-      fields.forEach(field => { field.setSubmitted(isSubmitted) })
+      const { children } = internalState.update(x => updateState(x, { isSubmitted }))
+      children.forEach(child => { child.setSubmitted(isSubmitted) })
     },
     reset() {
-      const { value: fields } = internalState.update(x => initialState)
-      fields.forEach(field => { field.reset() })
+      const { children } = internalState.update(x => initialState)
+      children.forEach(child => { child.reset() })
     },
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
     helpers: {
       add(initialValue) {
         internalState.update(x => {
-          const children = x.value
-          const newChildren = [...children, createFormFieldsAt(initialValue, children.length)]
+          const newChildren = [...x.children, createFormFieldsAt(initialValue, x.children.length)]
           return updateState(x, { value: newChildren })
         })
       },
       remove(entry) {
         internalState.update(x => {
-          const children = x.value
-          const newChildren = children.filter(x => x !== entry)
+          const newChildren = x.children.filter(x => x !== entry)
           return updateState(x, { value: newChildren })
         })
       }
