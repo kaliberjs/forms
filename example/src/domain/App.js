@@ -1,53 +1,55 @@
 import {
-  useForm, useFormField, useNumberFormField, useArrayFormField, useFieldValue,
-  required, minLength, number, min, object, array, optional,
+  useForm,
+  required, minLength, number, min, object, array, optional, max,
   email, message,
 } from '@kaliber/forms'
+import { FormTextInput, FormNumberInput, FormArrayField, FormValues, FormObjectField, FormFieldValue } from './Form'
 
 export default function App() {
-
   return (
     <MyForm />
   )
 }
 
+const formFields = {
+  // other2,
+  // test: { type: 'test '},
+  other: {},
+  name: [required, minLength(3)],
+  email: [required, email],
+  nickname: [],
+  age: [number, min(18), max(21)],
+  address: object({
+    street: required,
+    city: [required],
+  }),
+  friends: array([minLength(1), weird], {
+    name: required,
+    email,
+    emailAgain: equalTo('email'),
+  }),
+  otherFriends: array({
+    name: required,
+  }),
+
+  books: {
+    type: 'array',
+    fields: {
+      name: required,
+      author: optional,
+    }
+  }
+}
+
 function MyForm() {
-  const { form, submit } = useForm({
+  const { form, submit, reset } = useForm({
     initialValues: {
       name: 'Test',
       age: '',
       friends: [{ name: 'Fred' }],
       // test: '',
     },
-    fields: {
-      // other2,
-      // test: { type: 'test '},
-      other: {},
-      name: [required, minLength(3)],
-      email: [required, email],
-      nickname: [],
-      age: [number, min(18)],
-      address: object({
-        street: required,
-        city: [required, (x, ...context) => console.log('city context', context)],
-      }),
-      friends: array([minLength(1), weird], {
-        name: required,
-        email,
-        emailAgain: equalToEmail,
-      }),
-      otherFriends: array({
-        name: required,
-      }),
-
-      books: {
-        type: 'array',
-        fields: {
-          name: required,
-          author: optional,
-        }
-      }
-    },
+    fields: formFields,
     onSubmit: y => {
       console.log('submit', y)
     }
@@ -69,20 +71,26 @@ function MyForm() {
   return (
     <>
       <form onSubmit={submit}>
-        <TextInput field={fields.name} label='Name' />
-        <TextInput field={fields.email} label='Email' />
-        <NumberInput field={fields.age} label='Leeftijd' />
-        <TextInput field={fields.address.fields.street} label='Street' />
-        <TextInput field={fields.address.fields.city} label='City' />
-        <ArrayField field={fields.friends} render={({ id, fields, remove }) => (
+        <FormTextInput label='Naam' field={fields.name} />
+        <FormTextInput label='E-mail' field={fields.email} />
+        <FormNumberInput label='Leeftijd' field={fields.age} />
+        <FormObjectField field={fields.address} render={({ fields }) => (
+          <>
+            <FormTextInput label='Straat' field={fields.street} />
+            <FormTextInput label='Stad' field={fields.city} />
+          </>
+        )} />
+        <FormArrayField field={fields.friends} render={({ id, fields, remove, value }) => (
           <div key={id}>
-            <TextInput field={fields.name} label='Friend name' />
-            <TextInput field={fields.email} label='Friend email' />
-            <TextInput field={fields.emailAgain} label='Email-again' />
-            <button type='button' onClick={remove}>-</button>
+            <FormFieldValue field={fields.name} render={({ value }) => <div>{value}</div>} />
+            <FormTextInput label='Friend name' field={fields.name} />
+            <FormTextInput label='Friend email' field={fields.email} />
+            <FormTextInput label='Email-again' field={fields.emailAgain} />
+            <button type='button' onClick={remove}><b>x</b></button>
           </div>
         )} />
-        <button type='submit'>submit</button>
+        <button type='submit'> - submit - </button>
+        <button type='button' onClick={reset}> - reset - </button>
         <FormValues {...{ form }} />
       </form>
     </>
@@ -93,60 +101,9 @@ function weird(x, { form }) {
   return form.name === 'henk' && minLength(2)(x)
 }
 
-function equalToEmail(x, { parents }) {
-  console.log(parents)
-  const [parent] = parents.slice(-1)
-  return parent.email !== x && message('equal', 'email')
-}
-
-function ArrayField({ field, render }) {
-  const { name, state: { children, error, showError }, helpers } = useArrayFormField(field)
-
-  console.log(`[${name}] render array field`)
-
-  return (
-    <div>
-      {children.map(field => render({
-        id: field.name,
-        fields: field.fields,
-        remove: () => { helpers.remove(field) }
-      }))}
-      <button type='button' onClick={_ => helpers.add({})}>+</button>
-      {showError && <p>{JSON.stringify(error)}</p>}
-    </div>
-  )
-}
-
-function FormValues({ form }) {
-  const formState = useFieldValue(form)
-  return <pre><code>{JSON.stringify(formState, null, 2)}</code></pre>
-}
-
-function TextInput({ field, label }) {
-  const { name, state, eventHandlers } = useFormField(field)
-  return <InputBase type='text' {...{ name, label, state, eventHandlers }} />
-}
-
-function NumberInput({ field, label }) {
-  const { name, state, eventHandlers } = useNumberFormField(field)
-
-  return <InputBase type='text' {...{ name, label, state, eventHandlers }} />
-}
-
-function InputBase({ type, name, label, state, eventHandlers }) {
-  const { value, invalid, error, showError } = state
-  console.log(`[${name}] render ${type} field`)
-  return (
-    <>
-      <label htmlFor={name}>{label}</label>
-      <input
-        id={name}
-        value={value === undefined ? '' : value}
-        {...{ type }}
-        {...eventHandlers}
-      />{!invalid && '✓'}
-      <br />
-      {showError && <p>{JSON.stringify(error)}</p>}
-    </>
-  )
+function equalTo(field) {
+  return (x, { parents }) => {
+    const [parent] = parents.slice(-1)
+    return parent[field] !== x && message('equalTo', field)
+  }
 }
