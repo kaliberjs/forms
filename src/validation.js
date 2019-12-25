@@ -7,4 +7,7 @@ export function max(max) { return x => x > max && message('max', max) }
 
 export function minLength(min) { return x => x.length < min && message('min-length', min) }
 
+const emailRegex = /.+@.+\..+/
+export const email = x => x && !emailRegex.test(x) && message('email')
+
 export function message(id, ...params) { return { id, params } }

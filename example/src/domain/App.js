@@ -1,6 +1,7 @@
 import {
   useForm, useFormField, useFieldValue, useArrayFormField,
-  required, minLength, number, min, object, array, optional
+  required, minLength, number, min, object, array, optional,
+  email,
 } from '@kaliber/forms'
 
 export default function App() {
@@ -23,6 +24,7 @@ function MyForm() {
       // test: { type: 'test '},
       other: {},
       name: [required, minLength(3)],
+      email: [required, email],
       nickname: [],
       age: [number, min(18)],
       address: object({
@@ -31,6 +33,7 @@ function MyForm() {
       }),
       friends: array([minLength(1), weird], {
         name: required,
+        email,
       }),
       otherFriends: array({
         name: required,
@@ -66,12 +69,14 @@ function MyForm() {
     <>
       <form onSubmit={submit}>
         <TextInput field={fields.name} label='Name' />
+        <TextInput field={fields.email} label='Email' />
         <NumberInput field={fields.age} label='Leeftijd' />
         <TextInput field={fields.address.fields.street} label='Street' />
         <TextInput field={fields.address.fields.city} label='City' />
         <ArrayField field={fields.friends} render={({ id, fields, remove }) => (
           <div key={id}>
             <TextInput field={fields.name} label='Friend name' />
+            <TextInput field={fields.email} label='Friend email' />
             <button type='button' onClick={remove}>-</button>
           </div>
         )} />

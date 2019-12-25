@@ -7,4 +7,5 @@ export {
   number, min, max,
   minLength,
   message,
+  email,
 } from './validation'
