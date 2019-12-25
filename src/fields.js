@@ -1,5 +1,5 @@
 import { normalize } from './normalize'
-import { createState, subscribeToAll } from './state'
+import { createState, subscribeToAll, subscribeToChildren } from './state'
 import isEqual from 'react-fast-compare'
 
 const constructors = {
@@ -11,29 +11,19 @@ const constructors = {
 export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   const fields = createFormFields(initialValue, field.fields, name && `${name}.`)
+  const children = Object.values(fields)
 
-  const initialState = deriveFieldState({
-    fields,
-    children: Object.values(fields),
-  })
+  const initialState = deriveFieldState({})
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
 
   const value = {
-    get() {
-      const { fields } = internalState.get()
-      return Object.entries(fields).reduce(
-        (result, [name, child]) => ({ ...result, [name]: child.value.get() }),
-        {}
-      )
-    },
+    get() { return mapValues(fields, child => child.value.get()) },
     subscribe(f) {
-      return subscribeToAll({
-        state: internalState,
-        childrenFromState: x => x.children,
+      return subscribeToChildren({
+        children,
         notify: _ => f(value.get()),
         subscribeToChild: (x, f) => x.value.subscribe(f),
-        onlyNotifyOnChildChange: true,
       })
     },
   }
@@ -41,24 +31,21 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   return {
     type: 'object',
     name,
-    fields,
     validate(formValue) {
-      const { children } = validate
-        ? validate(value.get(), formValue)
-        : internalState.get()
-
+      if (validate) validate(value.get(), formValue)
       children.forEach(x => x.validate(formValue))
     },
     setSubmitted(isSubmitted) {
-      const { children } = internalState.update(x => updateState(x, { isSubmitted }))
+      internalState.update(x => updateState(x, { isSubmitted }))
       children.forEach(x => x.setSubmitted(isSubmitted))
     },
     reset() {
-      const { children } = internalState.update(x => updateState(x, initialState))
+      internalState.update(x => updateState(x, initialState))
       children.forEach(x => x.reset())
     },
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
+    fields,
   }
 
   function createFormFields(initialValues, fields, namePrefix = '') {
@@ -102,10 +89,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
     type: 'array',
     name,
     validate(formValue) {
-      const { children } = validate
-        ? validate(value.get(), formValue)
-        : internalState.get()
-
+      const { children } = validate ? validate(value.get(), formValue) : internalState.get()
       children.forEach(x => x.validate(formValue))
     },
     setSubmitted(isSubmitted) {

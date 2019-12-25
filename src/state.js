@@ -28,13 +28,13 @@ export function subscribeToAll({
   onlyNotifyOnChildChange = false,
 }) {
   const children = childrenFromState(state.get())
-  let unsubscribeChildren = subscribeToChildren(children, notify, subscribeToChild)
+  let unsubscribeChildren = subscribeToChildren({ children, notify, subscribeToChild })
   const unsubscribe = state.subscribe((newState, oldState) => {
     const [newChildren, oldChildren] = [childrenFromState(newState), childrenFromState(oldState)]
     const childrenChanged = newChildren !== oldChildren
     if (childrenChanged) {
       unsubscribeChildren()
-      unsubscribeChildren = subscribeToChildren(newChildren, notify, subscribeToChild)
+      unsubscribeChildren = subscribeToChildren({ children: newChildren, notify, subscribeToChild })
     }
     if (onlyNotifyOnChildChange && !childrenChanged) return
     notify(newState, oldState)
@@ -46,10 +46,10 @@ export function subscribeToAll({
   }
 }
 
-function subscribeToChildren(array, f, subscribeToChild) {
-  return array.reduce(
+export function subscribeToChildren({ children, notify, subscribeToChild }) {
+  return children.reduce(
     (unsubscribePrevious, x) => {
-      const unsubscribe = subscribeToChild(x, f)
+      const unsubscribe = subscribeToChild(x, notify)
 
       return () => {
         unsubscribePrevious(),

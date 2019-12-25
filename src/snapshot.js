@@ -1,4 +1,4 @@
-import { subscribeToAll } from './state'
+import { subscribeToAll, subscribeToChildren } from './state'
 
 export function get(field) {
   return {
@@ -17,8 +17,8 @@ export function subscribe(field, f) {
 }
 
 function getForObject(field) {
-  const { fields, error, invalid } = field.state.get()
-  const { childrenInvalid, childErrors, childValues } =  Object.entries(fields).reduce(
+  const { error, invalid } = field.state.get()
+  const { childrenInvalid, childErrors, childValues } =  Object.entries(field.fields).reduce(
     ({ childrenInvalid, childValues, childErrors }, [name, child]) => {
       const { value, error, invalid } = get(child)
       return {
@@ -63,9 +63,8 @@ function getForBasic(field) {
 }
 
 function subscribeForObject(field, f) {
-  return subscribeToAll({
-    state: field.state,
-    childrenFromState: x => x.children,
+  return subscribeToChildren({
+    children: Object.values(field.fields),
     notify: _ => f(getForObject(field)),
     subscribeToChild: subscribe,
   })
