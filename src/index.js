@@ -1,4 +1,10 @@
-export { useForm, useFormField, useFieldValue, useArrayFormField } from './hooks'
+export {
+  useForm,
+  useFormField,
+  useNumberFormField,
+  useArrayFormField,
+  useFieldValue,
+} from './hooks'
 export {
   array, object,
 } from './schema'

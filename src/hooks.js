@@ -66,6 +66,19 @@ export function useFormField(field) {
   return { name, state, eventHandlers }
 }
 
+export function useNumberFormField(field) {
+  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
+  const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
+
+  return { name, state, eventHandlers }
+
+  function handleChange(e) {
+    const userValue = e.target.value
+    const value = Number(userValue)
+    onChange(userValue === '' || Number.isNaN(value) ? userValue : value)
+  }
+}
+
 export function useArrayFormField(field) {
   const { name, helpers } = field
   const state = useFieldState(field.state)

@@ -1,5 +1,5 @@
 import {
-  useForm, useFormField, useFieldValue, useArrayFormField,
+  useForm, useFormField, useNumberFormField, useArrayFormField, useFieldValue,
   required, minLength, number, min, object, array, optional,
   email,
 } from '@kaliber/forms'
@@ -116,23 +116,16 @@ function FormValues({ form }) {
 
 function TextInput({ field, label }) {
   const { name, state, eventHandlers } = useFormField(field)
-  return <InputBase {...{ name, label, state, eventHandlers }} />
+  return <InputBase type='text' {...{ name, label, state, eventHandlers }} />
 }
 
 function NumberInput({ field, label }) {
-  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
-  const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
+  const { name, state, eventHandlers } = useNumberFormField(field)
 
-  return <InputBase {...{ name, label, state, eventHandlers }} />
-
-  function handleChange(e) {
-    const userValue = e.target.value
-    const value = Number(userValue)
-    onChange(userValue === '' || Number.isNaN(value) ? userValue : value)
-  }
+  return <InputBase type='text' {...{ name, label, state, eventHandlers }} />
 }
 
-function InputBase({ type = 'text', name, label, state, eventHandlers }) {
+function InputBase({ type, name, label, state, eventHandlers }) {
   const { value, invalid, error, showError } = state
   console.log(`[${name}] render ${type} field`)
   return (
