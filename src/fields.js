@@ -161,10 +161,10 @@ function createBasicFormField({ name, initialValue, field }) {
     state: { get: internalState.get, subscribe: internalState.subscribe },
     eventHandlers: {
       onBlur() {
-        internalState.update(x => updateState(x, { hasFocus: false }))
+        internalState.update(x => updateState(x, { hasFocus: false, isVisited: true }))
       },
       onFocus() {
-        internalState.update(x => updateState(x, { hasFocus: true, isVisited: true }))
+        internalState.update(x => updateState(x, { hasFocus: true }))
       },
       onChange(eOrValue) {
         const value = eOrValue && eOrValue.target
