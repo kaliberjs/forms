@@ -3,11 +3,15 @@ import {
   required, minLength, number, min, object, array, optional, max,
   email, message,
 } from '@kaliber/forms'
-import { FormTextInput, FormNumberInput, FormArrayField, FormValues, FormObjectField, FormFieldValue } from './Form'
+import { FormTextInput, FormNumberInput, FormArrayField, FormValues, FormObjectField, FormFieldValue } from './machinery/Form'
+import { Basic } from './Basic'
 
 export default function App() {
   return (
-    <MyForm />
+    <>
+      <Basic />
+      <MyForm />
+    </>
   )
 }
 
