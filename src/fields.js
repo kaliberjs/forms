@@ -1,5 +1,6 @@
 import { normalize } from './normalize'
 import { createState, subscribeToAll } from './state'
+import isEqual from 'react-fast-compare'
 
 const constructors = {
   basic: createBasicFormField,
@@ -14,10 +15,9 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   const initialState = deriveFieldState({
     fields,
     children: Object.values(fields),
-    error: field.validate && field.validate(initialValue),
   })
-
   const internalState = createState(initialState)
+  const validate = bindValidate(field.validate, internalState)
 
   const value = {
     get() {
@@ -38,16 +38,17 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     },
   }
 
-  if (field.validate) {
-    value.subscribe(value => {
-      internalState.update(x => updateState(x, { error: field.validate(value) }))
-    })
-  }
-
   return {
     type: 'object',
     name,
     fields,
+    validate(formValue) {
+      const { children } = validate
+        ? validate(value.get(), formValue)
+        : internalState.get()
+
+      children.forEach(x => x.validate(formValue))
+    },
     setSubmitted(isSubmitted) {
       const { children } = internalState.update(x => updateState(x, { isSubmitted }))
       children.forEach(x => x.setSubmitted(isSubmitted))
@@ -77,9 +78,9 @@ function createArrayFormField({ name, initialValue = [], field }) {
   const initialChildren = initialValue.map(createFormFieldsAt)
   const initialState = deriveFieldState({
     children: initialChildren,
-    error: field.validate && field.validate(initialValue),
   })
   const internalState = createState(initialState)
+  const validate = bindValidate(field.validate, internalState)
 
   const value = {
     get() {
@@ -97,22 +98,23 @@ function createArrayFormField({ name, initialValue = [], field }) {
     },
   }
 
-  if (field.validate) {
-    value.subscribe(value => {
-      internalState.update(x => updateState(x, { error: field.validate(value) }))
-    })
-  }
-
   return {
     type: 'array',
     name,
+    validate(formValue) {
+      const { children } = validate
+        ? validate(value.get(), formValue)
+        : internalState.get()
+
+      children.forEach(x => x.validate(formValue))
+    },
     setSubmitted(isSubmitted) {
       const { children } = internalState.update(x => updateState(x, { isSubmitted }))
-      children.forEach(child => { child.setSubmitted(isSubmitted) })
+      children.forEach(x => x.setSubmitted(isSubmitted))
     },
     reset() {
       const { children } = internalState.update(x => initialState)
-      children.forEach(child => { child.reset() })
+      children.forEach(x => x.reset())
     },
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
@@ -142,11 +144,10 @@ function createArrayFormField({ name, initialValue = [], field }) {
 }
 
 function createBasicFormField({ name, initialValue, field }) {
-  const initialFieldState = deriveFieldState({
-    value: initialValue,
-    error: field.validate && field.validate(initialValue),
-  })
+
+  const initialFieldState = deriveFieldState({ value: initialValue })
   const internalState = createState(initialFieldState)
+  const validate = bindValidate(field.validate, internalState)
 
   const value = {
     get() { return internalState.get().value },
@@ -158,15 +159,12 @@ function createBasicFormField({ name, initialValue, field }) {
     },
   }
 
-  if (field.validate) {
-    value.subscribe(value => {
-      internalState.update(x => updateState(x, { error: field.validate(value) }))
-    })
-  }
-
   return {
     type: 'basic',
     name,
+    validate(formValue) {
+      if (validate) validate(value.get(), formValue)
+    },
     setSubmitted(isSubmitted) {
       internalState.update(x => updateState(x, { isSubmitted }))
     },
@@ -219,5 +217,14 @@ function mapValues(o, f) {
   return Object.entries(o).reduce(
     (result, [k, v]) => (result[k] = f(v, k), result),
     {}
+  )
+}
+
+function bindValidate(f, state) {
+  return f && (
+    (...args) => {
+      const error = f && f(...args)
+      return state.update(x => isEqual(error, x.error) ? x : updateState(x, { error }))
+    }
   )
 }

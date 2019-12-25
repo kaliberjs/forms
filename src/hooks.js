@@ -9,10 +9,13 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
 
   if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues
-    formRef.current = createObjectFormField({
+    const form = createObjectFormField({
       initialValue: initialValues,
       field: normalize({ type: 'object', fields, validate })
     })
+    form.validate(initialValues)
+    form.value.subscribe(form.validate)
+    formRef.current = form
   }
 
   const submit = React.useCallback(handleSubmit, [formRef.current, onSubmit])

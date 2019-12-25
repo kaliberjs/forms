@@ -11,7 +11,7 @@ export function createState(initialState) {
       if (typeof f !== 'function') throw new Error('update requires a function to update the state')
       const oldState = state
       state = f(state)
-      listeners.forEach(f => { f(state, oldState) })
+      if (state !== oldState) listeners.forEach(f => { f(state, oldState) })
       return state
     },
     get() {

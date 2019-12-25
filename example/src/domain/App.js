@@ -29,7 +29,7 @@ function MyForm() {
         street: required,
         city: required,
       }),
-      friends: array(minLength(1), {
+      friends: array([minLength(1), weird], {
         name: required,
       }),
       otherFriends: array({
@@ -71,6 +71,10 @@ function MyForm() {
       </form>
     </>
   )
+}
+
+function weird(x, form) {
+  return form.name === 'henk' && minLength(2)(x)
 }
 
 function ArrayField({ field, render }) {
