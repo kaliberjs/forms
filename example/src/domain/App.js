@@ -1,7 +1,7 @@
 import {
   useForm, useFormField, useNumberFormField, useArrayFormField, useFieldValue,
   required, minLength, number, min, object, array, optional,
-  email,
+  email, message,
 } from '@kaliber/forms'
 
 export default function App() {
@@ -29,11 +29,12 @@ function MyForm() {
       age: [number, min(18)],
       address: object({
         street: required,
-        city: required,
+        city: [required, (x, ...context) => console.log('city context', context)],
       }),
       friends: array([minLength(1), weird], {
         name: required,
         email,
+        emailAgain: equalToEmail,
       }),
       otherFriends: array({
         name: required,
@@ -77,6 +78,7 @@ function MyForm() {
           <div key={id}>
             <TextInput field={fields.name} label='Friend name' />
             <TextInput field={fields.email} label='Friend email' />
+            <TextInput field={fields.emailAgain} label='Email-again' />
             <button type='button' onClick={remove}>-</button>
           </div>
         )} />
@@ -87,8 +89,14 @@ function MyForm() {
   )
 }
 
-function weird(x, form) {
+function weird(x, { form }) {
   return form.name === 'henk' && minLength(2)(x)
+}
+
+function equalToEmail(x, { parents }) {
+  console.log(parents)
+  const [parent] = parents.slice(-1)
+  return parent.email !== x && message('equal', 'email')
 }
 
 function ArrayField({ field, render }) {

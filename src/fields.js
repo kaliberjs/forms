@@ -31,9 +31,10 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   return {
     type: 'object',
     name,
-    validate(formValue) {
-      if (validate) validate(value.get(), formValue)
-      children.forEach(x => x.validate(formValue))
+    validate(context) {
+      const currentValue = value.get()
+      if (validate) validate(currentValue, context)
+      children.forEach(x => x.validate(addParent(context, currentValue)))
     },
     setSubmitted(isSubmitted) {
       internalState.update(x => updateState(x, { isSubmitted }))
@@ -88,9 +89,10 @@ function createArrayFormField({ name, initialValue = [], field }) {
   return {
     type: 'array',
     name,
-    validate(formValue) {
-      const { children } = validate ? validate(value.get(), formValue) : internalState.get()
-      children.forEach(x => x.validate(formValue))
+    validate(context) {
+      const currentValue = value.get()
+      const { children } = validate ? validate(currentValue, context) : internalState.get()
+      children.forEach(x => x.validate(addParent(context, currentValue)))
     },
     setSubmitted(isSubmitted) {
       const { children } = internalState.update(x => updateState(x, { isSubmitted }))
@@ -146,8 +148,8 @@ function createBasicFormField({ name, initialValue, field }) {
   return {
     type: 'basic',
     name,
-    validate(formValue) {
-      if (validate) validate(value.get(), formValue)
+    validate(context) {
+      if (validate) validate(value.get(), context)
     },
     setSubmitted(isSubmitted) {
       internalState.update(x => updateState(x, { isSubmitted }))
@@ -211,4 +213,8 @@ function bindValidate(f, state) {
       return state.update(x => isEqual(error, x.error) ? x : updateState(x, { error }))
     }
   )
+}
+
+function addParent(context, parent) {
+  return { ...context, parents: [...context.parents, parent] }
 }

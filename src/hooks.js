@@ -13,8 +13,8 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
       initialValue: initialValues,
       field: normalize({ type: 'object', fields, validate })
     })
-    form.validate(initialValues)
-    form.value.subscribe(form.validate)
+    form.validate({ form: initialValues, parents: [] })
+    form.value.subscribe(value => form.validate({ form: value, parents: [] }))
     formRef.current = form
   }
 
@@ -60,6 +60,7 @@ export function useFieldValue(field) {
 }
 
 export function useFormField(field) {
+  if (!field) throw new Error('No field was passed in')
   const { name, eventHandlers } = field
   const state = useFieldState(field.state)
 
