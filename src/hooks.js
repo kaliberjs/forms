@@ -18,13 +18,13 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
     formRef.current = form
   }
 
-  const submit = React.useCallback(handleSubmit, [formRef.current, onSubmit])
-  const reset = React.useCallback(handleReset, [formRef.current])
+  const submit = React.useCallback(handleSubmit, [onSubmit])
+  const reset = React.useCallback(handleReset, [])
 
   return { form: formRef.current, submit, reset }
 
   function handleSubmit(e) {
-    e.preventDefault()
+    if (e) e.preventDefault()
     formRef.current.setSubmitted(true)
     onSubmit(snapshot.get(formRef.current))
   }
