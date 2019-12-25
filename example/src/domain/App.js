@@ -49,6 +49,15 @@ function MyForm() {
     }
   })
 
+  const [count, setCount] = React.useState(0)
+  React.useEffect(
+    () => {
+      const id = setInterval(() => { setCount(x => x + 1) }, 5000)
+      return () => { clearInterval(id) }
+    },
+    []
+  )
+
   console.log('MyForm render, is that ok?')
 
   const { fields } = form
