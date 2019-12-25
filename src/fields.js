@@ -223,7 +223,7 @@ function mapValues(o, f) {
 function bindValidate(f, state) {
   return f && (
     (...args) => {
-      const error = f && f(...args)
+      const error = (f && f(...args)) || false
       return state.update(x => isEqual(error, x.error) ? x : updateState(x, { error }))
     }
   )
