@@ -11,7 +11,7 @@ export {
 export {
   required, optional,
   number, min, max,
-  minLength,
+  minLength, maxLength,
   message,
   email,
 } from './validation'
