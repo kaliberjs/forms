@@ -16,15 +16,15 @@ export function normalize(field) {
       { type: 'basic', validate: toValidationFunction(x) }
   }
   function convertArrayField(x) {
-    return 'type' in x && x.type === 'array' &&
+    return x && 'type' in x && x.type === 'array' &&
       { type: 'array', validate: toValidationFunction(x.validate), fields: x.fields }
   }
   function convertObjectField(x) {
-    return 'type' in x && x.type === 'object' &&
+    return x && 'type' in x && x.type === 'object' &&
       { type: 'object', validate: toValidationFunction(x.validate), fields: x.fields }
   }
   function convertSimpleField(x) {
-    return { type: 'basic', validate: toValidationFunction(x.validate) }
+    return { type: 'basic', validate: toValidationFunction(x && x.validate) }
   }
 
   function toValidationFunction(x = []) {
