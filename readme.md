@@ -74,6 +74,45 @@ function TextInput({ label, field }) {
 ```
 ![](https://media.giphy.com/media/c21EAVffi7zd6/giphy.gif)
 
+## Reference
+
+### useForm
+
+Defines a form.
+
+```js
+const {
+  form, // 'object' field containing the form
+  submit, // handler that can be used to submit the form
+  reset, // handler that can be used to reset the form
+} = useForm({
+  fields, // form structure
+  initialValues, // (optional) initial form values
+  validate, // (optional) validation for the complete form
+  handleSubmit, // called when the form is submitted
+})
+```
+
+|                |                                                                               |
+|----------------|-------------------------------------------------------------------------------|
+|`fields`        | An object with the shape: `{ [name: string]: FormField }`.|
+|`initialValues` | An object with the shape: `{ [name: keyof fields]: ValueFor<fields[name]> }`|
+|`validate`      | One of `Validate` or `Array<Validate>`|
+|`handleSubmit`  | A function that accepts a `Snapshot`|
+|                |                                                                               |
+|`FormField`     | One of `BasicField`, `ArrayField` or `ObjectField`|
+|`BasicField`    | One of `null`, `Validate` or `Array<Validate>`|
+|`ArrayField`    | Created with `array(fields)` or `array(validate, fields)`|
+|`ObjectField`   | Created with `object(fields)` or `object(validate, fields)`|
+|                |                                                                               |
+|`Validate`      | A function with the following shape: `(x, { form, context }) => falsy | { id, params }|`
+|                |                                                                               |
+|`ValueFor<BasicField>` | Value can be anything and depends on the value passed to `onChange`|
+|`ValueFor<ArrayField>` | Value is an array with objects mirroring the `fields` of that array|
+|`ValueFor<ObjectField>`| Value is an object mirroring the `fields` of that object|
+|                |                                                                               |
+|`Snapshot`| An object with the following shape: `{ invalid, value, error }`|
+
 ## Missing feature?
 
 If the library has a constraint that prevents you from implementing a specific feature (outside of the library) start a conversation.
