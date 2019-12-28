@@ -51,10 +51,11 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   function createFormFields(initialValues, fields, namePrefix = '') {
     return mapValues(fields, (field, name) => {
-      const normalizedField = normalize(field)
+      const fullName = `${namePrefix}${name}`
+      const normalizedField = normalize(field, fullName)
       const constructor = constructors[normalizedField.type]
       return constructor({
-        name: `${namePrefix}${name}`,
+        name: fullName,
         field: normalizedField,
         initialValue: initialValues[name]
       })
@@ -63,6 +64,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 }
 
 function createArrayFormField({ name, initialValue = [], field }) {
+
   const initialChildren = initialValue.map(createFormFieldsAt)
   const initialState = deriveFieldState({
     children: initialChildren,
@@ -121,10 +123,11 @@ function createArrayFormField({ name, initialValue = [], field }) {
   }
 
   function createFormFieldsAt(initialValue, index) {
+    const fullName = `${name}[${index}]`
     return createObjectFormField({
-      name: `${name}[${index}]`,
+      name: fullName,
       initialValue,
-      field: normalize({ type: 'object', fields: field.fields }),
+      field: normalize({ type: 'object', fields: field.fields }, fullName),
     })
   }
 }
