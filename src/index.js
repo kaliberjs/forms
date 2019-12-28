@@ -3,6 +3,7 @@ export {
   useFormField,
   useNumberFormField,
   useArrayFormField,
+  useFieldSnapshot,
   useFieldValue,
 } from './hooks'
 export {
