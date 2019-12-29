@@ -6,8 +6,12 @@ export function requiredWhenInForm(predicate) {
   return (x, { form }) => predicate(form) && required(x)
 }
 export function requiredWhenInParent(predicate) {
+  return whenInParent(predicate, required)
+}
+
+export function whenInParent(predicate, f) {
   return (x, { parents }) => {
     const [parent] = parents.slice(-1)
-    return predicate(parent) && required(x)
+    return predicate(parent) && f(x)
   }
 }

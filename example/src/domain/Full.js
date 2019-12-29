@@ -1,5 +1,5 @@
 import { optional, required, object, minLength, array, message, email, useForm, useFieldValue } from '@kaliber/forms'
-import { requiredWhenInParent, requiredWhenInForm, date } from './machinery/validation'
+import { requiredWhenInParent, requiredWhenInForm, date, whenInParent } from './machinery/validation'
 import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormFieldValue, FormArrayField } from './machinery/Form'
 import { Code } from './machinery/Code'
 
@@ -23,7 +23,7 @@ const fields = {
     {
       anoniem: required,
       naam: requiredWhenInParent(x => !x.anoniem),
-      email: [requiredWhenInParent(x => !x.anoniem), email],
+      email: [requiredWhenInParent(x => !x.anoniem), whenInParent(x => !x.anoniem, email)],
     }
   ),
 }
@@ -102,11 +102,9 @@ function Bedankt({ submitted, onReset }) {
   return (
     <>
       <p>Bedankt!</p>
-      <button type='button' onClick={onReset}><b>| Nog een keer|</b></button>
-      <p>
-        Dit is wat je had ingevuld:
-        <Code value={submitted} indent />
-      </p>
+      <p><button type='button' onClick={onReset}><b>| Nog een keer|</b></button></p>
+      Dit is wat je had ingevuld:
+      <Code value={submitted} indent />
     </>
   )
 }
