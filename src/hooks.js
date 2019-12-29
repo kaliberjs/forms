@@ -3,26 +3,9 @@ import { createObjectFormField } from './fields'
 import { normalize } from './normalize'
 import * as snapshot from './snapshot'
 
-// TODO: refactor this
-//
-// it has a flaw that will be exposed when 'form1' is unmounted and then mounted again
-const formCounter = new Set()
+let formCounter = 0 // This will stop working when we need a number greater than 9007199254740991
+function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
 
-function useFormId() {
-  const idRef = React.useRef(Symbol('form'))
-  const id = React.useMemo(
-    () => {
-      formCounter.add(idRef.current)
-      return `form${formCounter.size}`
-    },
-    []
-  )
-  React.useEffect(
-    () => () => formCounter.delete(idRef.current),
-    []
-  )
-  return id
-}
 
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit }) {
   const initialValuesRef = React.useRef(null)
