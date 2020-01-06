@@ -3,7 +3,7 @@ import { required, email } from '@kaliber/forms/validation'
 
 const validationErrors = {
   required: 'This field is required',
-  email: 'This is not a valid e-mail',
+  email: 'This is not a valid email',
 }
 
 export function Basic() {
