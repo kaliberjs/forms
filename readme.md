@@ -332,8 +332,8 @@ import { ... } from '@kaliber/forms/validation'
 |`number`                    | Reports if the value can not be converted to a number.|
 |`min` and `max`             | Reports if the value is outside of the given value.|
 |`minLength` and `maxLength` | Reports if the `length` of the value is outside of the given value.|
-|`message`                   | Utility to create an error object.|
 |`email`                     | Reports if the value does not vaguely look like an email address.|
+|`error`                     | Utility to create an error object.|
 
 ## Missing feature?
 

@@ -1,5 +1,5 @@
 import { object, array, useForm, useFieldValue } from '@kaliber/forms'
-import { optional, required, minLength, message, email } from '@kaliber/forms/validation'
+import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
 import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormFieldValue, FormArrayField } from './machinery/Form'
 import { Code } from './machinery/Code'
@@ -14,13 +14,18 @@ const fields = {
   geboortedatum: [required, date],
   kortingscode: optional,
   betaalNu: required,
-  betaalInfo: object(x => x.andereNaam && !x.rekeninghouder && message('rekeninghouderIsVerplicht'), {
-    andereNaam: optional,
-    rekeninghouder: ifParentHasValue(x => x.andereNaam, required),
-    rekeningnummer: [ifFormHasValue(x => x.betaalNu, required), minLength(9)],
-  }),
+  betaalInfo: object(
+    // custom validation
+    x => x.andereNaam && !x.rekeninghouder && error('rekeninghouderIsVerplicht'),
+    {
+      andereNaam: optional,
+      rekeninghouder: ifParentHasValue(x => x.andereNaam, required),
+      rekeningnummer: [ifFormHasValue(x => x.betaalNu, required), minLength(9)],
+    }
+  ),
   extraKaartjes: array(
-    (x, { form }) => form.kortingscode && minLength(1)(x) && message('kortingMoetMetVrienden'),
+    // return a different validation error
+    (x, { form }) => form.kortingscode && minLength(1)(x) && error('kortingMoetMetVrienden'),
     {
       anoniem: required,
       naam: ifParentHasValue(x => !x.anoniem, required),

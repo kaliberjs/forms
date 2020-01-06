@@ -2,6 +2,6 @@ export {
   required, optional,
   number, min, max,
   minLength, maxLength,
-  message,
   email,
+  error,
 } from './src/validation'

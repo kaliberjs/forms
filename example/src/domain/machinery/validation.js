@@ -1,7 +1,7 @@
-import { message } from '@kaliber/forms'
+import { error } from '@kaliber/forms/validation'
 
 const dateRegex = /^\d\d?-\d\d?-\d\d\d\d$/
-export const date = x => !dateRegex.test(x) && message('date')
+export const date = x => !dateRegex.test(x) && error('date')
 
 export function ifFormHasValue(predicate, f) {
   return (x, { form }) => predicate(form) && f(x)
