@@ -97,3 +97,10 @@ export function useArrayFormField(field) {
 
   return { name, state, helpers }
 }
+
+export function useObjectFormField(field) {
+  const { name, fields } = field
+  const state = useFieldState(field.state)
+
+  return { name, state, fields }
+}

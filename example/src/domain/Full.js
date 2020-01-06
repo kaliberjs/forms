@@ -14,7 +14,7 @@ const fields = {
   geboortedatum: [required, date],
   kortingscode: optional,
   betaalNu: required,
-  betaalInfo: object({
+  betaalInfo: object(x => x.andereNaam && !x.rekeninghouder && message('rekeninghouderIsVerplicht'), {
     andereNaam: optional,
     rekeninghouder: ifParentHasValue(x => x.andereNaam, required),
     rekeningnummer: [ifFormHasValue(x => x.betaalNu, required), minLength(9)],
