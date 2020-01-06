@@ -111,7 +111,7 @@ const {
 |`ArrayField`    | Created with `array(fields)` or `array(validate, fields)`|
 |`ObjectField`   | Created with `object(fields)` or `object(validate, fields)`|
 |                |                                                                               |
-|`Validate`      | A function with the following shape: `(x, { form, context }) => falsy | { id, params }|`
+|`Validate`      | A function with the following shape: `(x, { form, parents }) => falsy | { id, params }`|
 |                |                                                                               |
 |`ValueFor<BasicField>` | Value can be anything and depends on the value passed to `onChange`|
 |`ValueFor<ArrayField>` | Value is an array with objects mirroring the `fields` of that array|
