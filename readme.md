@@ -123,7 +123,7 @@ const {
   fields, // form structure
   initialValues, // (optional) initial form values
   validate, // (optional) validation for the complete form
-  handleSubmit, // called when the form is submitted
+  onSubmit, // called when the form is submitted
 })
 ```
 
@@ -132,7 +132,7 @@ const {
 |`fields`        | An object with the shape: `{ [name: string]: FormField }`.|
 |`initialValues` | An object with the shape: `{ [name: keyof fields]: ValueFor<fields[name]> }`|
 |`validate`      | One of `Validate` or `Array<Validate>`|
-|`handleSubmit`  | A function that accepts a `Snapshot`|
+|`onSubmit`      | A function that accepts a `Snapshot`|
 |                |                                                                               |
 |`FormField`     | One of `BasicField`, `ArrayField` or `ObjectField`|
 |`BasicField`    | One of `null`, `Validate` or `Array<Validate>`|
