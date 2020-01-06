@@ -1,4 +1,5 @@
-import { optional, required, object, minLength, array, message, email, useForm, useFieldValue } from '@kaliber/forms'
+import { object, array, useForm, useFieldValue } from '@kaliber/forms'
+import { optional, required, minLength, message, email } from '@kaliber/forms/validation'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
 import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormFieldValue, FormArrayField } from './machinery/Form'
 import { Code } from './machinery/Code'

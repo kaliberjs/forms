@@ -20,14 +20,15 @@ yarn add @kaliber/forms
 Please look at the example for more advanced use-cases.
 
 ```jsx
-import { useForm, useFormField, required, email } from '@kaliber/forms'
+import { useForm, useFormField } from '@kaliber/forms'
+import { required, email } from '@kaliber/forms/validation'
 
 const validationErrors = {
   required: 'This field is required',
   email: 'This is not a valid e-mail',
 }
 
-export function Simple() {
+export function Basic() {
   const { form: { fields }, submit } = useForm({
     initialValues: {
       name: '',
@@ -55,17 +56,12 @@ export function Simple() {
 
 function TextInput({ label, field }) {
   const { name, state, eventHandlers } = useFormField(field)
-  const { value, error, showError } = state
+  const { value = '', error, showError } = state
   return (
     <>
       <div>
         <label htmlFor={name}>{label}</label>
-        <input
-          id={name}
-          type='text'
-          value={value === undefined ? '' : value}
-          {...eventHandlers}
-        />
+        <input id={name} type='text' {...{ name, value }} {...eventHandlers} />
       </div>
       {showError && <p>{validationErrors[error.id]}</p>}
     </>

@@ -1,4 +1,5 @@
-import { useForm, useFormField, required, email } from '@kaliber/forms'
+import { useForm, useFormField } from '@kaliber/forms'
+import { required, email } from '@kaliber/forms/validation'
 
 const validationErrors = {
   required: 'This field is required',
@@ -33,17 +34,12 @@ export function Basic() {
 
 function TextInput({ label, field }) {
   const { name, state, eventHandlers } = useFormField(field)
-  const { value, error, showError } = state
+  const { value = '', error, showError } = state
   return (
     <>
       <div>
         <label htmlFor={name}>{label}</label>
-        <input
-          id={name}
-          type='text'
-          value={value === undefined ? '' : value}
-          {...eventHandlers}
-        />
+        <input id={name} type='text' {...{ name, value }} {...eventHandlers} />
       </div>
       {showError && <p>{validationErrors[error.id]}</p>}
     </>
