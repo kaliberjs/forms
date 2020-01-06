@@ -27,6 +27,7 @@ export function FormCheckbox({ field, label }) {
         id={name}
         type='checkbox'
         checked={value || false}
+        {...{ name }}
         {...eventHandlers}
       />
     </LabelAndError>
@@ -88,7 +89,7 @@ function InputBase({ type, name, label, state, eventHandlers }) {
       <input
         id={name}
         value={value === undefined ? '' : value}
-        {...{ type }}
+        {...{ name, type }}
         {...eventHandlers}
       />
     </LabelAndError>
