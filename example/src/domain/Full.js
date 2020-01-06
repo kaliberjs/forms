@@ -1,5 +1,5 @@
 import { optional, required, object, minLength, array, message, email, useForm, useFieldValue } from '@kaliber/forms'
-import { requiredWhenInParent, requiredWhenInForm, date, whenInParent } from './machinery/validation'
+import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
 import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormFieldValue, FormArrayField } from './machinery/Form'
 import { Code } from './machinery/Code'
 
@@ -15,15 +15,15 @@ const fields = {
   betaalNu: required,
   betaalInfo: object({
     andereNaam: optional,
-    rekeninghouder: requiredWhenInParent(x => x.andereNaam),
-    rekeningnummer: [requiredWhenInForm(x => x.betaalNu), minLength(9)],
+    rekeninghouder: ifParentHasValue(x => x.andereNaam, required),
+    rekeningnummer: [ifFormHasValue(x => x.betaalNu, required), minLength(9)],
   }),
   extraKaartjes: array(
     (x, { form }) => form.kortingscode && minLength(1)(x) && message('kortingMoetMetVrienden'),
     {
       anoniem: required,
-      naam: requiredWhenInParent(x => !x.anoniem),
-      email: [requiredWhenInParent(x => !x.anoniem), whenInParent(x => !x.anoniem, email)],
+      naam: ifParentHasValue(x => !x.anoniem, required),
+      email: [ifParentHasValue(x => !x.anoniem, required), ifParentHasValue(x => !x.anoniem, email)],
     }
   ),
 }
