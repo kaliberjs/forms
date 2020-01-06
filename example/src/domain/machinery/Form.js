@@ -13,6 +13,7 @@ export function FormTextInput({ field, label }) {
 
 export function FormNumberInput({ field, label }) {
   const { name, state, eventHandlers } = useNumberFormField(field)
+  // We use type='text' to show `number` validation
   return <InputBase type='text' {...{ name, label, state, eventHandlers }} />
 }
 
