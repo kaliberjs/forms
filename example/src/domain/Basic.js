@@ -8,14 +8,17 @@ const validationErrors = {
 
 export function Basic() {
   const { form: { fields }, submit } = useForm({
+    // provide initial values to populate the form with
     initialValues: {
       name: '',
       email: '',
     },
+    // create the form structure, fields are essentially their validation functions
     fields: {
       name: required,
       email: [required, email],
     },
+    // handle form submit
     onSubmit: handleSubmit,
   })
 
@@ -28,6 +31,7 @@ export function Basic() {
   )
 
   function handleSubmit(snapshot) {
+    // note that the snapshot can still be invalid
     console.log(snapshot)
   }
 }

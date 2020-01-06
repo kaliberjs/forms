@@ -17,7 +17,7 @@ yarn add @kaliber/forms
 
 ## Usage
 
-Please look at the example for more advanced use-cases.
+_Please look at the example for more advanced use-cases._
 
 ```jsx
 import { useForm, useFormField } from '@kaliber/forms'
@@ -30,14 +30,17 @@ const validationErrors = {
 
 export function Basic() {
   const { form: { fields }, submit } = useForm({
+    // provide initial values to populate the form with
     initialValues: {
       name: '',
       email: '',
     },
+    // create the form structure, fields are essentially their validation functions
     fields: {
       name: required,
       email: [required, email],
     },
+    // handle form submit
     onSubmit: handleSubmit,
   })
 
@@ -50,6 +53,7 @@ export function Basic() {
   )
 
   function handleSubmit(snapshot) {
+    // note that the snapshot can still be invalid
     console.log(snapshot)
   }
 }
@@ -72,7 +76,13 @@ function TextInput({ label, field }) {
 
 ## Reference
 
-### useForm
+### Hooks
+
+```js
+import { ... } from '@kaliber/forms'
+```
+
+#### useForm
 
 Defines a form.
 
