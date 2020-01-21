@@ -861,9 +861,9 @@
   integrity sha512-Nzqn+bWNNkwd2Mp4fxdoYdl9evBE7dIwjaEe3fMDfaYxA+AhuZIFTWhXkvJo9qqYv1dzAuOIwU238RI0UvUKVQ==
 
 "@kaliber/eslint-plugin@*":
-  version "0.0.1-alpha.3"
-  resolved "https://registry.yarnpkg.com/@kaliber/eslint-plugin/-/eslint-plugin-0.0.1-alpha.3.tgz#75bd22a499f13f7e57ae60c1ba042870e799eb3e"
-  integrity sha512-LEsDbpHjhUJa9WABnmokX1xn9E+k5EGR47Q5+326Uq1di3cE0yFAMvnMFmfYVzAjAIQeecqC7/RQq+DUJSeyRg==
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@kaliber/eslint-plugin/-/eslint-plugin-0.0.1.tgz#9d48c09602609c17a7cf8d91a7217d42a4580d0b"
+  integrity sha512-TUzSR0hiU0VlSt3MwS+LsoXVkK4wJY0oJd0vTfad+9JgqRF/4dLmjzTqegoiBB7b+pxKDUaptu+R6cWgsO4tKA==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"

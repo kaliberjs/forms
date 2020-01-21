@@ -96,8 +96,8 @@ _See the example for use cases_
   - [useNumberFormField](#useNumberFormField)
   - [useArrayFormField](#useArrayFormField)
   - [useObjectFormField](#useObjectFormField)
-  - [useFieldSnapshot](#useFieldSnapshot)
-  - [useFieldValue](#useFieldValue)
+  - [useFormFieldSnapshot](#useFormFieldSnapshot)
+  - [useFormFieldValue](#useFormFieldValue)
 - [Schema](#schema)
   - [array](#array)
   - [object](#object)
@@ -237,12 +237,12 @@ const {
 |`- showError`   | Handy derived boolean to determine when to show an error|
 |`fields`        | An object containing the fields|
 
-#### useFieldSnapshot
+#### useFormFieldSnapshot
 
 Subscribes to the state of a field (or form).
 
 ```jsx
-const snapshot = useFieldSnapshot(form)
+const snapshot = useFormFieldSnapshot(form)
 ```
 
 | Output         |                                                                               |
@@ -256,12 +256,12 @@ const snapshot = useFieldSnapshot(form)
 |`ObjectError`   | An object with the shape: `{ self, children }` where `self` is a `BasicError` and children an object with errors|
 |`ArrayError`    | An object with the shape: `{ self, children }` where `self` is a `BasicError` and children an array with errors|
 
-#### useFieldValue
+#### useFormFieldValue
 
 Subscribes to the value of a field (or form).
 
 ```jsx
-const value = useFieldValue(field)
+const value = useFormFieldValue(field)
 ```
 
 | Output         |                                                                               |
