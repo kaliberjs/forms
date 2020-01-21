@@ -91,6 +91,17 @@ export function useNumberFormField(field) {
   }
 }
 
+export function useBooleanFormField(field) {
+  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
+  const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
+
+  return { name, state, eventHandlers }
+
+  function handleChange(e) {
+    onChange(e.target.checked)
+  }
+}
+
 export function useArrayFormField(field) {
   const { name, helpers } = field
   const state = useFieldState(field.state)

@@ -2,6 +2,7 @@ export {
   useForm,
   useFormField,
   useNumberFormField,
+  useBooleanFormField,
   useArrayFormField,
   useObjectFormField,
   useFieldSnapshot,
