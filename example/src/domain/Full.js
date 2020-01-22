@@ -1,4 +1,4 @@
-import { object, array, useForm, useFieldValue } from '@kaliber/forms'
+import { object, array, useForm, useFormFieldValue } from '@kaliber/forms'
 import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
 import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormFieldValue, FormArrayField } from './machinery/Form'
@@ -116,6 +116,6 @@ function Bedankt({ submitted, onReset }) {
 }
 
 function Conditional({ field, children, reverse = false }) {
-  const value = useFieldValue(field)
+  const value = useFormFieldValue(field)
   return (reverse ? !value : value) && children
 }

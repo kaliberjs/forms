@@ -1,8 +1,8 @@
-import { useFieldSnapshot, useFieldValue, useFormField, useNumberFormField, useArrayFormField, useObjectFormField } from '@kaliber/forms'
+import { useFormFieldSnapshot, useFormFieldValue, useFormField, useNumberFormField, useArrayFormField, useObjectFormField } from '@kaliber/forms'
 import { Code } from './Code'
 
 export function FormValues({ form }) {
-  const formState = useFieldSnapshot(form)
+  const formState = useFormFieldSnapshot(form)
   return <Code value={formState} indent />
 }
 
@@ -77,7 +77,7 @@ export function FormObjectField({ field, render }) {
 
 export function FormFieldValue({ field, render }) {
   console.log(`[${field.name}] render value field`)
-  const value = useFieldValue(field)
+  const value = useFormFieldValue(field)
   return render({ value }) || null
 }
 
