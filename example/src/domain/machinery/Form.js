@@ -1,4 +1,4 @@
-import { useFormFieldSnapshot, useFormFieldValue, useFormField, useNumberFormField, useArrayFormField, useObjectFormField } from '@kaliber/forms'
+import { useFormFieldSnapshot, useFormFieldValue, useFormField, useNumberFormField, useBooleanFormField, useArrayFormField, useObjectFormField } from '@kaliber/forms'
 import { Code } from './Code'
 
 export function FormValues({ form }) {
@@ -32,12 +32,6 @@ export function FormCheckbox({ field, label }) {
       />
     </LabelAndError>
   )
-}
-
-function useBooleanFormField(field) {
-  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
-  const eventHandlers = { ...originalEventHandlers, onChange: e => onChange(e.target.checked) }
-  return { name, state, eventHandlers }
 }
 
 export function FormArrayField({ field, render, initialValue }) {
