@@ -2,9 +2,27 @@
   "name": "@kaliber/forms",
   "version": "0.0.1",
   "main": "index.js",
-  "repository": "http://github.com/kaliberjs/forms",
-  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "react",
+    "forms",
+    "form",
+    "hooks",
+    "hook"
+  ],
+  "files": [
+    "index.js",
+    "src/**",
+    "LICENSE",
+    "readme.md",
+    "package.json"
+  ],
   "private": false,
+  "license": "MIT",
+  "repository": "https://github.com/kaliberjs/forms.git",
   "dependencies": {
     "react-fast-compare": "^2.0.4"
   }

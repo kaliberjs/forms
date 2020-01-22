@@ -84,6 +84,7 @@ function TextInput({ label, field }) {
   )
 }
 ```
+
 ![](https://media.giphy.com/media/c21EAVffi7zd6/giphy.gif)
 
 ## Reference
