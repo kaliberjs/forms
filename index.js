@@ -5,8 +5,8 @@ export {
   useBooleanFormField,
   useArrayFormField,
   useObjectFormField,
-  useFieldSnapshot,
-  useFieldValue,
+  useFormFieldSnapshot,
+  useFormFieldValue,
 } from './src/hooks'
 export {
   array, object,

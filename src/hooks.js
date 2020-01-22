@@ -55,7 +55,7 @@ function useFieldState(state) {
   return fieldState
 }
 
-export function useFieldSnapshot(field) {
+export function useFormFieldSnapshot(field) {
   const state = React.useMemo(
     () => ({
       get() { return snapshot.get(field) },
@@ -66,7 +66,7 @@ export function useFieldSnapshot(field) {
   return useFieldState(state)
 }
 
-export function useFieldValue(field) {
+export function useFormFieldValue(field) {
   return useFieldState(field.value)
 }
 
