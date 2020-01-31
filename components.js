@@ -1,6 +1,4 @@
 export {
-  FormArrayField,
-  FormObjectField,
   FormFieldValue,
   FormFieldValues,
   FormFieldValid,
