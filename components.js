@@ -1,5 +1,5 @@
 export {
   FormFieldValue,
-  FormFieldValues,
+  FormFieldsValues,
   FormFieldValid,
 } from './src/components'

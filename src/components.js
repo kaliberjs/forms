@@ -1,13 +1,16 @@
-import { useArrayFormField, useObjectFormField, useFormFieldValue, useFormFieldSnapshot } from './hooks'
+import {
+  useFormFieldValue, useFormFieldsValues,
+  useFormFieldSnapshot
+} from './hooks'
 
 export function FormFieldValue({ field, render }) {
   const value = useFormFieldValue(field)
-  return render({ value }) || null
+  return render(value) || null
 }
 
-export function FormFieldValues({ fields, render }) {
-  // TODO
-  return null
+export function FormFieldsValues({ fields, render }) {
+  const values = useFormFieldsValues(fields)
+  return render(values) || null
 }
 
 export function FormFieldValid({ field, render }) {
