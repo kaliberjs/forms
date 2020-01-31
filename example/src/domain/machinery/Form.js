@@ -69,12 +69,6 @@ export function FormObjectField({ field, render }) {
   )
 }
 
-export function FormFieldValue({ field, render }) {
-  console.log(`[${field.name}] render value field`)
-  const value = useFormFieldValue(field)
-  return render({ value }) || null
-}
-
 function InputBase({ type, name, label, state, eventHandlers }) {
   const { value } = state
   console.log(`[${name}] render ${type} field`)

@@ -1,7 +1,8 @@
 import { object, array, useForm, useFormFieldValue } from '@kaliber/forms'
 import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
+import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
-import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormFieldValue, FormArrayField } from './machinery/Form'
+import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField } from './machinery/Form'
 import { Code } from './machinery/Code'
 
 /**
@@ -47,7 +48,7 @@ export function Full() {
     <>
       {submitted
         ? <Bedankt onReset={handleReset} {...{ submitted }} />
-        : <Formulier onSubmit={submit} fields={form.fields} />
+        : <Formulier onSubmit={submit} {...{ form }} />
       }
       <h3>Current form state:</h3>
       <FormValues {...{ form }} />
@@ -65,7 +66,8 @@ export function Full() {
   }
 }
 
-function Formulier({ fields, onSubmit }) {
+function Formulier({ form, onSubmit }) {
+  const { fields } = form
   return (
     <form {...{ onSubmit }}>
       <FormTextInput label='Naam' field={fields.naam} />
@@ -73,7 +75,7 @@ function Formulier({ fields, onSubmit }) {
       <FormTextInput label='Geboortedatum' field={fields.geboortedatum} />
       <FormTextInput label='Kortingscode' field={fields.kortingscode} />
       <FormCheckbox label='Nu betalen?' field={fields.betaalNu} />
-      <FormFieldValue field={fields.betaalNu} render={({ value }) =>
+      <FormFieldValue field={fields.betaalNu} render={value =>
         value && (
           <FormObjectField field={fields.betaalInfo} render={({ fields }) => (
             <>
@@ -92,6 +94,9 @@ function Formulier({ fields, onSubmit }) {
         render={({ fields }) =>
           <>
             <Conditional reverse field={fields.anoniem}>
+              <FormFieldsValues fields={[fields.naam, fields.email]} render={([naam, email]) =>
+                naam && email && `${naam} (${email})`
+              } />
               <FormTextInput label='Naam' field={fields.naam} />
               <FormTextInput label='Email' field={fields.email} />
             </Conditional>
@@ -99,7 +104,9 @@ function Formulier({ fields, onSubmit }) {
           </>
         }
       />
-      <button type='submit'><b>| Aanmelden |</b></button>
+      <FormFieldValid field={form} render={valid =>
+        <button type='submit' style={{ cursor: !valid && 'not-allowed' }} disabled={!valid}><b>| Aanmelden |</b></button>
+      } />
     </form>
   )
 }
