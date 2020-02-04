@@ -99,6 +99,7 @@ _See the example for use cases_
   - [useObjectFormField](#useObjectFormField)
   - [useFormFieldSnapshot](#useFormFieldSnapshot)
   - [useFormFieldValue](#useFormFieldValue)
+  - [useFormFieldsValues](#useFormFieldsValues)
 - [Schema](#schema)
   - [array](#array)
   - [object](#object)
@@ -269,6 +270,17 @@ const value = useFormFieldValue(field)
 |----------------|-------------------------------------------------------------------------------|
 |`value`         | The value of the field. |
 
+#### useFormFieldsValues
+
+Subscribes to the values of multiple fields (or forms).
+
+```jsx
+const values = useFormFieldsValues(fields)
+```
+
+| Output         |                                                                               |
+|----------------|-------------------------------------------------------------------------------|
+|`values`        | An array with the values of the fields. |
 
 ### Schema
 
