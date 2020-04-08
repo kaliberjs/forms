@@ -369,7 +369,7 @@ Because this is such a common usecase, we provide several of these components.
 
 | Props   |                                                                                      |
 |---------|--------------------------------------------------------------------------------------|
-|`render` | A function with the following shape: `value => JSX.Element | falsy`. Will render the return value as children, or `null` in case this value is falsy. |
+|`render` | A function with the following shape: `value => JSX.Element | null`. Will render the return value, or `null` in case this value is `undefined`. |
 |`field`  | The field whose value is used as the `value` argument when calling `render`.|
 
 ##### Example
@@ -384,7 +384,7 @@ Because this is such a common usecase, we provide several of these components.
 
 | Props   |                                                                                      |
 |---------|--------------------------------------------------------------------------------------|
-|`render` | A function with the following shape: `values => JSX.Element | falsy`, where `values` is an array. Will render the return value as children, or `null` in case this value is falsy. |
+|`render` | A function with the following shape: `values => JSX.Element | null`, where `values` is an array. Will render the return value, or `null` in case this value is `undefined`. |
 |`fields`  | The fields whose values are used as the `values` argument when calling `render`.|
 
 ##### Example
@@ -399,7 +399,7 @@ Because this is such a common usecase, we provide several of these components.
 
 | Props   |                                                                                      |
 |---------|--------------------------------------------------------------------------------------|
-|`render` | A function with the following shape: `valid => JSX.Element | falsy`. Will render the return value as children, or `null` in case this value is falsy. |
+|`render` | A function with the following shape: `valid => JSX.Element | null`. Will render the return value, or `null` in case this value is `undefined`. |
 |`field`  | The field whose validity state is used as the `valid` argument when calling `render`.|
 
 ##### Example
