@@ -5,15 +5,19 @@ import {
 
 export function FormFieldValue({ field, render }) {
   const value = useFormFieldValue(field)
-  return render(value) || null
+  return valueOrNull(render(value))
 }
 
 export function FormFieldsValues({ fields, render }) {
   const values = useFormFieldsValues(fields)
-  return render(values) || null
+  return valueOrNull(render(values))
 }
 
 export function FormFieldValid({ field, render }) {
   const { invalid } = useFormFieldSnapshot(field)
-  return React.useMemo(() => render(!invalid) || null, [invalid])
+  return React.useMemo(() => valueOrNull(render(!invalid)), [invalid])
+}
+
+function valueOrNull(value) {
+  return typeof value === 'undefined' ? null : value
 }
