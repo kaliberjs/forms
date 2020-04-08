@@ -15,7 +15,7 @@ export function FormFieldsValues({ fields, render }) {
 
 export function FormFieldValid({ field, render }) {
   const { invalid } = useFormFieldSnapshot(field)
-  return React.useMemo(() => valueOrNull(render(!invalid)), [invalid])
+  return valueOrNull(render(!invalid))
 }
 
 function valueOrNull(value) {
