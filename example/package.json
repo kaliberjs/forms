@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@kaliber/build": "^0.0.99-alpha.3"
+    "@kaliber/build": "^0.0.102"
   },
   "scripts": {
     "start": "npm-run-all --parallel watch serve:dev",

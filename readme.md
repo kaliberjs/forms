@@ -96,6 +96,7 @@ _See the example for use cases_
   - [useForm](#useForm)
   - [useFormField](#useFormField)
   - [useNumberFormField](#useNumberFormField)
+  - [useBooleanFormField](#useBooleanFormField)
   - [useArrayFormField](#useArrayFormField)
   - [useObjectFormField](#useObjectFormField)
   - [useFormFieldSnapshot](#useFormFieldSnapshot)
@@ -196,6 +197,10 @@ const {
 #### useNumberFormField
 
 Specialized version of [`useFormField`](#useFormField) that converts the value to a a number if possible.
+
+#### useBooleanFormField
+
+Specialized version of [`useFormField`](#useFormField) that uses the checked state of the event target as value.
 
 #### useArrayFormField
 
