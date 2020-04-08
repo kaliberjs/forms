@@ -194,7 +194,7 @@ Specialized version of [`useFormField`](#useFormField) that converts the value t
 
 #### useBooleanFormField
 
-Specialized version of [`useFormField`](#useFormField) that reports the checked state of the input as value.
+Specialized version of [`useFormField`](#useFormField) that uses the checked state of the event target as value.
 
 #### useArrayFormField
 
