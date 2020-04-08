@@ -68,7 +68,6 @@ export function FormObjectField({ field, render }) {
     </div>
   )
 }
-
 export function FormFieldValue({ field, render }) {
   console.log(`[${field.name}] render value field`)
   const value = useFormFieldValue(field)
