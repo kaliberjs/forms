@@ -16,6 +16,7 @@
   "files": [
     "index.js",
     "validation.js",
+    "components.js",
     "src/**",
     "LICENSE",
     "readme.md",
