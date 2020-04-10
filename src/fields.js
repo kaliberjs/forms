@@ -13,7 +13,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   const fields = createFormFields(initialValue, field.fields, name && `${name}.`)
   const children = Object.values(fields)
 
-  const initialState = deriveFieldState({})
+  const initialState = deriveFormFieldState({})
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
 
@@ -65,12 +65,14 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
 function createArrayFormField({ name, initialValue = [], field }) {
 
-  const initialChildren = initialValue.map(createFormFieldsAt)
-  const initialState = deriveFieldState({
+  const initialChildren = initialValue.map(createFormField)
+  const initialState = deriveFormFieldState({
     children: initialChildren,
   })
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
+
+  let index = 0
 
   const value = {
     get() {
@@ -109,7 +111,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
     helpers: {
       add(initialValue) {
         internalState.update(x => {
-          const newChildren = [...x.children, createFormFieldsAt(initialValue, x.children.length)]
+          const newChildren = [...x.children, createFormField(initialValue)]
           return updateState(x, { children: newChildren })
         })
       },
@@ -122,8 +124,8 @@ function createArrayFormField({ name, initialValue = [], field }) {
     }
   }
 
-  function createFormFieldsAt(initialValue, index) {
-    const fullName = `${name}[${index}]`
+  function createFormField(initialValue) {
+    const fullName = `${name}[${index++}]`
     return createObjectFormField({
       name: fullName,
       initialValue,
@@ -134,8 +136,8 @@ function createArrayFormField({ name, initialValue = [], field }) {
 
 function createBasicFormField({ name, initialValue, field }) {
 
-  const initialFieldState = deriveFieldState({ value: initialValue })
-  const internalState = createState(initialFieldState)
+  const initialFormFieldState = deriveFormFieldState({ value: initialValue })
+  const internalState = createState(initialFormFieldState)
   const validate = bindValidate(field.validate, internalState)
 
   const value = {
@@ -158,7 +160,7 @@ function createBasicFormField({ name, initialValue, field }) {
       internalState.update(x => updateState(x, { isSubmitted }))
     },
     reset() {
-      internalState.update(x => initialFieldState)
+      internalState.update(x => initialFormFieldState)
     },
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
@@ -180,11 +182,11 @@ function createBasicFormField({ name, initialValue, field }) {
   }
 }
 
-function updateState(fieldState, update) {
-  return deriveFieldState({ ...fieldState, ...update })
+function updateState(formFieldState, update) {
+  return deriveFormFieldState({ ...formFieldState, ...update })
 }
 
-function deriveFieldState({
+function deriveFormFieldState({
   error = false,
   isSubmitted = false,
   isVisited = false,
