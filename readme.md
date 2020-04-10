@@ -9,6 +9,7 @@ A set of utilities to help you create forms in React.
   - [Hooks](#hooks)
   - [Schema](#schema)
   - [Validation](#validation)
+  - [Components](#components)
 - [Missing feature?](#missing-feature?)
 - [Other libraries](#other-libraries)
 - [Guiding principles](#guiding-principles)
@@ -100,10 +101,15 @@ _See the example for use cases_
   - [useObjectFormField](#useObjectFormField)
   - [useFormFieldSnapshot](#useFormFieldSnapshot)
   - [useFormFieldValue](#useFormFieldValue)
+  - [useFormFieldsValues](#useFormFieldsValues)
 - [Schema](#schema)
   - [array](#array)
   - [object](#object)
 - [Validation](#validation)
+- [Components](#components)
+  - [FormFieldValue](#FormFieldValue)
+  - [FormFieldsValues](#FormFieldsValues)
+  - [FormFieldValid](#FormFieldValid)
 
 
 ### Hooks
@@ -274,6 +280,17 @@ const value = useFormFieldValue(field)
 |----------------|-------------------------------------------------------------------------------|
 |`value`         | The value of the field. |
 
+#### useFormFieldsValues
+
+Subscribes to the values of multiple fields (or forms).
+
+```jsx
+const values = useFormFieldsValues(fields)
+```
+
+| Output         |                                                                               |
+|----------------|-------------------------------------------------------------------------------|
+|`values`        | An array with the values of the fields. |
 
 ### Schema
 
@@ -340,6 +357,57 @@ import { ... } from '@kaliber/forms/validation'
 |`minLength` and `maxLength` | Reports if the `length` of the value is outside of the given value.|
 |`email`                     | Reports if the value does not vaguely look like an email address.|
 |`error`                     | Utility to create an error object.|
+
+### Components
+
+When you want to conditionally render or set some props based on your current form state, you should avoid the use of `useFormFieldSnapshot` or `useFormFieldValue` in your form root, since that will re-render your entire form with each change. Rather you should create a specialised component and make the values available through a render prop. 
+
+Because this is such a common usecase, we provide several of these components.
+
+#### FormFieldValue
+
+| Props   |                                                                                      |
+|---------|--------------------------------------------------------------------------------------|
+|`render` | A function with the following shape: `value => React.ReactNode | null`. Will render the return value, or `null` in case this value is `undefined`. |
+|`field`  | The field whose value is used as the `value` argument when calling `render`.|
+
+##### Example
+
+```jsx
+<FormFieldValue field={fields.subscribeToNewsletter} render={value => (
+  value && <TextInput label='Email' field={fields.email} />
+)}>
+```
+
+#### FormFieldsValues
+
+| Props   |                                                                                      |
+|---------|--------------------------------------------------------------------------------------|
+|`render` | A function with the following shape: `values => React.ReactNode | null`, where `values` is an array. Will render the return value, or `null` in case this value is `undefined`. |
+|`fields`  | The fields whose values are used as the `values` argument when calling `render`.|
+
+##### Example
+
+```jsx
+<FormFieldValue field={[fields.firstName, fields.lastName]} render={([firstName, lastName]) => (
+  firstName && lastName && <Greeting>{firstName} {lastName}</Greeting>
+)}>
+```
+
+#### FormFieldValid
+
+| Props   |                                                                                      |
+|---------|--------------------------------------------------------------------------------------|
+|`render` | A function with the following shape: `valid => React.ReactNode | null`. Will render the return value, or `null` in case this value is `undefined`. |
+|`field`  | The field whose validity state is used as the `valid` argument when calling `render`.|
+
+##### Example
+
+```jsx
+<FormFieldValid field={form} render={valid => (
+  <Button type="submit" disabled={!valid}>Verstuur</Button>
+)}>
+```
 
 ## Missing feature?
 

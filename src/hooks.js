@@ -55,6 +55,31 @@ function useFormFieldState(state) {
   return formFieldState
 }
 
+function useFieldStates(states) {
+  const [fieldStates, setFieldStates] = React.useState(getStates)
+
+  React.useEffect(
+    () => {
+      setFieldStates(getStates())
+      return states.reduce(
+        (previous, x) => {
+          const unsubscribe = x.subscribe(_ => setFieldStates(getStates()))
+          return () => {
+            previous()
+            unsubscribe()
+          }
+        },
+        () => {}
+      )
+    },
+    states // explanation below
+  )
+
+  return fieldStates
+
+  function getStates() { return states.map(x => x.get()) }
+}
+
 export function useFormFieldSnapshot(field) {
   const state = React.useMemo(
     () => ({
@@ -68,6 +93,10 @@ export function useFormFieldSnapshot(field) {
 
 export function useFormFieldValue(field) {
   return useFormFieldState(field.value)
+}
+
+export function useFormFieldsValues(fields) {
+  return useFieldStates(fields.map(x => x.value))
 }
 
 export function useFormField(field) {
@@ -115,3 +144,14 @@ export function useObjectFormField(field) {
 
   return { name, state, fields }
 }
+
+/*
+  When a hook receives an array as argument, it usually is a good idea to pass it as a dependency
+  array instead of putting it as a slot in a dependency array.
+
+  React.useEffect(..., arrayArgument)   ✓ good
+  React.useEffect(..., [arrayArgument]) x bad
+
+  Why? Because it allows the users of your hook to simply pass an array without worrying about
+  memoization to improve performance.
+*/
