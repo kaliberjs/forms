@@ -41,18 +41,18 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
   }
 }
 
-function useFieldState(state) {
-  const [fieldState, setFieldState] = React.useState(state.get)
+function useFormFieldState(state) {
+  const [formFieldState, setFormFieldState] = React.useState(state.get)
 
   React.useEffect(
     () => {
-      setFieldState(state.get())
-      return state.subscribe(setFieldState)
+      setFormFieldState(state.get())
+      return state.subscribe(setFormFieldState)
     },
     [state]
   )
 
-  return fieldState
+  return formFieldState
 }
 
 export function useFormFieldSnapshot(field) {
@@ -63,17 +63,17 @@ export function useFormFieldSnapshot(field) {
     }),
     [field]
   )
-  return useFieldState(state)
+  return useFormFieldState(state)
 }
 
 export function useFormFieldValue(field) {
-  return useFieldState(field.value)
+  return useFormFieldState(field.value)
 }
 
 export function useFormField(field) {
   if (!field) throw new Error('No field was passed in')
   const { name, eventHandlers } = field
-  const state = useFieldState(field.state)
+  const state = useFormFieldState(field.state)
 
   return { name, state, eventHandlers }
 }
@@ -104,14 +104,14 @@ export function useBooleanFormField(field) {
 
 export function useArrayFormField(field) {
   const { name, helpers } = field
-  const state = useFieldState(field.state)
+  const state = useFormFieldState(field.state)
 
   return { name, state, helpers }
 }
 
 export function useObjectFormField(field) {
   const { name, fields } = field
-  const state = useFieldState(field.state)
+  const state = useFormFieldState(field.state)
 
   return { name, state, fields }
 }
