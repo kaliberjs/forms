@@ -42,7 +42,7 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
 }
 
 function useFormFieldState(state) {
-  const [FormFieldState, setFormFieldState] = React.useState(state.get)
+  const [formFieldState, setFormFieldState] = React.useState(state.get)
 
   React.useEffect(
     () => {
@@ -52,7 +52,7 @@ function useFormFieldState(state) {
     [state]
   )
 
-  return FormFieldState
+  return formFieldState
 }
 
 export function useFormFieldSnapshot(field) {

@@ -180,8 +180,8 @@ function createBasicFormField({ name, initialValue, field }) {
   }
 }
 
-function updateState(FormFieldState, update) {
-  return deriveFormFieldState({ ...FormFieldState, ...update })
+function updateState(formFieldState, update) {
+  return deriveFormFieldState({ ...formFieldState, ...update })
 }
 
 function deriveFormFieldState({
