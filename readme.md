@@ -360,8 +360,7 @@ import { ... } from '@kaliber/forms/validation'
 
 ### Components
 
-When you want to conditionally render or set some props based on your current form state, you should avoid
-use `useFormFieldSnapshot` or `useFormFieldValue` in your form root, since that will re-render your entire form with each change. Rather you should create a specialised component and make the values available through a render prop. 
+When you want to conditionally render or set some props based on your current form state, you should avoid the use of `useFormFieldSnapshot` or `useFormFieldValue` in your form root, since that will re-render your entire form with each change. Rather you should create a specialised component and make the values available through a render prop. 
 
 Because this is such a common usecase, we provide several of these components.
 
@@ -369,7 +368,7 @@ Because this is such a common usecase, we provide several of these components.
 
 | Props   |                                                                                      |
 |---------|--------------------------------------------------------------------------------------|
-|`render` | A function with the following shape: `value => JSX.Element | null`. Will render the return value, or `null` in case this value is `undefined`. |
+|`render` | A function with the following shape: `value => React.ReactNode | null`. Will render the return value, or `null` in case this value is `undefined`. |
 |`field`  | The field whose value is used as the `value` argument when calling `render`.|
 
 ##### Example
@@ -384,7 +383,7 @@ Because this is such a common usecase, we provide several of these components.
 
 | Props   |                                                                                      |
 |---------|--------------------------------------------------------------------------------------|
-|`render` | A function with the following shape: `values => JSX.Element | null`, where `values` is an array. Will render the return value, or `null` in case this value is `undefined`. |
+|`render` | A function with the following shape: `values => React.ReactNode | null`, where `values` is an array. Will render the return value, or `null` in case this value is `undefined`. |
 |`fields`  | The fields whose values are used as the `values` argument when calling `render`.|
 
 ##### Example
@@ -399,7 +398,7 @@ Because this is such a common usecase, we provide several of these components.
 
 | Props   |                                                                                      |
 |---------|--------------------------------------------------------------------------------------|
-|`render` | A function with the following shape: `valid => JSX.Element | null`. Will render the return value, or `null` in case this value is `undefined`. |
+|`render` | A function with the following shape: `valid => React.ReactNode | null`. Will render the return value, or `null` in case this value is `undefined`. |
 |`field`  | The field whose validity state is used as the `valid` argument when calling `render`.|
 
 ##### Example
