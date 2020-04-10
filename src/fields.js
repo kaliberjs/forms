@@ -65,12 +65,14 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
 function createArrayFormField({ name, initialValue = [], field }) {
 
-  const initialChildren = initialValue.map(createFormFieldsAt)
+  const initialChildren = initialValue.map(createFormField)
   const initialState = deriveFieldState({
     children: initialChildren,
   })
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
+
+  let index = 0
 
   const value = {
     get() {
@@ -109,7 +111,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
     helpers: {
       add(initialValue) {
         internalState.update(x => {
-          const newChildren = [...x.children, createFormFieldsAt(initialValue, x.children.length)]
+          const newChildren = [...x.children, createFormField(initialValue)]
           return updateState(x, { children: newChildren })
         })
       },
@@ -122,8 +124,8 @@ function createArrayFormField({ name, initialValue = [], field }) {
     }
   }
 
-  function createFormFieldsAt(initialValue, index) {
-    const fullName = `${name}[${index}]`
+  function createFormField(initialValue) {
+    const fullName = `${name}[${index++}]`
     return createObjectFormField({
       name: fullName,
       initialValue,
