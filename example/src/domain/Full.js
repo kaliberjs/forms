@@ -33,6 +33,7 @@ const fields = {
       email: [ifParentHasValue(x => !x.anoniem, required), ifParentHasValue(x => !x.anoniem, email)],
     }
   ),
+  voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
 }
 
 export function Full() {
@@ -104,6 +105,7 @@ function Formulier({ form, onSubmit }) {
           </>
         }
       />
+      <FormCheckbox label='Ik accepteer de voorwaarden' field={fields.voorwaarden} />
       <FormFieldValid field={form} render={valid =>
         <button type='submit' style={{ cursor: !valid && 'not-allowed' }} disabled={!valid}><b>| Aanmelden |</b></button>
       } />
