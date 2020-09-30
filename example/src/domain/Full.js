@@ -1,4 +1,4 @@
-import { object, array, useForm, useFormFieldValue } from '@kaliber/forms'
+import { object, array, useForm, useFormFieldValue, snapshot } from '@kaliber/forms'
 import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
 import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
@@ -45,6 +45,8 @@ export function Full() {
     validate: x => { /* you could validate the whole form as well if you wanted */ }
   })
 
+  useSendSignalWhenIsVisited(form, () => { console.log('Form was visited') })
+
   return (
     <>
       {submitted
@@ -69,6 +71,7 @@ export function Full() {
 
 function Formulier({ form, onSubmit }) {
   const { fields } = form
+  console.log('Form render')
   return (
     <form {...{ onSubmit }}>
       <FormTextInput label='Naam' field={fields.naam} />
@@ -127,4 +130,55 @@ function Bedankt({ submitted, onReset }) {
 function Conditional({ field, children, reverse = false }) {
   const value = useFormFieldValue(field)
   return (reverse ? !value : value) && children
+}
+
+function useSendSignalWhenIsVisited(form, f) {
+  const callbackRef = React.useRef(f)
+  React.useEffect(
+    () => {
+      const unsubscribe = snapshot.subscribeToFieldState(
+        form,
+        field => {
+          if (getIsVisited(field)) {
+            callbackRef.current()
+            unsubscribe()
+          }
+        }
+      )
+
+      return unsubscribe
+    },
+    [form]
+  )
+}
+
+
+
+function getIsVisited(field) {
+  return {
+    'object': getIsVisitedForObject,
+    'array': getIsVisitedForArray,
+    'basic': getIsVisitedForBasic,
+  }[field.type](field)
+}
+
+function getIsVisitedForObject(field) {
+  const { isVisited } = field.state.get()
+  return isVisited || Object.values(field.fields).reduce(
+    (childrenVisited, child) => childrenVisited || getIsVisited(child),
+    false
+  )
+}
+
+function getIsVisitedForArray(field) {
+  const { children, isVisited } = field.state.get()
+  return isVisited || children.reduce(
+    (childrenVisited, child) => childrenVisited || getIsVisited(child),
+    false
+  )
+}
+
+function getIsVisitedForBasic(field) {
+  const { isVisited } = field.state.get()
+  return isVisited
 }
