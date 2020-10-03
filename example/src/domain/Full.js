@@ -71,7 +71,6 @@ export function Full() {
 
 function Formulier({ form, onSubmit }) {
   const { fields } = form
-  console.log('Form render')
   return (
     <form {...{ onSubmit }}>
       <FormTextInput label='Naam' field={fields.naam} />
