@@ -132,6 +132,7 @@ const {
   initialValues, // (optional) initial form values
   validate, // (optional) validation for the complete form
   onSubmit, // called when the form is submitted
+  formId, // (optional) a custom id, can be useful when multiple forms are placed on the same page
 })
 ```
 
@@ -360,7 +361,7 @@ import { ... } from '@kaliber/forms/validation'
 
 ### Components
 
-When you want to conditionally render or set some props based on your current form state, you should avoid the use of `useFormFieldSnapshot` or `useFormFieldValue` in your form root, since that will re-render your entire form with each change. Rather you should create a specialised component and make the values available through a render prop. 
+When you want to conditionally render or set some props based on your current form state, you should avoid the use of `useFormFieldSnapshot` or `useFormFieldValue` in your form root, since that will re-render your entire form with each change. Rather you should create a specialised component and make the values available through a render prop.
 
 Because this is such a common usecase, we provide several of these components.
 

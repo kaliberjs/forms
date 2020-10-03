@@ -42,7 +42,8 @@ export function Full() {
     initialValues: { betaalNu: false, betaalInfo: { andereNaam: false } },
     fields,
     onSubmit: handleSubmit,
-    validate: x => { /* you could validate the whole form as well if you wanted */ }
+    validate: x => { /* you could validate the whole form as well if you wanted */ },
+    formId: 'my-form',
   })
 
   useSendSignalWhenIsVisited(form, () => { console.log('Form was visited') })
