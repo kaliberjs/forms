@@ -1,3 +1,5 @@
+import * as snapshot from './src/snapshot'
+export { snapshot }
 export {
   useForm,
   useFormField,

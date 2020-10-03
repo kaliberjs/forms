@@ -9,6 +9,10 @@ export function get(field) {
 }
 
 export function subscribe(field, f) {
+  return subscribeToFieldState(field, x => f(get(x)))
+}
+
+export function subscribeToFieldState(field, f) {
   return {
     'object': subscribeForObject,
     'array': subscribeForArray,
@@ -65,7 +69,7 @@ function getForBasic(field) {
 function subscribeForObject(field, f) {
   return subscribeToChildren({
     children: Object.values(field.fields),
-    notify: _ => f(getForObject(field)),
+    notify: _ => f(field),
     subscribeToChild: subscribe,
   })
 }
@@ -74,11 +78,11 @@ function subscribeForArray(field, f) {
   return subscribeToAll({
     state: field.state,
     childrenFromState: x => x.children,
-    notify: _ => f(getForArray(field)),
+    notify: _ => f(field),
     subscribeToChild: subscribe,
   })
 }
 
 function subscribeForBasic(field, f) {
-  return field.state.subscribe(({ value, error, invalid }) => f({ value, error, invalid }))
+  return field.state.subscribe(_ => f(field))
 }

@@ -1,4 +1,4 @@
-import { useFormFieldSnapshot, useFormFieldValue, useFormField, useNumberFormField, useBooleanFormField, useArrayFormField, useObjectFormField } from '@kaliber/forms'
+import { useFormFieldSnapshot, useFormField, useNumberFormField, useBooleanFormField, useArrayFormField, useObjectFormField } from '@kaliber/forms'
 import { Code } from './Code'
 
 export function FormValues({ form }) {
