@@ -41,7 +41,9 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
       children.forEach(x => x.setSubmitted(isSubmitted))
     },
     reset() {
-      internalState.update(x => updateState(x, initialState))
+      internalState.update(x =>
+        updateState(x, pick(initialState, ['isSubmitted']))
+      )
       children.forEach(x => x.reset())
     },
     value,
@@ -103,7 +105,9 @@ function createArrayFormField({ name, initialValue = [], field }) {
       children.forEach(x => x.setSubmitted(isSubmitted))
     },
     reset() {
-      const { children } = internalState.update(x => initialState)
+      const { children } = internalState.update(x =>
+        updateState(x, pick(initialState, ['children', 'isSubmitted']))
+      )
       children.forEach(x => x.reset())
     },
     value,
@@ -160,7 +164,9 @@ function createBasicFormField({ name, initialValue, field }) {
       internalState.update(x => updateState(x, { isSubmitted }))
     },
     reset() {
-      internalState.update(x => initialFormFieldState)
+      internalState.update(x =>
+        updateState(x, pick(initialFormFieldState, ['value', 'isSubmitted', 'isVisited']))
+      )
     },
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
@@ -184,6 +190,13 @@ function createBasicFormField({ name, initialValue, field }) {
 
 function updateState(formFieldState, update) {
   return deriveFormFieldState({ ...formFieldState, ...update })
+}
+
+function pick(o, properties) {
+  return properties.reduce(
+    (result, property) => ({ ...result, [property]: o[property] }),
+    {}
+  )
 }
 
 function deriveFormFieldState({

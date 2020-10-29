@@ -54,6 +54,7 @@ export function Full() {
         ? <Bedankt onReset={handleReset} {...{ submitted }} />
         : <Formulier onSubmit={submit} {...{ form }} />
       }
+      <button type='button' onClick={handleReset}>Reset form</button>
       <h3>Current form state:</h3>
       <FormValues {...{ form }} />
     </>
@@ -76,15 +77,19 @@ function Formulier({ form, onSubmit }) {
     <form {...{ onSubmit }}>
       <FormTextInput label='Naam' field={fields.naam} />
       <FormTextInput label='Email' field={fields.email} />
+      <button type='button' onClick={() => fields.geboortedatum.reset()}>Reset geboortedatum</button>
       <FormTextInput label='Geboortedatum' field={fields.geboortedatum} />
       <FormTextInput label='Kortingscode' field={fields.kortingscode} />
+      <button type='button' onClick={() => fields.betaalNu.reset()}>Reset nu betalen</button>
       <FormCheckbox label='Nu betalen?' field={fields.betaalNu} />
       <FormFieldValue field={fields.betaalNu} render={value =>
         value && (
           <FormObjectField field={fields.betaalInfo} render={({ fields }) => (
             <>
+              <button type='button' onClick={() => form.fields.betaalInfo.reset()}>Reset betaalInfo</button>
               <FormCheckbox label='Andere naam' field={fields.andereNaam} />
               <Conditional field={fields.andereNaam}>
+                <button type='button' onClick={() => fields.rekeninghouder.reset()}>Reset rekeninghouder</button>
                 <FormTextInput label='Rekeninghouder' field={fields.rekeninghouder} />
               </Conditional>
               <FormTextInput label='Rekeningnummer' field={fields.rekeningnummer} />
@@ -92,6 +97,7 @@ function Formulier({ form, onSubmit }) {
           )} />
         )}
       />
+      <button type='button' onClick={() => fields.extraKaartjes.reset()}>Reset extra kaartjes</button>
       <FormArrayField
         field={fields.extraKaartjes}
         initialValue={{ anoniem: false }}
@@ -102,6 +108,7 @@ function Formulier({ form, onSubmit }) {
                 naam && email && `${naam} (${email})`
               } />
               <FormTextInput label='Naam' field={fields.naam} />
+              <button type='button' onClick={() => fields.email.reset()}>Reset email</button>
               <FormTextInput label='Email' field={fields.email} />
             </Conditional>
             <FormCheckbox label='Anoniem' field={fields.anoniem} />

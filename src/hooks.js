@@ -36,7 +36,6 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
 
   function handleReset() {
     formRef.current.reset()
-    formRef.current.validate({ form: initialValues, parents: [] })
   }
 }
 
