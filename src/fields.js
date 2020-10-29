@@ -65,14 +65,14 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
 function createArrayFormField({ name, initialValue = [], field }) {
 
+  let index = 0
+
   const initialChildren = initialValue.map(createFormField)
   const initialState = deriveFormFieldState({
     children: initialChildren,
   })
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
-
-  let index = 0
 
   const value = {
     get() {
