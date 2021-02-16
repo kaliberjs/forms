@@ -1,0 +1,31 @@
+{
+  "dependencies": {
+    "@kaliber/build": "^0.0.102",
+    "@kaliber/firebase-queue": "^1.2.0",
+    "firebase": "^8.2.7",
+    "firebase-admin": "^9.5.0",
+    "nodemailer": "^6.4.18"
+  },
+  "scripts": {
+    "start": "npm-run-all --parallel watch serve.dev",
+    "watch": "CONFIG_ENV=dev kaliber-watch",
+    "build": "NODE_ENV=production kaliber-build",
+    "serve": "kaliber-serve",
+    "serve.dev": "PORT=8000 CONFIG_ENV=dev kaliber-serve",
+    "lint": "npm-run-all --serial lint.javascript lint.styles",
+    "lint.javascript": "eslint -c .eslintrc --ignore-path .gitignore './**/*.js'",
+    "lint.styles": "stylelint --config .stylelintrc --ignore-path .gitignore './**/*.css'",
+    "postinstall": "./bin/postinstall",
+    "deploy-storage-rules.dev": "CONFIG_ENV=dev yarn run deploy-storage-rules",
+    "deploy-storage-rules": "node ./scripts/deploy-storage-rules.js",
+    "deploy-database-rules.dev": "CONFIG_ENV=dev yarn run deploy-database-rules",
+    "deploy-database-rules": "node ./scripts/deploy-database-rules.js",
+    "deploy-rules.dev": "CONFIG_ENV=dev yarn run deploy-rules",
+    "deploy-rules": "npm-run-all --serial deploy-storage-rules deploy-database-rules",
+    "form-processing-service.dev": "CONFIG_ENV=dev yarn run form-processing-service",
+    "form-processing-service": "node ./services/form-processing-service.js"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}

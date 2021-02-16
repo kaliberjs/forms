@@ -1,0 +1,11 @@
+*.DS_Store
+*.log
+*.sublime-workspace
+config/local.js
+node_modules
+sketch
+target
+.babelcache
+config/dev-firebase-credentials.json
+config/dev-firebase-info.js
+config/dev-mail-transport.js
