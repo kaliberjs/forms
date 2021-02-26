@@ -1,0 +1,23 @@
+{
+  "typeAcquisition": {
+    "enable": true
+  },
+  "include": ["./src/**/*", "./types/**/*", "./node_modules/@kaliber/**/*"],
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "ESNext",
+    "resolveJsonModule": true,
+    "preserveSymlinks": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": ["dom", "esnext"],
+    "jsx": "react",
+    "baseUrl": ".",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "paths": {
+      "/*?universal": ["src/*"],
+      "/*": ["src/*"]
+    }
+  }
+}
