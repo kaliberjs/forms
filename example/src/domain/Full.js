@@ -107,7 +107,7 @@ function Formulier({ form, onSubmit }) {
       <button type='button' onClick={() => fields.extraKaartjes.reset()}>Reset extra kaartjes</button>
       <FormArrayField
         field={fields.extraKaartjes}
-        initialValue={{}}
+        initialValue={{ anoniem: false }}
         render={({ fields }) =>
           <>
             <Conditional reverse field={fields.anoniem}>
