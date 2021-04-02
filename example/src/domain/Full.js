@@ -1,8 +1,8 @@
 import { object, array, useForm, useFormFieldValue, snapshot } from '@kaliber/forms'
-import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
+import { optional, required, minLength, arrayWithAtLeast, error, email } from '@kaliber/forms/validation'
 import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
-import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField } from './machinery/Form'
+import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField, FormCheckboxGroupField } from './machinery/Form'
 import { Code } from './machinery/Code'
 
 /**
@@ -33,8 +33,15 @@ const fields = {
       email: [ifParentHasValue(x => !x.anoniem, required), ifParentHasValue(x => !x.anoniem, email)],
     }
   ),
+  gevondenVia: [required, arrayWithAtLeast(1)],
   voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
 }
+
+const gevondenViaOptions = [
+  { label: 'Vrienden', value: 'vrienden' },
+  { label: 'Google', value: 'google' },
+  { label: 'Reclame', value: 'reclame' },
+]
 
 export function Full() {
   const [submitted, setSubmitted] = React.useState(null)
@@ -100,7 +107,7 @@ function Formulier({ form, onSubmit }) {
       <button type='button' onClick={() => fields.extraKaartjes.reset()}>Reset extra kaartjes</button>
       <FormArrayField
         field={fields.extraKaartjes}
-        initialValue={{ anoniem: false }}
+        initialValue={{}}
         render={({ fields }) =>
           <>
             <Conditional reverse field={fields.anoniem}>
@@ -114,6 +121,11 @@ function Formulier({ form, onSubmit }) {
             <FormCheckbox label='Anoniem' field={fields.anoniem} />
           </>
         }
+      />
+      <FormCheckboxGroupField
+        field={fields.gevondenVia}
+        options={gevondenViaOptions}
+        label='Gevonden via'
       />
       <FormCheckbox label='Ik accepteer de voorwaarden' field={fields.voorwaarden} />
       <FormFieldValid field={form} render={valid =>

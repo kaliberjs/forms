@@ -34,6 +34,42 @@ export function FormCheckbox({ field, label }) {
   )
 }
 
+export function FormCheckboxGroupField({ field, options, label }) {
+  const { name, state, eventHandlers: { onChange, ...eventHandlers } } = useFormField(field)
+  const { value } = state
+
+  console.log(`[${name}] render checkbox group field`)
+
+  return (
+    <FieldsetAndError {...{ label, state }}>
+      {options.map((option, i) => (
+        <div key={`${name}__${i}`}>
+          <label htmlFor={name}>{option.label}</label>
+          <input
+            id={`${name}__${i}`}
+            type='checkbox'
+            value={option.value}
+            checked={Boolean(value) && value.includes(option.value)}
+            onChange={handleChange}
+            {...eventHandlers}
+            {...{ name }}
+          />
+        </div>
+      ))}
+    </FieldsetAndError>
+  )
+
+  function handleChange(e) {
+    const changedValue = e.currentTarget.value
+    const newValue =
+      !Array.isArray(value) ? [changedValue] : 
+      value.includes(changedValue) ? value.filter(x => x !== changedValue) :
+      value.concat(changedValue)
+
+    onChange(newValue)
+  }
+}
+
 export function FormArrayField({ field, render, initialValue }) {
   const { name, state: { children, error, showError }, helpers } = useArrayFormField(field)
 
@@ -99,6 +135,22 @@ function LabelAndError({ name, label, children, state }) {
       </div>
       {showError && <FormError {...{ error }} />}
     </>
+  )
+}
+
+function FieldsetAndError({ label, children, state }) {
+  const { showError, error, invalid, isVisited, isSubmitted, hasFocus } = state
+  return (
+    <fieldset>
+      <legend>{label}</legend>
+      {children}
+      {(
+        (hasFocus || isVisited || isSubmitted) && !invalid ? '✓' :
+        hasFocus ? '-' :
+        (isVisited || isSubmitted) && invalid && 'x'
+      )}
+      {showError && <FormError {...{ error }} />}
+    </fieldset>
   )
 }
 
