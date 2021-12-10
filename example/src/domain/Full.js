@@ -34,11 +34,14 @@ const fields = {
     }
   ),
   specialeToevoeging: array(
-    x => (
-      'roodInfo' in x ? { roodInfo: required } :
-      'groenInfo' in x ? { groenInfo: required } :
-      {}
-    )
+    x => ({
+      type: required,
+      ...(
+        x.type === 'rood' ? { roodInfo: required } :
+        x.type === 'groen' ? { groenInfo: required } :
+        {}
+      )
+    })
   ),
   voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
 }
@@ -126,8 +129,8 @@ function Formulier({ form, onSubmit }) {
       <FormHeterogeneousArrayField
         field={fields.specialeToevoeging}
         types={[
-          { name: 'rood', initialValue: { roodInfo: '' } },
-          { name: 'groen', initialValue: { groenInfo: '' } }
+          { name: 'rood', initialValue: { type: 'rood', roodInfo: '' } },
+          { name: 'groen', initialValue: { type: 'groen', groenInfo: '' } }
         ]}
         render={({ fields, value }) =>
           'roodInfo' in value ? <FormTextInput label='Rood info' field={fields.roodInfo} /> :
