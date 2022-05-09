@@ -50,7 +50,7 @@ export function FormCheckboxGroupField({ field, options, label }) {
             type='checkbox'
             value={option.value}
             checked={Array.isArray(value) && value.includes(option.value)}
-            onChange={handleChange}
+            onChange={handleChangeFor(option.value)}
             {...eventHandlers}
             {...{ name }}
           />
@@ -59,14 +59,15 @@ export function FormCheckboxGroupField({ field, options, label }) {
     </FieldsetAndError>
   )
 
-  function handleChange(e) {
-    const changedValue = e.currentTarget.value
-    const newValue =
-      !Array.isArray(value) ? [changedValue] :
-      value.includes(changedValue) ? value.filter(x => x !== changedValue) :
-      value.concat(changedValue)
+  function handleChangeFor(changedValue) {
+    return e => {
+      const newValue =
+        !Array.isArray(value) ? [changedValue] :
+        value.includes(changedValue) ? value.filter(x => x !== changedValue) :
+        value.concat(changedValue)
 
-    onChange(newValue)
+      onChange(newValue)
+    }
   }
 }
 
