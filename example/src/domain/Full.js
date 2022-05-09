@@ -1,8 +1,8 @@
 import { object, array, useForm, useFormFieldValue, snapshot } from '@kaliber/forms'
-import { optional, required, minLength, arrayWithAtLeast, error, email } from '@kaliber/forms/validation'
+import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
 import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
-import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField, FormCheckboxGroupField } from './machinery/Form'
+import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField, FormHeterogeneousArrayField, FormCheckboxGroupField } from './machinery/Form'
 import { Code } from './machinery/Code'
 
 /**
@@ -33,7 +33,17 @@ const fields = {
       email: [ifParentHasValue(x => !x.anoniem, required), ifParentHasValue(x => !x.anoniem, email)],
     }
   ),
-  gevondenVia: [required, arrayWithAtLeast(1)],
+  gevondenVia: [required, minLength(1)],
+  specialeToevoeging: array(
+    x => ({
+      type: required,
+      ...(
+        x.type === 'rood' ? { roodInfo: required } :
+        x.type === 'groen' ? { groenInfo: required } :
+        {}
+      )
+    })
+  ),
   voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
 }
 
@@ -128,6 +138,18 @@ function Formulier({ form, onSubmit }) {
         label='Gevonden via'
       />
       <FormCheckbox label='Ik accepteer de voorwaarden' field={fields.voorwaarden} />
+      <FormHeterogeneousArrayField
+        field={fields.specialeToevoeging}
+        types={[
+          { name: 'rood', initialValue: { type: 'rood', roodInfo: '' } },
+          { name: 'groen', initialValue: { type: 'groen', groenInfo: '' } }
+        ]}
+        render={({ fields, value }) =>
+          'roodInfo' in value ? <FormTextInput label='Rood info' field={fields.roodInfo} /> :
+          'groenInfo' in value ? <FormTextInput label='Groen info' field={fields.groenInfo} /> :
+          null
+        }
+      />
       <FormFieldValid field={form} render={valid =>
         <button type='submit' style={{ cursor: !valid && 'not-allowed' }} disabled={!valid}><b>| Aanmelden |</b></button>
       } />

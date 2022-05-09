@@ -313,6 +313,40 @@ array(validation, fields)
 array(fields)
 ```
 
+If you want to use heterogeneous arrays (different types) you can use a `function` instead of a `fields` object:
+
+```js
+array(initialValue => ({
+  _type: required,
+  ...(
+    initialValue._type === 'content' ? { text: required } :
+    initialValue._type === 'image' ? { image: required } :
+    null
+  )
+}))
+```
+
+When rendering the `array` field you can render a different component based on the value of the field:
+
+```jsx
+const { state: { children }, helpers } = useArrayFormField(field)
+
+return (
+  <>
+    {children.map(field => {
+      const { _type } = field.value.get()
+      return (
+        _type === 'content' ? <ContentForm key={field.name} {...{ field }} /> :
+        _type === 'image' ? <ImageForm key={field.name} {...{ field }} /> :
+        null
+      )
+    })}
+    <button type='button' onClick={_ => helpers.add({ _type: 'content' })}>Add content</button>
+    <button type='button' onClick={_ => helpers.add({ _type: 'image' })}>Add image</button>
+  </>
+)
+```
+
 #### object
 
 Used to create an object form field.

@@ -92,6 +92,31 @@ export function FormArrayField({ field, render, initialValue }) {
   )
 }
 
+export function FormHeterogeneousArrayField({ field, render, types }) {
+  const { name, state: { children, error, showError }, helpers } = useArrayFormField(field)
+
+  console.log(`[${name}] render heterogeneous array field`)
+
+  return (
+    <div>
+      {children.map(field => (
+        <React.Fragment key={field.name}>
+          {render({
+            name: field.name,
+            fields: field.fields,
+            value: field.value.get(),
+          })}
+          <button type='button' onClick={_ => helpers.remove(field)}><b>x</b></button>
+        </React.Fragment>
+      ))}
+      {types.map(type =>
+        <button key={type.name} type='button' onClick={_ => helpers.add(type.initialValue)}><b>+ {type.name}</b></button>
+      )}
+      {showError && <FormError {...{ error }} />}
+    </div>
+  )
+}
+
 export function FormObjectField({ field, render }) {
   const { name, state: { error, showError }, fields } = useObjectFormField(field)
 

@@ -130,10 +130,11 @@ function createArrayFormField({ name, initialValue = [], field }) {
 
   function createFormField(initialValue) {
     const fullName = `${name}[${index++}]`
+    const fields = typeof field.fields == 'function' ? field.fields(initialValue) : field.fields
     return createObjectFormField({
       name: fullName,
       initialValue,
-      field: normalize({ type: 'object', fields: field.fields }, fullName),
+      field: normalize({ type: 'object', fields }, fullName),
     })
   }
 }
