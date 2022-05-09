@@ -12,11 +12,6 @@ export function minLength(min) { return x => x && x.length < min && error('minLe
 /** @param {number} max */
 export function maxLength(max) { return x => x && x.length > max && error('maxLength', max) }
 
-/** @param {number} min */
-export function arrayWithAtLeast(min) { 
-  return x => x && x.length < min && error('arrayWithAtLeast', min) 
-}
-
 const emailRegex = /.+@.+\..+/
 export const email = x => x && !emailRegex.test(x) && error('email')
 
