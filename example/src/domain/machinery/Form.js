@@ -62,7 +62,7 @@ export function FormCheckboxGroupField({ field, options, label }) {
   function handleChange(e) {
     const changedValue = e.currentTarget.value
     const newValue =
-      !Array.isArray(value) ? [changedValue] : 
+      !Array.isArray(value) ? [changedValue] :
       value.includes(changedValue) ? value.filter(x => x !== changedValue) :
       value.concat(changedValue)
 
@@ -146,17 +146,13 @@ function InputBase({ type, name, label, state, eventHandlers }) {
 }
 
 function LabelAndError({ name, label, children, state }) {
-  const { showError, error, invalid, isVisited, isSubmitted, hasFocus } = state
+  const { showError, error } = state
   return (
     <>
       <div>
         <label htmlFor={name}>{label}</label>
         {children}
-        {(
-          (hasFocus || isVisited || isSubmitted) && !invalid ? '✓' :
-          hasFocus ? '-' :
-          (isVisited || isSubmitted) && invalid && 'x'
-        )}
+        {determineIndicator(state)}
       </div>
       {showError && <FormError {...{ error }} />}
     </>
@@ -164,16 +160,12 @@ function LabelAndError({ name, label, children, state }) {
 }
 
 function FieldsetAndError({ label, children, state }) {
-  const { showError, error, invalid, isVisited, isSubmitted, hasFocus } = state
+  const { showError, error } = state
   return (
     <fieldset>
       <legend>{label}</legend>
       {children}
-      {(
-        (hasFocus || isVisited || isSubmitted) && !invalid ? '✓' :
-        hasFocus ? '-' :
-        (isVisited || isSubmitted) && invalid && 'x'
-      )}
+      {determineIndicator(state)}
       {showError && <FormError {...{ error }} />}
     </fieldset>
   )
@@ -181,4 +173,14 @@ function FieldsetAndError({ label, children, state }) {
 
 function FormError({ error }) {
   return <Code value={error} />
+}
+
+function determineIndicator(state) {
+  const { invalid, isVisited, isSubmitted, hasFocus } = state
+
+  return (
+    (hasFocus || isVisited || isSubmitted) && !invalid ? '✓' :
+    hasFocus ? '-' :
+    (isVisited || isSubmitted) && invalid && 'x'
+  )
 }
