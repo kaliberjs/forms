@@ -42,20 +42,22 @@ export function FormCheckboxGroupField({ field, options, label }) {
 
   return (
     <FieldsetAndError {...{ label, state }}>
-      {options.map((option, i) => (
-        <div key={`${name}__${i}`}>
-          <label htmlFor={name}>{option.label}</label>
-          <input
-            id={`${name}__${i}`}
-            type='checkbox'
-            value={option.value}
-            checked={Array.isArray(value) && value.includes(option.value)}
-            onChange={handleChangeFor(option.value)}
-            {...eventHandlers}
-            {...{ name }}
-          />
-        </div>
-      ))}
+      {options.map((option, i) => {
+        const id = `${name}__${i}`
+        return (
+          <div key={id}>
+            <label htmlFor={id}>{option.label}</label>
+            <input
+              type='checkbox'
+              value={option.value}
+              checked={Array.isArray(value) && value.includes(option.value)}
+              onChange={handleChangeFor(option.value)}
+              {...eventHandlers}
+              {...{ name, id }}
+            />
+          </div>
+        )
+      })}
     </FieldsetAndError>
   )
 
