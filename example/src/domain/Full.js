@@ -2,7 +2,7 @@ import { object, array, useForm, useFormFieldValue, snapshot } from '@kaliber/fo
 import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
 import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
-import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField, FormHeterogeneousArrayField } from './machinery/Form'
+import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField, FormHeterogeneousArrayField, FormCheckboxGroupField } from './machinery/Form'
 import { Code } from './machinery/Code'
 
 /**
@@ -33,6 +33,7 @@ const fields = {
       email: [ifParentHasValue(x => !x.anoniem, required), ifParentHasValue(x => !x.anoniem, email)],
     }
   ),
+  gevondenVia: [required, minLength(1)],
   specialeToevoeging: array(
     x => ({
       type: required,
@@ -45,6 +46,12 @@ const fields = {
   ),
   voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
 }
+
+const gevondenViaOptions = [
+  { label: 'Vrienden', value: 'vrienden' },
+  { label: 'Google', value: 'google' },
+  { label: 'Reclame', value: 'reclame' },
+]
 
 export function Full() {
   const [submitted, setSubmitted] = React.useState(null)
@@ -124,6 +131,11 @@ function Formulier({ form, onSubmit }) {
             <FormCheckbox label='Anoniem' field={fields.anoniem} />
           </>
         }
+      />
+      <FormCheckboxGroupField
+        field={fields.gevondenVia}
+        options={gevondenViaOptions}
+        label='Gevonden via'
       />
       <FormCheckbox label='Ik accepteer de voorwaarden' field={fields.voorwaarden} />
       <FormHeterogeneousArrayField

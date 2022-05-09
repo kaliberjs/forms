@@ -34,6 +34,45 @@ export function FormCheckbox({ field, label }) {
   )
 }
 
+export function FormCheckboxGroupField({ field, options, label }) {
+  const { name, state, eventHandlers: { onChange, ...eventHandlers } } = useFormField(field)
+  const { value } = state
+
+  console.log(`[${name}] render checkbox group field`)
+
+  return (
+    <FieldsetAndError {...{ label, state }}>
+      {options.map((option, i) => {
+        const id = `${name}__${i}`
+        return (
+          <div key={id}>
+            <label htmlFor={id}>{option.label}</label>
+            <input
+              type='checkbox'
+              value={option.value}
+              checked={Array.isArray(value) && value.includes(option.value)}
+              onChange={handleChangeFor(option.value)}
+              {...eventHandlers}
+              {...{ name, id }}
+            />
+          </div>
+        )
+      })}
+    </FieldsetAndError>
+  )
+
+  function handleChangeFor(changedValue) {
+    return e => {
+      const newValue =
+        !Array.isArray(value) ? [changedValue] :
+        value.includes(changedValue) ? value.filter(x => x !== changedValue) :
+        value.concat(changedValue)
+
+      onChange(newValue)
+    }
+  }
+}
+
 export function FormArrayField({ field, render, initialValue }) {
   const { name, state: { children, error, showError }, helpers } = useArrayFormField(field)
 
@@ -110,23 +149,41 @@ function InputBase({ type, name, label, state, eventHandlers }) {
 }
 
 function LabelAndError({ name, label, children, state }) {
-  const { showError, error, invalid, isVisited, isSubmitted, hasFocus } = state
+  const { showError, error } = state
   return (
     <>
       <div>
         <label htmlFor={name}>{label}</label>
         {children}
-        {(
-          (hasFocus || isVisited || isSubmitted) && !invalid ? '✓' :
-          hasFocus ? '-' :
-          (isVisited || isSubmitted) && invalid && 'x'
-        )}
+        {determineIndicator(state)}
       </div>
       {showError && <FormError {...{ error }} />}
     </>
   )
 }
 
+function FieldsetAndError({ label, children, state }) {
+  const { showError, error } = state
+  return (
+    <fieldset>
+      <legend>{label}</legend>
+      {children}
+      {determineIndicator(state)}
+      {showError && <FormError {...{ error }} />}
+    </fieldset>
+  )
+}
+
 function FormError({ error }) {
   return <Code value={error} />
+}
+
+function determineIndicator(state) {
+  const { invalid, isVisited, isSubmitted, hasFocus } = state
+
+  return (
+    (hasFocus || isVisited || isSubmitted) && !invalid ? '✓' :
+    hasFocus ? '-' :
+    (isVisited || isSubmitted) && invalid && 'x'
+  )
 }
