@@ -49,7 +49,7 @@ export function FormCheckboxGroupField({ field, options, label }) {
             id={`${name}__${i}`}
             type='checkbox'
             value={option.value}
-            checked={Boolean(value) && value.includes(option.value)}
+            checked={Array.isArray(value) && value.includes(option.value)}
             onChange={handleChange}
             {...eventHandlers}
             {...{ name }}
