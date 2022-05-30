@@ -286,7 +286,7 @@ const value = useFormFieldValue(field)
 Subscribes to the values of multiple fields (or forms).
 
 ```jsx
-const values = useFormFieldsValues(fields)
+const [...values] = useFormFieldsValues([...fields])
 ```
 
 | Output         |                                                                               |

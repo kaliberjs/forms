@@ -9,6 +9,7 @@ export {
   useObjectFormField,
   useFormFieldSnapshot,
   useFormFieldValue,
+  useFormFieldsValues,
 } from './src/hooks'
 export {
   array, object,
