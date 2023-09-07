@@ -3,9 +3,9 @@ export const required = x => !x && x !== false && x !== 0 && error('required')
 
 export const number = x => Number(x) !== x && error('number')
 /** @param {number} min */
-export function min(min) { return x => x < min && error('min', min) }
+export function min(min) { return x => (x || x === 0) && x < min && error('min', min) }
 /** @param {number} max */
-export function max(max) { return x => x > max && error('max', max) }
+export function max(max) { return x => (x || x === 0) && x > max && error('max', max) }
 
 /** @param {number} min */
 export function minLength(min) { return x => x && x.length < min && error('minLength', min) }
