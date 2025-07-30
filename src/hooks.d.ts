@@ -1,5 +1,4 @@
-
-import { FormField, FormFields, FormFieldState, FormSnapshot, FieldsSchema, ValidationRule } from '../index';
+import { FormField, FormFields, FormFieldState, FormSnapshot, FieldsSchema, ValidationRule, TypeFromFieldsSchema } from '../index';
 
 export type EventHandlers<T> = {
   onBlur(): void;
@@ -11,13 +10,13 @@ export type EventHandlers<T> = {
   ): void;
 };
 
-export function useForm<T extends object>(options: {
-  initialValues?: T;
-  fields: FieldsSchema<T>;
-  validate?: ValidationRule<T>;
-  onSubmit(snapshot: FormSnapshot<T>): void;
+export function useForm<T extends FieldsSchema<any>>(options: {
+  initialValues?: Partial<TypeFromFieldsSchema<T>>;
+  fields: T;
+  validate?: ValidationRule<TypeFromFieldsSchema<T>>;
+  onSubmit(snapshot: FormSnapshot<TypeFromFieldsSchema<T>>): void;
   formId?: string;
-}): { form: FormField<T>; submit: (e?: React.FormEvent) => void; reset: () => void };
+}): { form: FormField<TypeFromFieldsSchema<T>>; submit: (e?: React.FormEvent) => void; reset: () => void };
 
 export function useFormField<T>(field: FormField<T>): { name: string; state: FormFieldState<T>; eventHandlers: EventHandlers<T> };
 export function useNumberFormField(field: FormField<number>): { name:string; state: FormFieldState<number>; eventHandlers: EventHandlers<number> };
