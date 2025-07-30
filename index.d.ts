@@ -3,7 +3,7 @@ export * from './src/schema';
 export * from './src/state';
 export * from './src/validation';
 
-import { ValidationError, ValidationRule } from './src/validation';
+import { ValidationError } from './src/validation';
 
 export type ValidationContext<T> = { form: T, parents: any[] };
 
@@ -46,9 +46,18 @@ export type FormFieldState<T> = {
   children?: T extends (infer E)[] ? FormField<E>[] : never;
 };
 
+export type FormError<T> = {
+  self: ValidationError | false;
+  children: T extends (infer E)[]
+    ? FormError<E>[]
+    : T extends object
+    ? { [K in keyof T]?: FormError<T[K]> }
+    : never;
+};
+
 export type FormSnapshot<T> = {
   value: T;
-  error: { self: ValidationError | false; children: any };
+  error: FormError<T>;
   invalid: boolean;
 };
 
