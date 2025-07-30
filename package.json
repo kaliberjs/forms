@@ -1,6 +1,7 @@
 {
   "name": "@kaliber/forms",
   "version": "2.1.2",
+  "types": "index.d.ts",
   "main": "index.js",
   "sideEffects": false,
   "publishConfig": {
@@ -17,6 +18,8 @@
     "index.js",
     "validation.js",
     "components.js",
+    "index.d.ts",
+    "validation.d.ts",
     "src/**",
     "LICENSE",
     "readme.md",
