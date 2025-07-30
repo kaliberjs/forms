@@ -4,7 +4,6 @@ export * from './src/state';
 export * from './src/validation';
 
 import { ValidationError, ValidationRule } from './src/validation';
-import { FieldsSchema, TypeFromFieldsSchema } from './src/schema';
 
 export type ValidationContext<T> = { form: T, parents: any[] };
 

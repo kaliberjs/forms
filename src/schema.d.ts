@@ -1,8 +1,5 @@
 import { ValidationRule } from './validation';
 
-type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N;
-type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
-
 export type Schema<T> = T extends (infer E)[]
   ? { type: 'array', fields: Schema<E> | ((value: E) => Schema<E>) }
   : T extends object
@@ -11,21 +8,42 @@ export type Schema<T> = T extends (infer E)[]
 
 export type FieldsSchema<T> = { [K in keyof T]: Schema<T[K]> };
 
-export type TypeFromSchema<S> = S extends { type: 'array'; fields: infer F }
-  ? F extends (value: any) => any
-    ? TypeFromSchema<ReturnType<F>>[]
-    : TypeFromSchema<F>[]
-  : S extends { type: 'object'; fields: infer F }
-  ? TypeFromFieldsSchema<F>
-  : S extends (ValidationRule<infer T>)[]
-  ? T
-  : S extends ValidationRule<infer T>
-  ? T
-  : S extends FieldsSchema<any>
-  ? TypeFromFieldsSchema<S>
-  : any;
+type InferFromArray<S> =
+  S extends { type: 'array'; fields: infer F }
+    ? F extends (...args: any[]) => any
+      ? InferValue<ReturnType<F>>[]
+      : InferValue<F>[]
+    : never;
 
-export type TypeFromFieldsSchema<T> = { [K in keyof T]: TypeFromSchema<T[K]> };
+type InferFromObject<S> =
+  S extends { type: 'object'; fields: infer F }
+    ? { [K in keyof F]: InferValue<F[K]> }
+    : never;
+
+type InferFromRuleArray<S> =
+  S extends ValidationRule<infer T>[]
+    ? T
+    : never;
+
+type InferFromRule<S> =
+  S extends ValidationRule<infer T>
+    ? T
+    : never;
+
+type InferFromPlainObject<S> =
+  S extends object
+    ? { [K in keyof S]: InferValue<S[K]> }
+    : never;
+
+type InferFallback = unknown;
+
+export type InferValue<S> =
+  | InferFromArray<S>
+  | InferFromObject<S>
+  | InferFromRuleArray<S>
+  | InferFromRule<S>
+  | InferFromPlainObject<S>
+  | InferFallback;
 
 export function object<T>(fields: FieldsSchema<T>): { type: 'object', fields: FieldsSchema<T> };
 export function object<T>(validate: ValidationRule<T>, fields: FieldsSchema<T>): { type: 'object', validate: ValidationRule<T>, fields: FieldsSchema<T> };
