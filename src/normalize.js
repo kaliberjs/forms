@@ -31,8 +31,9 @@ function convertSimpleField(x, name) {
 function toValidationFunction(x = [], name) {
   const result = [].concat(x).reduce(
     (previous, next) => {
-      const combined = previous && next && ((...args) => previous(...args) || next(...args))
-      return combined || next || previous
+      const nextAsFn = typeof next === 'function' ? next : () => next
+      const combined = previous && nextAsFn && ((...args) => previous(...args) || nextAsFn(...args))
+      return combined || nextAsFn || previous
     },
     null
   )

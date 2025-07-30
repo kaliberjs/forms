@@ -3,7 +3,9 @@ export * from './src/schema';
 export * from './src/state';
 export * from './src/validation';
 
-import { ValidationRule, ValidationError } from './src/validation';
+import { ValidationError } from './src/validation';
+
+export type FormFields<T> = { [K in keyof T]: FormField<T[K]> };
 
 export type FormField<T> = {
   type: 'basic' | 'array' | 'object';
@@ -24,11 +26,11 @@ export type FormField<T> = {
     onFocus(): void;
     onChange(eOrValue: any): void;
   };
-  helpers?: {
-    add(initialValue: any): void;
-    remove(entry: any): void;
-  };
-  fields?: { [key: string]: FormField<any> };
+  helpers?: T extends (infer E)[] ? {
+    add(initialValue: E): void;
+    remove(entry: FormField<E>): void;
+  } : never;
+  fields?: T extends object ? FormFields<T> : never;
 };
 
 export type FormFieldState<T> = {
@@ -39,7 +41,7 @@ export type FormFieldState<T> = {
   isVisited: boolean;
   hasFocus: boolean;
   showError: boolean;
-  children?: FormField<any>[];
+  children?: T extends (infer E)[] ? FormField<E>[] : never;
 };
 
 export type FormSnapshot<T> = {
