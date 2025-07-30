@@ -11,8 +11,10 @@ export type Schema<T> = T extends (infer E)[]
 
 export type FieldsSchema<T> = { [K in keyof T]: Schema<T[K]> };
 
-export function object<A, B>(fieldsOrValidate: A, fields?: B): Expand<{ type: 'object' } & IfAny<B, { fields: A }, { fields: B, validate: A }>>;
-export function array<A, B>(fieldsOrValidate: A, fields?: B): Expand<{ type: 'array' } & IfAny<B, { fields: A }, { fields: B, validate: A }>>;
+export function object<T>(fields: FieldsSchema<T>): { type: 'object', fields: FieldsSchema<T> };
+export function object<T>(validate: ValidationRule<T>, fields: FieldsSchema<T>): { type: 'object', validate: ValidationRule<T>, fields: FieldsSchema<T> };
+export function array<T>(fields: Schema<T>): { type: 'array', fields: Schema<T> };
+export function array<T>(validate: ValidationRule<T[]>, fields: Schema<T>): { type: 'array', validate: ValidationRule<T[]>, fields: Schema<T> };
 
 
 export function basic<T>(validate?: ValidationRule<T>): { type: 'basic', validate?: ValidationRule<T> };

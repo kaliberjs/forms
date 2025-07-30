@@ -5,12 +5,14 @@ export * from './src/validation';
 
 import { ValidationError } from './src/validation';
 
+export type ValidationContext<T> = { form: T, parents: any[] };
+
 export type FormFields<T> = { [K in keyof T]: FormField<T[K]> };
 
 export type FormField<T> = {
   type: 'basic' | 'array' | 'object';
   name: string;
-  validate(context: any): void;
+  validate(context: ValidationContext<T>): void;
   setSubmitted(isSubmitted: boolean): void;
   reset(): void;
   value: {
@@ -24,7 +26,7 @@ export type FormField<T> = {
   eventHandlers?: {
     onBlur(): void;
     onFocus(): void;
-    onChange(eOrValue: any): void;
+    onChange(eOrValue: T | string | { target: { value: string } }): void;
   };
   helpers?: T extends (infer E)[] ? {
     add(initialValue: E): void;
@@ -53,4 +55,5 @@ export type FormSnapshot<T> = {
 export declare const snapshot: {
   get<T>(field: FormField<T>): FormSnapshot<T>;
   subscribe<T>(field: FormField<T>, f: (snapshot: FormSnapshot<T>) => void): () => void;
+  subscribeToFieldState<T>(field: FormField<T>, f: (field: FormField<T>) => void): () => void;
 };

@@ -6,16 +6,16 @@ export type State<T> = {
 
 export function createState<T>(initialState: T): State<T>;
 
-export function subscribeToAll<T>(options: {
+export function subscribeToAll<T, C>(options: {
   state: State<T>;
-  childrenFromState: (state: T) => any[];
+  childrenFromState: (state: T) => C[];
   notify: (newState: T, oldState: T) => void;
-  subscribeToChild: (child: any, notify: (newState: T, oldState: T) => void) => () => void;
+  subscribeToChild: (child: C, notify: (newState: T, oldState: T) => void) => () => void;
   onlyNotifyOnChildChange?: boolean;
 }): () => void;
 
-export function subscribeToChildren(options: {
-  children: any[];
+export function subscribeToChildren<T>(options: {
+  children: T[];
   notify: (value: any) => void;
-  subscribeToChild: (child: any, notify: (value: any) => void) => () => void;
+  subscribeToChild: (child: T, notify: (value: any) => void) => () => void;
 }): () => void;
