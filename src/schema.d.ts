@@ -8,21 +8,19 @@ export type Schema<T> = T extends (infer E)[]
 
 export type FieldsSchema<T> = { [K in keyof T]: Schema<T[K]> };
 
-export type TypeFromSchema<S> = S extends { type: 'array'; fields: infer F }
+export type InferValue<S> = S extends { type: 'array'; fields: infer F }
   ? F extends (value: any) => any
-    ? TypeFromSchema<ReturnType<F>>[]
-    : TypeFromSchema<F>[]
+    ? InferValue<ReturnType<F>>[]
+    : InferValue<F>[]
   : S extends { type: 'object'; fields: infer F }
-  ? TypeFromFieldsSchema<F>
+  ? { [K in keyof F]: InferValue<F[K]> }
   : S extends (ValidationRule<infer T>)[]
   ? T
   : S extends ValidationRule<infer T>
   ? T
-  : S extends FieldsSchema<any>
-  ? TypeFromFieldsSchema<S>
+  : S extends FieldsSchema<infer T>
+  ? { [K in keyof T]: InferValue<T[K]> }
   : any;
-
-export type TypeFromFieldsSchema<T> = { [K in keyof T]: TypeFromSchema<T[K]> };
 
 export function object<T>(fields: FieldsSchema<T>): { type: 'object', fields: FieldsSchema<T> };
 export function object<T>(validate: ValidationRule<T>, fields: FieldsSchema<T>): { type: 'object', validate: ValidationRule<T>, fields: FieldsSchema<T> };

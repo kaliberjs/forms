@@ -1,10 +1,10 @@
 import { ValidationContext } from '../index';
 
-export type ValidationError = { id: string; params: any[] };
+export type ValidationError = { id: string; params: unknown[] };
 export type ValidationFunction<T> = (value: T, context: ValidationContext<T>) => ValidationError | false | void;
 export type ValidationRule<T> = ValidationFunction<T> | (ValidationFunction<T> | ValidationError)[] | ValidationError;
 
-export function error(id: string, ...params: any[]): ValidationError;
+export function error(id: string, ...params: unknown[]): ValidationError;
 
 export function equalTo<T>(field: string, message?: string): ValidationRule<T>;
 export function oneOf<T>(values: T[], message?: string): ValidationRule<T>;

@@ -1,3 +1,5 @@
+import { InferValue } from "src/schema";
+
 export type State<T> = {
   get(): T;
   subscribe(f: (newState: T, oldState: T) => void): () => void;
@@ -16,6 +18,6 @@ export function subscribeToAll<T, C>(options: {
 
 export function subscribeToChildren<T>(options: {
   children: T[];
-  notify: (value: any) => void;
-  subscribeToChild: (child: T, notify: (value: any) => void) => () => void;
+  notify: (value: InferValue<T>) => void;
+  subscribeToChild: (child: T, notify: (value: InferValue<T>) => void) => () => void;
 }): () => void;

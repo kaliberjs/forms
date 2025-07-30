@@ -5,7 +5,7 @@ export * from './src/validation';
 
 import { ValidationError } from './src/validation';
 
-export type ValidationContext<T> = { form: T, parents: any[] };
+export type ValidationContext<T> = { form: T, parents: object[] };
 
 export type FormFields<T> = { [K in keyof T]: FormField<T[K]> };
 
@@ -48,12 +48,13 @@ export type FormFieldState<T> = {
 
 export type FormError<T> = {
   self: ValidationError | false;
-  children: T extends (infer E)[]
-    ? FormError<E>[]
+} & (
+  T extends (infer E)[]
+    ? { children: FormError<E>[] }
     : T extends object
-    ? { [K in keyof T]?: FormError<T[K]> }
-    : never;
-};
+    ? { children: { [K in keyof T]?: FormError<T[K]> } }
+    : {}
+);
 
 export type FormSnapshot<T> = {
   value: T;
