@@ -6,21 +6,33 @@ const validationErrors = {
   email: 'This is not a valid email',
 }
 
+/**
+ * @template T
+ * @typedef {import('@kaliber/forms/types/index.d.ts').UseFormOptions<T>} UseFormOptions
+ * */
+
+const initialValues = {
+  name: '',
+  email: '',
+}
+
 export function Basic() {
-  const { form: { fields }, submit } = useForm({
+  const { form: { fields }, submit } = useForm(/** @type {UseFormOptions<typeof initialValues>} */({
     // provide initial values to populate the form with
-    initialValues: {
-      name: '',
-      email: '',
-    },
+    initialValues,
+
     // create the form structure, fields are essentially their validation functions
     fields: {
       name: required,
       email: [required, email],
     },
+
     // handle form submit
-    onSubmit: handleSubmit,
-  })
+    onSubmit: snapshot => {
+      if (!snapshot.invalid)
+        console.log(snapshot)
+    },
+  }))
 
   return (
     <form onSubmit={submit}>
@@ -29,23 +41,22 @@ export function Basic() {
       <button type='submit'>Submit</button>
     </form>
   )
-
-  function handleSubmit(snapshot) {
-    // note that the snapshot can still be invalid
-    console.log(snapshot)
-  }
 }
 
 function TextInput({ label, field }) {
   const { name, state, eventHandlers } = useFormField(field)
   const { value = '', error, showError } = state
+
   return (
     <>
       <div>
         <label htmlFor={name}>{label}</label>
         <input id={name} type='text' {...{ name, value }} {...eventHandlers} />
       </div>
-      {showError && <p>{validationErrors[error.id]}</p>}
+
+      {showError && error && 'id' in error && (
+        <p>{validationErrors[error.id]}</p>
+      )}
     </>
   )
 }

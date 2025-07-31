@@ -2,7 +2,11 @@
   "typeAcquisition": {
     "enable": true
   },
-  "include": ["./src/**/*", "./types/**/*", "./node_modules/@kaliber/**/*"],
+  "include": [
+    "./src/**/*",
+    "./types/**/*",
+    "./node_modules/@kaliber/**/*",
+  ],
   "compilerOptions": {
     "moduleResolution": "node",
     "target": "ESNext",
