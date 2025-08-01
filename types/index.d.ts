@@ -1,30 +1,9 @@
-export type BasicError = ValidationError | false
-
-export type ObjectError<T> = {
-  self: BasicError
-  children: {
-    [K in keyof T]: ErrorFor<T[K]>
-  }
-}
-
-export type ArrayError<T extends any[]> = {
-  self: BasicError
-  children: ErrorFor<T[number]>[]
-}
-
-export type ErrorFor<T> =
-  T extends any[] ? ArrayError<T> :
-  T extends object ? ObjectError<T> :
-  BasicError
-
-export type ValidationError = { id: string, params?: any }
+import { ErrorFor, Validate, ValidationError } from '../src/validation'
 
 export interface ValidationContext<Form = any> {
   form: Form
   parents: unknown[]
 }
-
-export type Validate<T = any> = (value: T, context: ValidationContext) => false | ValidationError | void
 
 export type BasicField<T = any> =
   | null
@@ -47,6 +26,10 @@ export type FieldDefinition<T> =
   T extends any[] ? ArrayFieldDefinition<T> :
   T extends { [key: string]: any } ? ObjectFieldDefinition<T> :
   BasicField<T>
+
+export type FromFields<TFields> = {
+  [K in keyof TFields]: TFields[K] extends FieldDefinition<infer T> ? T : never
+}
 
 export type Fields<T> = {
   [K in keyof T]: FieldDefinition<T[K]>
@@ -125,16 +108,22 @@ export interface Snapshot<T> {
   invalid: boolean
 }
 
-export interface UseFormOptions<T> {
-  initialValues: T
-  fields: Fields<T>
-  validate?: Validate<T>
-  onSubmit: (snapshot: Snapshot<T>) => void
+type FormValues<TFields, TInitialValues> = {
+  [K in keyof TFields]: K extends keyof TInitialValues
+    ? TInitialValues[K]
+    : TFields[K] extends FieldDefinition<infer T> ? T : never
+}
+
+export interface UseFormOptions<TFields, TInitialValues> {
+  initialValues?: TInitialValues
+  fields: TFields & Fields<FormValues<TFields, TInitialValues>>
+  validate?: Validate<FormValues<TFields, TInitialValues>>
+  onSubmit: (snapshot: Snapshot<FormValues<TFields, TInitialValues>>) => void
   formId?: string
 }
 
-export function useForm<T>(options: UseFormOptions<T>): {
-  form: ObjectFormField<T>
+export function useForm<TFields, TInitialValues = {}>(options: UseFormOptions<TFields, TInitialValues>): {
+  form: ObjectFormField<FormValues<TFields, TInitialValues>>
   submit: (e?: React.FormEvent) => void
   reset: () => void
 }
@@ -158,3 +147,4 @@ export function useArrayFormField<T>(field: FormField<T>): T
 export function useObjectFormField<T>(field: FormField<T>): T
 export function useFormFieldsValues<T extends any[]>(fields: FormField<T[number]>[]): T
 export function useFormFieldSnapshot<T>(field: FormField<T>): Snapshot<T>
+ 

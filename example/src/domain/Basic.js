@@ -1,5 +1,6 @@
 import { useForm, useFormField } from '@kaliber/forms'
-import { required, email } from '@kaliber/forms/validation'
+import { string } from '@kaliber/forms/src/validation'
+import { required, email, optional } from '@kaliber/forms/validation'
 
 const validationErrors = {
   required: 'This field is required',
@@ -11,20 +12,22 @@ const validationErrors = {
  * @typedef {import('@kaliber/forms/types/index.d.ts').UseFormOptions<T>} UseFormOptions
  * */
 
-const initialValues = {
-  name: '',
-  email: '',
-}
-
 export function Basic() {
-  const { form: { fields }, submit } = useForm(/** @type {UseFormOptions<typeof initialValues>} */({
+  const { form: { fields }, submit } = useForm({
     // provide initial values to populate the form with
-    initialValues,
+    initialValues: {
+      name: '',
+      email: '',
+      nonValidatedValue: ''
+    },
 
     // create the form structure, fields are essentially their validation functions
     fields: {
       name: required,
       email: [required, email],
+      nonValidatedValue: null,
+      fieldWithoutInitialValue: optional,
+      fieldToBeValidatedAsString: [string]
     },
 
     // handle form submit
@@ -32,7 +35,13 @@ export function Basic() {
       if (!snapshot.invalid)
         console.log(snapshot)
     },
-  }))
+  })
+
+  // Gemini: why is this still value of any while we know it is exclusively a string?
+  fields.name.value.get()
+  fields.fieldWithoutInitialValue.value.get()
+  fields.nonValidatedValue.value.get()
+  fields.fieldToBeValidatedAsString.value.get()
 
   return (
     <form onSubmit={submit}>

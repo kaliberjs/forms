@@ -7,7 +7,7 @@ let formCounter = 0 // This will stop working when we need a number greater than
 function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
 
 
-export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
+export function useForm({ initialValues = {}, fields, validate = undefined, onSubmit, formId = useFormId() }) {
   const initialValuesRef = React.useRef(null)
   const formRef = React.useRef(null)
 

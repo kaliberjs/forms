@@ -1,6 +1,6 @@
 export {
   required, optional,
-  number, min, max,
+  number, string, min, max,
   minLength, maxLength,
   email,
   error,
