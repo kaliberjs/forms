@@ -54,7 +54,7 @@ function TextInput({ label, field }) {
         <input id={name} type='text' {...{ name, value }} {...eventHandlers} />
       </div>
 
-      {showError && error && 'id' in error && (
+      {showError && (
         <p>{validationErrors[error.id]}</p>
       )}
     </>

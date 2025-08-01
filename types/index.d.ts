@@ -24,7 +24,7 @@ export interface ValidationContext<Form = any> {
   parents: unknown[]
 }
 
-export type Validate<T = any> = (value: T, context: ValidationContext) => false | ValidationError
+export type Validate<T = any> = (value: T, context: ValidationContext) => false | ValidationError | void
 
 export type BasicField<T = any> =
   | null
@@ -45,7 +45,7 @@ export interface ArrayFieldDefinition<T extends any[]> {
 
 export type FieldDefinition<T> =
   T extends any[] ? ArrayFieldDefinition<T> :
-  T extends object ? ObjectFieldDefinition<T> :
+  T extends { [key: string]: any } ? ObjectFieldDefinition<T> :
   BasicField<T>
 
 export type Fields<T> = {
@@ -59,14 +59,24 @@ export type ValueField<T> = {
   }
 }
 
-export interface FormFieldState<T> {
+export type FormFieldState<T> =
+  | FormFieldStateError<T>
+  | FormFieldStateWithoutError<T>
+
+interface FormFieldStateBase<T> {
   value: T
-  error: ValidationError | false
   isSubmitted: boolean
+  invalid: boolean
   isVisited: boolean
   hasFocus: boolean
-  invalid: boolean
+}
+interface FormFieldStateError<T> extends FormFieldStateBase<T> {
+  error: ValidationError
   showError: boolean
+}
+interface FormFieldStateWithoutError<T> extends FormFieldStateBase<T> {
+  error: false
+  showError: false
 }
 
 export interface BaseFormField<T> extends ValueField<T> {
@@ -142,7 +152,9 @@ export function useFormField<T>(field: FormField<T>): {
 }
 
 export function useFormFieldValue<T>(field: FormField<T>): T
-
+export function useNumberFormField<T>(field: FormField<T>): T
+export function useBooleanFormField<T>(field: FormField<T>): T
+export function useArrayFormField<T>(field: FormField<T>): T
+export function useObjectFormField<T>(field: FormField<T>): T
 export function useFormFieldsValues<T extends any[]>(fields: FormField<T[number]>[]): T
-
 export function useFormFieldSnapshot<T>(field: FormField<T>): Snapshot<T>
