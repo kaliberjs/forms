@@ -32,9 +32,9 @@ interface ValidationErrorWithoutType {
   params?: any[]
 }
 
-export type Validate<T = any> = (value: T, context: ValidationContext) => false | ValidationError | void
+export type Validate<T = any> = (value: T, context?: ValidationContext) => false | ValidationError | void
 
-export const optional: null;
+export const optional: Validate<undefined>;
 export const required: Validate<any>;
 export const number: Validate<number>;
 export const string: Validate<string>;

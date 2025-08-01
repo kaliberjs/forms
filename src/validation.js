@@ -1,6 +1,6 @@
-export const optional = null
-export const required = x => !x && x !== false && x !== 0 && error('required')
+export const optional = () => undefined
 
+export const required = x => !x && x !== false && x !== 0 && error('required')
 export const number = x => Number(x) !== x && error('number')
 export const string = x => typeof x !== 'string' && error('string')
 /** @param {number} min */

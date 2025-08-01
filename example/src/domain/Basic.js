@@ -7,11 +7,6 @@ const validationErrors = {
   email: 'This is not a valid email',
 }
 
-/**
- * @template T
- * @typedef {import('@kaliber/forms/types/index.d.ts').UseFormOptions<T>} UseFormOptions
- * */
-
 export function Basic() {
   const { form: { fields }, submit } = useForm({
     // provide initial values to populate the form with
