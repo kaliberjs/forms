@@ -16,6 +16,7 @@
   ],
   "files": [
     "index.js",
+    "helpers.js",
     "validation.js",
     "components.js",
     "src/**",

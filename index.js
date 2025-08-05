@@ -14,4 +14,6 @@ export {
 export {
   array, object,
 } from './src/schema'
- 
+export {
+  objectWithValidation
+} from './src/helpers'
