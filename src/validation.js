@@ -1,4 +1,4 @@
-export const optional = () => undefined
+export const optional = () => {}
 
 export const required = x => !x && x !== false && x !== 0 && error('required')
 export const number = x => Number(x) !== x && error('number')

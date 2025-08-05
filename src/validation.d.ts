@@ -19,7 +19,7 @@ export type ErrorFor<T> =
   T extends object ? ObjectError<T> :
   BasicError
 
-export type ValidationError<T = any> = 
+export type ValidationError<T = any> =
   | ValidationErrorWithType<T>
   | ValidationErrorWithoutType
 
@@ -34,7 +34,7 @@ interface ValidationErrorWithoutType {
 
 export type Validate<T = any> = (value: T, context?: ValidationContext) => false | ValidationError | void
 
-export const optional: Validate<undefined>;
+export const optional: Validate<any>;
 export const required: Validate<any>;
 export const number: Validate<number>;
 export const string: Validate<string>;
