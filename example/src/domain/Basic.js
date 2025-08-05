@@ -21,7 +21,8 @@ export function Basic() {
       name: required,
       email: [required, email],
       nonValidatedValue: null,
-      fieldWithoutInitialValue: optional,
+      fieldWithoutInitialValueAsAny: optional,
+      fieldWithoutInitialValueAsString: [optional, string],
       fieldToBeValidatedAsString: [string]
     },
 
@@ -32,11 +33,12 @@ export function Basic() {
     },
   })
 
-  // Gemini: why is this still value of any while we know it is exclusively a string?
-  fields.name.value.get()
-  fields.fieldWithoutInitialValue.value.get()
-  fields.nonValidatedValue.value.get()
-  fields.fieldToBeValidatedAsString.value.get()
+  console.log({
+    fieldWithoutInitialValueAsAny: fields.fieldWithoutInitialValueAsAny.value.get(),
+    fieldWithoutInitialValueAsString: fields.fieldWithoutInitialValueAsString.value.get(),
+    nonValidatedValue: fields.nonValidatedValue.value.get(),
+    fieldToBeValidatedAsString: fields.fieldToBeValidatedAsString.value.get()
+  })
 
   return (
     <form onSubmit={submit}>

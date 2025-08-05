@@ -6,6 +6,7 @@ export interface ValidationContext<Form = any> {
 }
 
 export type BasicField<T = any> =
+  | undefined
   | null
   | Validate<T>
   | Validate<T>[]
@@ -25,7 +26,7 @@ export interface ArrayFieldDefinition<T extends any[]> {
 export type FieldDefinition<T> =
   T extends any[] ? ArrayFieldDefinition<T> :
   T extends { [key: string]: any } ? ObjectFieldDefinition<T> :
-  BasicField<T>
+  BasicField<T> extends infer U ? U : never
 
 export type FromFields<TFields> = {
   [K in keyof TFields]: TFields[K] extends FieldDefinition<infer T> ? T : never
