@@ -24,7 +24,7 @@ export function array(fieldsOrValidate, fields) {
  * @param {A} fieldsOrValidate
  * @param {B} [fields]
  *
- * @returns {Expand<{ type: T } & IfAny<B, { fields: A }, { fields: B, validate: A }>>}
+ * @returns {import("types").Expand<{ type: T } & import("types").IfAny<B, { fields: A }, { fields: B, validate: A }>>}
  */
 function body(type, fieldsOrValidate, fields) {
   // @ts-ignore - if you want to remove this @ts-ignore: good luck and please leave a comment afterwards *

@@ -1,4 +1,5 @@
 import { ErrorFor, Validate, ValidationError } from '../src/validation'
+export { Validate, ValidationError }
 
 export interface ValidationContext<Form = any> {
   form: Form
@@ -125,7 +126,7 @@ export interface UseFormOptions<TFields, TInitialValues> {
 
 export function useForm<TFields, TInitialValues = {}>(options: UseFormOptions<TFields, TInitialValues>): {
   form: ObjectFormField<FormValues<TFields, TInitialValues>>
-  submit: (e?: React.FormEvent) => void
+  submit: (e?: import('react').FormEvent) => void
   reset: () => void
 }
 
@@ -148,3 +149,17 @@ export function useArrayFormField<T>(field: FormField<T>): T
 export function useObjectFormField<T>(field: FormField<T>): T
 export function useFormFieldsValues<T extends any[]>(fields: FormField<T[number]>[]): T
 export function useFormFieldSnapshot<T>(field: FormField<T>): Snapshot<T>
+
+/**
+ * If you have an optional parameter which is generic, it is inferred as any, the IfAny helps to
+ * detect that.
+ *
+ * When T === any return Y else return N
+ */
+export type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N
+
+/**
+ * While type declarations should be opaque, type hinting in visual studio still shows them, this
+ * is used to make the types from this library, exposed to the developer more friendly.
+ */
+export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never

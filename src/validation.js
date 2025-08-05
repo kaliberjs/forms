@@ -3,14 +3,10 @@ export const optional = () => {}
 export const required = x => !x && x !== false && x !== 0 && error('required')
 export const number = x => Number(x) !== x && error('number')
 export const string = x => typeof x !== 'string' && error('string')
-/** @param {number} min */
 export function min(min) { return x => (x || x === 0) && x < min && error('min', min) }
-/** @param {number} max */
 export function max(max) { return x => (x || x === 0) && x > max && error('max', max) }
 
-/** @param {number} min */
 export function minLength(min) { return x => x && x.length < min && error('minLength', min) }
-/** @param {number} max */
 export function maxLength(max) { return x => x && x.length > max && error('maxLength', max) }
 
 const emailRegex = /.+@.+\..+/

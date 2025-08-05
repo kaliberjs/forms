@@ -1,5 +1,5 @@
 import { useForm, useFormField } from '@kaliber/forms'
-import { string } from '@kaliber/forms/src/validation'
+import { error, string } from '@kaliber/forms/src/validation'
 import { required, email, optional } from '@kaliber/forms/validation'
 
 const validationErrors = {
@@ -7,13 +7,19 @@ const validationErrors = {
   email: 'This is not a valid email',
 }
 
+/** @type {import('@kaliber/forms').Validate<string>} */
+const customValidator = x => typeof x === 'string' && x && error('custom')
+
+/** @type {import('@kaliber/forms').Validate<string>} */
+const optionalString = (x, c) => optional(x, c)
+
 export function Basic() {
   const { form: { fields }, submit } = useForm({
     // provide initial values to populate the form with
     initialValues: {
       name: '',
       email: '',
-      nonValidatedValue: ''
+      nonValidatedValue: '',
     },
 
     // create the form structure, fields are essentially their validation functions
@@ -22,7 +28,9 @@ export function Basic() {
       email: [required, email],
       nonValidatedValue: null,
       fieldWithoutInitialValueAsAny: optional,
+      fieldWithoutInitialValueAsOptionalString: optionalString,
       fieldWithoutInitialValueAsString: [optional, string],
+      fieldWithCustomValidator: [optionalString, customValidator],
       fieldToBeValidatedAsString: [string]
     },
 
@@ -37,6 +45,7 @@ export function Basic() {
     fieldWithoutInitialValueAsAny: fields.fieldWithoutInitialValueAsAny.value.get(),
     fieldWithoutInitialValueAsString: fields.fieldWithoutInitialValueAsString.value.get(),
     nonValidatedValue: fields.nonValidatedValue.value.get(),
+    fieldWithCustomValidator: fields.fieldWithCustomValidator.value.get(),
     fieldToBeValidatedAsString: fields.fieldToBeValidatedAsString.value.get()
   })
 
