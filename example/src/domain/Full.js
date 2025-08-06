@@ -35,14 +35,16 @@ const fields = {
   ),
   gevondenVia: [required, minLength(1)],
   specialeToevoeging: array(
-    x => ({
+    x => {
+      if (x.type === 'rood' && !x.roodInfo) return error('roodInfo is verplicht')
+      if (x.type === 'groen' && !x.groenInfo) return error('groenInfo is verplicht')
+      return null
+    },
+    {
       type: required,
-      ...(
-        x.type === 'rood' ? { roodInfo: required } :
-        x.type === 'groen' ? { groenInfo: required } :
-        {}
-      )
-    })
+      roodInfo: optional,
+      groenInfo: optional,
+    }
   ),
   voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
 }

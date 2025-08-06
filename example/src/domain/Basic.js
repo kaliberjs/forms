@@ -7,10 +7,10 @@ const validationErrors = {
   email: 'This is not a valid email',
 }
 
-/** @type {import('@kaliber/forms/types/validation').Validate<string>} */
+/** @type {import('@kaliber/forms').Validate<string>} */
 const customValidator = x => typeof x === 'string' && x && error('custom')
 
-/** @type {import('@kaliber/forms/types/validation').Validate<string>} */
+/** @type {import('@kaliber/forms').Validate<string>} */
 const optionalString = () => optional()
 
 export function Basic() {

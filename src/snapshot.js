@@ -1,4 +1,12 @@
+/// <reference path="./snapshot.d.ts" />
+
 import { subscribeToAll, subscribeToChildren } from './state'
+
+export const snapshot = {
+  get,
+  subscribe,
+  subscribeToFieldState,
+}
 
 export function get(field) {
   return {

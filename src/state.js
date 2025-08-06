@@ -1,3 +1,5 @@
+/// <reference path="./state.d.ts" />
+
 export function createState(initialState) {
   let state = initialState
   let listeners = new Set()

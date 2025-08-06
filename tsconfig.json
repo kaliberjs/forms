@@ -22,9 +22,6 @@
     "checkJs": true,
     "noEmit": true,
     "target": "ESNext",
-    "paths": {
-      "*": ["./typescript/node_modules/*"]
-    },
     "allowUmdGlobalAccess": true
   }
 }
