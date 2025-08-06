@@ -1,3 +1,5 @@
+/// <reference path="./validation.d.ts" />
+
 export const optional = () => {}
 
 export const required = x => !x && x !== false && x !== 0 && error('required')

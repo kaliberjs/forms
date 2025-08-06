@@ -1,4 +1,17 @@
-import { ValidationContext } from '../types'
+import { ValidationContext } from "./hooks";
+
+export const optional: Validate<any>;
+export const required: Validate<any>;
+export const number: Validate<number>;
+export const string: Validate<string>;
+export const email: Validate<string>;
+
+export function min(min: number): Validate<number>;
+export function max(max: number): Validate<number>;
+export function minLength(min: number): Validate<any>;
+export function maxLength(max: number): Validate<any>;
+
+export function error<T extends string>(id: T, ...params: any[]): ValidationError<T>;
 
 export type BasicError = ValidationError | false
 
@@ -33,16 +46,3 @@ interface ValidationErrorWithoutType {
 }
 
 export type Validate<T = any> = (value: T, context?: ValidationContext) => false | ValidationError | void
-
-export const optional: Validate<any>;
-export const required: Validate<any>;
-export const number: Validate<number>;
-export const string: Validate<string>;
-export const email: Validate<string>;
-
-export function min(min: number): Validate<number>;
-export function max(max: number): Validate<number>;
-export function minLength(min: number): Validate<any>;
-export function maxLength(max: number): Validate<any>;
-
-export function error<T extends string>(id: T, ...params: any[]): ValidationError

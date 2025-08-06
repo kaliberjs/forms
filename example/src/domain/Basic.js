@@ -1,4 +1,4 @@
-import { useForm, useFormField } from '@kaliber/forms'
+import { useForm, useFormField } from '@kaliber/forms/src/hooks'
 import { error, string } from '@kaliber/forms/src/validation'
 import { required, email, optional } from '@kaliber/forms/validation'
 
@@ -7,11 +7,11 @@ const validationErrors = {
   email: 'This is not a valid email',
 }
 
-/** @type {import('@kaliber/forms').Validate<string>} */
+/** @type {import('@kaliber/forms/types/validation').Validate<string>} */
 const customValidator = x => typeof x === 'string' && x && error('custom')
 
-/** @type {import('@kaliber/forms').Validate<string>} */
-const optionalString = (x, c) => optional(x, c)
+/** @type {import('@kaliber/forms/types/validation').Validate<string>} */
+const optionalString = () => optional()
 
 export function Basic() {
   const { form: { fields }, submit } = useForm({

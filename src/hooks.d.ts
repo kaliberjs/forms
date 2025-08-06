@@ -1,5 +1,4 @@
-import { ErrorFor, Validate, ValidationError } from '../src/validation'
-export { Validate, ValidationError }
+import { ValidationError, Validate, ErrorFor } from './validation'
 
 export interface ValidationContext<Form = any> {
   form: Form
@@ -124,42 +123,28 @@ export interface UseFormOptions<TFields, TInitialValues> {
   formId?: string
 }
 
-export function useForm<TFields, TInitialValues = {}>(options: UseFormOptions<TFields, TInitialValues>): {
-  form: ObjectFormField<FormValues<TFields, TInitialValues>>
-  submit: (e?: import('react').FormEvent) => void
-  reset: () => void
-}
+export declare function useForm<TFields, TInitialValues = {}>(options: UseFormOptions<TFields, TInitialValues>): {
+    form: ObjectFormField<FormValues<TFields, TInitialValues>>
+    submit: (e?: import('react').FormEvent) => void
+    reset: () => void
+    }
 
-export function useFormField<T>(field: BasicFormField<T>): {
-  name: string
-  state: FormFieldState<T>
-  eventHandlers: BasicFormField<T>['eventHandlers']
-}
+    export declare function useFormField<T>(field: BasicFormField<T>): {
+    name: string
+    state: FormFieldState<T>
+    eventHandlers: BasicFormField<T>['eventHandlers']
+    }
 
-export function useFormField<T>(field: FormField<T>): {
-  name: string
-  state: FormFieldState<T>
-  eventHandlers?: never
-}
+    export declare function useFormField<T>(field: FormField<T>): {
+    name: string
+    state: FormFieldState<T>
+    eventHandlers?: never
+    }
 
-export function useFormFieldValue<T>(field: FormField<T>): T
-export function useNumberFormField<T>(field: FormField<T>): T
-export function useBooleanFormField<T>(field: FormField<T>): T
-export function useArrayFormField<T>(field: FormField<T>): T
-export function useObjectFormField<T>(field: FormField<T>): T
-export function useFormFieldsValues<T extends any[]>(fields: FormField<T[number]>[]): T
-export function useFormFieldSnapshot<T>(field: FormField<T>): Snapshot<T>
-
-/**
- * If you have an optional parameter which is generic, it is inferred as any, the IfAny helps to
- * detect that.
- *
- * When T === any return Y else return N
- */
-export type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N
-
-/**
- * While type declarations should be opaque, type hinting in visual studio still shows them, this
- * is used to make the types from this library, exposed to the developer more friendly.
- */
-export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
+    export declare function useFormFieldValue<T>(field: FormField<T>): T
+    export declare function useNumberFormField<T>(field: FormField<T>): T
+    export declare function useBooleanFormField<T>(field: FormField<T>): T
+    export declare function useArrayFormField<T>(field: FormField<T>): T
+    export declare function useObjectFormField<T>(field: FormField<T>): T
+    export declare function useFormFieldsValues<T extends any[]>(fields: FormField<T[number]>[]): T
+    export declare function useFormFieldSnapshot<T>(field: FormField<T>): Snapshot<T>

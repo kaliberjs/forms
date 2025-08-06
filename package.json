@@ -14,6 +14,9 @@
     "hooks",
     "hook"
   ],
+  "scripts": {
+    "postinstall": "[ -d ./scripts -a -f ./scripts/install-peer-dependencies-for-typescript.js ] && node ./scripts/install-peer-dependencies-for-typescript.js || true"
+  },
   "files": [
     "index.js",
     "helpers.js",

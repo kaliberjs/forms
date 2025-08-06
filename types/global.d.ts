@@ -1,1 +1,1 @@
-declare const React: typeof import('react')
+// declare const React: typeof import('react')

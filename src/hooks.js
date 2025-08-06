@@ -1,3 +1,5 @@
+/// <reference path="./hooks.d.ts" />
+ 
 import isEqual from 'react-fast-compare'
 import { createObjectFormField } from './fields'
 import { normalize } from './normalize'
