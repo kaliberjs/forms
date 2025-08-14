@@ -1,3 +1,4 @@
+import { object } from '@kaliber/forms'
 import { useForm, useFormField } from '@kaliber/forms/src/hooks'
 import { error, string } from '@kaliber/forms/src/validation'
 import { required, email, optional } from '@kaliber/forms/validation'
@@ -20,6 +21,10 @@ export function Basic() {
       name: '',
       email: '',
       nonValidatedValue: '',
+      someObjectWithInitialValues: {
+        value: '',
+        isEnabled: true,
+      },
     },
 
     // create the form structure, fields are essentially their validation functions
@@ -31,7 +36,15 @@ export function Basic() {
       fieldWithoutInitialValueAsOptionalString: optionalString,
       fieldWithoutInitialValueAsString: [optional, string],
       fieldWithCustomValidator: [optionalString, customValidator],
-      fieldToBeValidatedAsString: [string]
+      fieldToBeValidatedAsString: [string],
+      someObjectWithInitialValues: object({
+        value: [required, string],
+        isEnabled: optional,
+      }),
+      someObjectWithoutInitialValues: object({
+        value: [required, string],
+        isEnabled: optional,
+      }),
     },
 
     // handle form submit
@@ -42,11 +55,26 @@ export function Basic() {
   })
 
   console.log({
+    // This should be any
     fieldWithoutInitialValueAsAny: fields.fieldWithoutInitialValueAsAny.value.get(),
+
+    // This should be a string
     fieldWithoutInitialValueAsString: fields.fieldWithoutInitialValueAsString.value.get(),
+
+    // This should be a string
     nonValidatedValue: fields.nonValidatedValue.value.get(),
+
+    // This should be a string
     fieldWithCustomValidator: fields.fieldWithCustomValidator.value.get(),
-    fieldToBeValidatedAsString: fields.fieldToBeValidatedAsString.value.get()
+
+    // This should be a string
+    fieldToBeValidatedAsString: fields.fieldToBeValidatedAsString.value.get(),
+
+    // This should be an object with a value and isEnabled
+    someObject: fields.someObjectWithInitialValues.value.get(),
+
+    // This should be an object with a value and isEnabled
+    someObjectWithoutInitialValues: fields.someObjectWithoutInitialValues.value.get(),
   })
 
   return (

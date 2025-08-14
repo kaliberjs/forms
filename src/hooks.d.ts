@@ -28,10 +28,6 @@ export type FieldDefinition<T> =
   T extends { [key: string]: any } ? ObjectFieldDefinition<T> :
   BasicField<T> extends infer U ? U : never
 
-export type FromFields<TFields> = {
-  [K in keyof TFields]: TFields[K] extends FieldDefinition<infer T> ? T : never
-}
-
 export type Fields<T> = {
   [K in keyof T]: FieldDefinition<T[K]>
 }
@@ -124,27 +120,27 @@ export interface UseFormOptions<TFields, TInitialValues> {
 }
 
 export declare function useForm<TFields, TInitialValues = {}>(options: UseFormOptions<TFields, TInitialValues>): {
-    form: ObjectFormField<FormValues<TFields, TInitialValues>>
-    submit: (e?: import('react').FormEvent) => void
-    reset: () => void
-    }
+  form: ObjectFormField<FormValues<TFields, TInitialValues>>
+  submit: (e?: import('react').FormEvent) => void
+  reset: () => void
+}
 
-    export declare function useFormField<T>(field: BasicFormField<T>): {
-    name: string
-    state: FormFieldState<T>
-    eventHandlers: BasicFormField<T>['eventHandlers']
-    }
+export declare function useFormField<T>(field: BasicFormField<T>): {
+  name: string
+  state: FormFieldState<T>
+  eventHandlers: BasicFormField<T>['eventHandlers']
+}
 
-    export declare function useFormField<T>(field: FormField<T>): {
-    name: string
-    state: FormFieldState<T>
-    eventHandlers?: never
-    }
+export declare function useFormField<T>(field: FormField<T>): {
+  name: string
+  state: FormFieldState<T>
+  eventHandlers?: never
+}
 
-    export declare function useFormFieldValue<T>(field: FormField<T>): T
-    export declare function useNumberFormField<T>(field: FormField<T>): T
-    export declare function useBooleanFormField<T>(field: FormField<T>): T
-    export declare function useArrayFormField<T>(field: FormField<T>): T
-    export declare function useObjectFormField<T>(field: FormField<T>): T
-    export declare function useFormFieldsValues<T extends any[]>(fields: FormField<T[number]>[]): T
-    export declare function useFormFieldSnapshot<T>(field: FormField<T>): Snapshot<T>
+export declare function useFormFieldValue<T>(field: FormField<T>): T
+export declare function useNumberFormField<T>(field: FormField<T>): T
+export declare function useBooleanFormField<T>(field: FormField<T>): T
+export declare function useArrayFormField<T>(field: FormField<T>): T
+export declare function useObjectFormField<T>(field: FormField<T>): T
+export declare function useFormFieldsValues<T extends any[]>(fields: FormField<T[number]>[]): T
+export declare function useFormFieldSnapshot<T>(field: FormField<T>): Snapshot<T>

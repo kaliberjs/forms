@@ -9,6 +9,10 @@ import { Code } from './machinery/Code'
  * When you study this example, don't forget to check the components in the machinery directory
  */
 
+const questions = /** @type {{ id: string, type: string, required: boolean }[]} */ ([
+  { id: 'test', type: 'checkbox', required: false }
+])
+
 const fields = {
   naam: optional,
   email: [required, email],
@@ -47,6 +51,9 @@ const fields = {
     }
   ),
   voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
+  questionnaireQuestions: object(
+    Object.fromEntries(questions.map(x => [x.id, [x.required ? (x.type === 'checkbox' ? required : required) : optional]])),
+  ),
 }
 
 const gevondenViaOptions = [
