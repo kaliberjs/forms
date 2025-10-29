@@ -9,6 +9,7 @@
     "resolveJsonModule": true,
     "preserveSymlinks": true,
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "lib": ["dom", "esnext"],
     "jsx": "react",
     "baseUrl": ".",

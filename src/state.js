@@ -1,3 +1,10 @@
+/** @import { State } from './types.js' */
+
+/**
+ * @template T
+ * @param {T} initialState
+ * @returns {State.ReadWrite<T>}
+ */
 export function createState(initialState) {
   let state = initialState
   let listeners = new Set()

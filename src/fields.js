@@ -2,12 +2,22 @@ import { normalize } from './normalize'
 import { createState, subscribeToAll, subscribeToChildren } from './state'
 import isEqual from 'react-fast-compare'
 
+/** @import { Falsy, Field, NormalizedField, State, ValidationError } from './types.ts' */
+
 const constructors = {
   basic: createBasicFormField,
   array: createArrayFormField,
   object: createObjectFormField,
 }
 
+/**
+ * @arg {{
+ *   name?: string,
+ *   initialValue?: { [name: string]: any },
+ *   field: NormalizedField.Object,
+ * }} props
+ * @returns {Field.Object}
+ */
 export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   const fields = createFormFields(initialValue, field.fields, name && `${name}.`)
@@ -17,6 +27,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
 
+  /** @type {State.Readonly<{ [name: string]: any }>} */
   const value = {
     get() { return mapValues(fields, child => child.value.get()) },
     subscribe(f) {
@@ -51,6 +62,12 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     fields,
   }
 
+  /**
+   * @arg {any} initialValues
+   * @arg {NormalizedField.Object['fields']} fields
+   * @arg {string} namePrefix
+   * @returns
+   */
   function createFormFields(initialValues, fields, namePrefix = '') {
     return mapValues(fields, (field, name) => {
       const fullName = `${namePrefix}${name}`
@@ -58,6 +75,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
       const constructor = constructors[normalizedField.type]
       return constructor({
         name: fullName,
+        // @ts-expect-error
         field: normalizedField,
         initialValue: initialValues[name]
       })
@@ -65,6 +83,14 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   }
 }
 
+/**
+ * @arg {{
+ *   name?: string,
+ *   initialValue?: { [name: string]: any }[],
+ *   field: NormalizedField.Array,
+ * }} props
+ * @returns {Field.Array}
+ */
 function createArrayFormField({ name, initialValue = [], field }) {
 
   let index = 0
@@ -128,17 +154,26 @@ function createArrayFormField({ name, initialValue = [], field }) {
     }
   }
 
+  /** @arg {{ [name: string]: any }} initialValue */
   function createFormField(initialValue) {
     const fullName = `${name}[${index++}]`
     const fields = typeof field.fields == 'function' ? field.fields(initialValue) : field.fields
     return createObjectFormField({
       name: fullName,
       initialValue,
-      field: normalize({ type: 'object', fields }, fullName),
+      field: /** @type {NormalizedField.Object} */ (normalize({ type: 'object', fields }, fullName)),
     })
   }
 }
 
+/**
+ * @arg {{
+*   name?: string,
+*   initialValue?: any,
+*   field: NormalizedField.Basic,
+* }} props
+* @returns {Field.Basic}
+*/
 function createBasicFormField({ name, initialValue, field }) {
 
   const initialFormFieldState = deriveFormFieldState({ value: initialValue })
@@ -189,17 +224,40 @@ function createBasicFormField({ name, initialValue, field }) {
   }
 }
 
+/**
+ * @template {Record<string, any>} T1
+ * @template {Record<string, any>} T2
+ * @arg {T1} formFieldState
+ * @arg {T2} update
+ */
 function updateState(formFieldState, update) {
   return deriveFormFieldState({ ...formFieldState, ...update })
 }
 
+/**
+ * @template T
+ * @template {keyof T} K
+ * @arg {T} o
+ * @arg {K[]} properties
+ * @returns {Pick<T, K>}
+ */
 function pick(o, properties) {
+  // @ts-expect-error
   return properties.reduce(
     (result, property) => ({ ...result, [property]: o[property] }),
     {}
   )
 }
 
+/**
+ * @template {Record<string, any>} T
+ * @arg {{
+ *   error?: Falsy | ValidationError,
+ *   isSubmitted?: boolean,
+ *   isVisited?: boolean,
+ *   hasFocus?: boolean,
+ * } & T} state
+ */
 function deriveFormFieldState({
   error = false,
   isSubmitted = false,
@@ -218,9 +276,19 @@ function deriveFormFieldState({
   }
 }
 
+/**
+ * @template {{ [key: string | number | symbol]: any }} O
+ * @template {(v: O[keyof O], k: keyof O, o: O) => any} F
+ *
+ * @param {O} o
+ * @param {F} f
+ * @returns {{ [key in keyof O]: ReturnType<F> }}
+ */
 function mapValues(o, f) {
+  // @ts-expect-error
   return Object.entries(o).reduce(
-    (result, [k, v]) => (result[k] = f(v, k), result),
+    // @ts-expect-error
+    (result, [k, v]) => (result[k] = f(v, k, o), result),
     {}
   )
 }
