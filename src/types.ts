@@ -19,7 +19,7 @@ export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 export type Validate<T = any> =
   [Validate<T>, ...Validate<T>[]] |
   ValidationFunction<T> |
-  ValidationFunction<T>[] |
+  readonly ValidationFunction<T>[] |
   null
 export type ValidationFunction<T = any> = (value: T, context?: ValidationContext) => Falsy | ValidationError
 export type ValidationContext = { form: any, parents: Field.Object[] }

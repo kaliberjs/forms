@@ -1,23 +1,31 @@
 import { object } from './schema'
+import { asConst } from './type-helpers.js'
 import type { Validate } from './types.ts'
 
+const simpleObjectInput = asConst({
+  noValidation: null,
+  singleValidation: validate,
+  multipleValidation: [validate, validate],
+})
+type ObjectSchema<Fields> = {
+  type: 'object',
+  fields: Fields
+}
+type SimpleObjectSchema = ObjectSchema<{
+  noValidation: Validate,
+  singleValidation: Validate,
+  multipleValidation: readonly [Validate, Validate],
+}>
+type SimpleObjectValues = {
+  noValidation: any,
+  singleValidation: any,
+  multipleValidation: any,
+}
+
 {
-  const simpleObject = object({
-    noValidation: null,
-    singleValidation: validate,
-    multipleValidation: [validate, validate],
-  })
-
-  expectNotAny(simpleObject)
-  expectAssignable<{
-    type: 'object',
-    fields: {
-      noValidation: Validate,
-      singleValidation: Validate,
-      multipleValidation: [Validate, Validate],
-    }
-  }, Prepared<typeof simpleObject>>()
-
+  const simpleObjectSchema = object(simpleObjectInput)
+  expectNotAny(simpleObjectSchema)
+  expectAssignable<SimpleObjectSchema, Prepared<typeof simpleObjectSchema>>()
 }
 
 {
@@ -25,55 +33,24 @@ import type { Validate } from './types.ts'
     (value) => {
       expectNotNever(value)
       expectNotAny(value)
-      expectAssignable<{
-        noValidation: any,
-        singleValidation: any,
-        multipleValidation: any,
-      }, Prepared<typeof value>>()
+      expectAssignable<SimpleObjectValues, Prepared<typeof value>>()
       return validate(value)
     },
-    {
-      noValidation: null,
-      singleValidation: validate,
-      multipleValidation: [validate, validate],
-    }
+    simpleObjectInput
   )
   expectNotAny(simpleObjectWithValidation)
-  expectAssignable<{
-    type: 'object',
-    fields: {
-      noValidation: Validate,
-      singleValidation: Validate,
-      multipleValidation: readonly [Validate, Validate],
-    },
-    validate: Validate,
-  }, Prepared<typeof simpleObjectWithValidation>>()
+  expectAssignable<
+    SimpleObjectSchema & { validate: Validate },
+    Prepared<typeof simpleObjectWithValidation>
+  >
 }
 
+const nestedObjectInput = { nested: object(simpleObjectInput) }
+type NestedObjectSchema = ObjectSchema<{ nested: SimpleObjectSchema }>
 {
-  const nestedObject = object(
-    {
-      nested: object({
-        noValidation: null,
-        singleValidation: validate,
-        multipleValidation: [validate, validate],
-      })
-    }
-  )
+  const nestedObject = object(nestedObjectInput)
   expectNotAny(nestedObject)
-  expectAssignable<{
-    type: 'object',
-    fields: {
-      nested: {
-        type: 'object',
-        fields: {
-          noValidation: Validate,
-          singleValidation: Validate,
-          multipleValidation: readonly [Validate, Validate],
-        }
-      }
-    }
-  }, Prepared<typeof nestedObject>>()
+  expectAssignable<NestedObjectSchema, Prepared<typeof nestedObject>>
 }
 
 {
@@ -82,41 +59,19 @@ import type { Validate } from './types.ts'
       expectNotAny(value)
       expectNotNever(value)
       expectAssignable<
-        {
-          nested: {
-            noValidation: any,
-            singleValidation: any,
-            multipleValidation: any,
-          }
-        },
+        { nested: SimpleObjectValues },
         Prepared<typeof value>
-      >()
+      >
 
       return validate(value)
     },
-    {
-      nested: object({
-        noValidation: null,
-        singleValidation: validate,
-        multipleValidation: [validate, validate],
-      })
-    }
+    nestedObjectInput
   )
   expectNotAny(nestedObjectWithValidation)
-  expectAssignable<{
-    type: 'object',
-    fields: {
-      nested: {
-        type: 'object',
-        fields: {
-          // noValidation: Validate, // TODO: NoExtraKeys is not recursive
-          singleValidation: Validate,
-          multipleValidation: readonly [Validate, Validate],
-        }
-      }
-    },
-    validate: Validate,
-  }, Prepared<typeof nestedObjectWithValidation>>()
+  expectAssignable<
+    NestedObjectSchema & { validate: Validate },
+    Prepared<typeof nestedObjectWithValidation>
+  >
 }
 
 /** We need this because `never` matches all types (if we mistakenly infer an any or an infer type, we have problem) */
