@@ -1,4 +1,4 @@
-import { object } from './schema'
+import { array, object } from './schema'
 import { asConst } from './type-helpers.js'
 import type { Validate } from './types.ts'
 
@@ -9,13 +9,18 @@ const simpleObjectInput = asConst({
 })
 type ObjectSchema<Fields> = {
   type: 'object',
-  fields: Fields
+  fields: Fields,
 }
-type SimpleObjectSchema = ObjectSchema<{
+type ArraySchema<Fields> = {
+  type: 'array',
+  fields: Fields,
+}
+type SimpleObjectSchema = ObjectSchema<SimpleObjectFields>
+type SimpleObjectFields = {
   noValidation: Validate,
   singleValidation: Validate,
   multipleValidation: readonly [Validate, Validate],
-}>
+}
 type SimpleObjectValues = {
   noValidation: any,
   singleValidation: any,
@@ -29,48 +34,70 @@ type SimpleObjectValues = {
 }
 
 {
-  const simpleObjectWithValidation = object(
+  const simpleObjectWithValidationSchema = object(
     (value) => {
       expectNotNever(value)
       expectNotAny(value)
       expectAssignable<SimpleObjectValues, Prepared<typeof value>>()
+
       return validate(value)
     },
     simpleObjectInput
   )
-  expectNotAny(simpleObjectWithValidation)
+  expectNotAny(simpleObjectWithValidationSchema)
   expectAssignable<
     SimpleObjectSchema & { validate: Validate },
-    Prepared<typeof simpleObjectWithValidation>
+    Prepared<typeof simpleObjectWithValidationSchema>
   >
 }
 
 const nestedObjectInput = { nested: object(simpleObjectInput) }
 type NestedObjectSchema = ObjectSchema<{ nested: SimpleObjectSchema }>
 {
-  const nestedObject = object(nestedObjectInput)
-  expectNotAny(nestedObject)
-  expectAssignable<NestedObjectSchema, Prepared<typeof nestedObject>>
+  const nestedObjectSchema = object(nestedObjectInput)
+  expectNotAny(nestedObjectSchema)
+  expectAssignable<NestedObjectSchema, Prepared<typeof nestedObjectSchema>>
 }
 
 {
-  const nestedObjectWithValidation = object(
+  const nestedObjectWithValidationSchema = object(
     value => {
       expectNotAny(value)
       expectNotNever(value)
-      expectAssignable<
-        { nested: SimpleObjectValues },
-        Prepared<typeof value>
-      >
+      expectAssignable<{ nested: SimpleObjectValues }, Prepared<typeof value>>
 
       return validate(value)
     },
     nestedObjectInput
   )
-  expectNotAny(nestedObjectWithValidation)
+  expectNotAny(nestedObjectWithValidationSchema)
   expectAssignable<
     NestedObjectSchema & { validate: Validate },
-    Prepared<typeof nestedObjectWithValidation>
+    Prepared<typeof nestedObjectWithValidationSchema>
+  >
+}
+
+{
+  const simpleArraySchema = array(simpleObjectInput)
+  expectNotAny(simpleArraySchema)
+  expectAssignable<ArraySchema<SimpleObjectFields>, Prepared<typeof simpleArraySchema>>
+}
+
+{
+  const simpleArrayWithValidationSchema = array(
+    value => {
+      expectNotAny(value)
+      expectNotNever(value)
+      expectAssignable<SimpleObjectValues[], Prepared<typeof value>>
+
+      return validate(value)
+    },
+    simpleObjectInput
+  )
+  expectNotAny(simpleArrayWithValidationSchema)
+  expectAssignable<
+    ArraySchema<SimpleObjectFields> & { validate: Validate },
+    Prepared<typeof simpleArrayWithValidationSchema>
   >
 }
 

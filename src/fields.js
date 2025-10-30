@@ -91,7 +91,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
  * }} props
  * @returns {Field.Array}
  */
-function createArrayFormField({ name, initialValue = [], field }) {
+function createArrayFormField({ name = '', initialValue = [], field }) {
 
   let index = 0
 
@@ -102,7 +102,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
 
-  const value = {
+  const value = /** @satisfies {State.Readonly} */ ({
     get() {
       const { children } = internalState.get()
       return children.map(child => child.value.get())
@@ -116,7 +116,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
         onlyNotifyOnChildChange: true,
       })
     },
-  }
+  })
 
   return {
     type: 'array',

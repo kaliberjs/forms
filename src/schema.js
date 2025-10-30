@@ -11,7 +11,8 @@ export function object(fieldsOrValidate, fields) {
 }
 
 /**
- * @template A, B
+ * @template {FieldSchema.ObjectInput | Validate<FieldSchema.ToValue<B>[]>} const A
+ * @template {FieldSchema.ObjectInput} [const B = {}]
  * @arg {A} fieldsOrValidate
  * @arg {B} [fields]
  */
