@@ -1,9 +1,19 @@
 /** @import { Expand, FieldSchema, Validate } from './types.ts' */
 
 /**
- * @template {FieldSchema.ObjectInput | Validate<FieldSchema.ToValue<B>>} const A
- * @template {FieldSchema.ObjectInput} [const B = {}]
+ * @template {Validate<FieldSchema.ToValue<B>>} const A
+ * @template {FieldSchema.ObjectInput} const B
+ *
+ * @overload
  * @arg {A} fieldsOrValidate
+ * @arg {B} fields
+ * @returns {ReturnType<typeof body<'object', A, B>>}
+ *
+ * @overload
+ * @arg {B} fieldsOrValidate
+ * @returns {ReturnType<typeof body<'object', B, undefined>>}
+ *
+ * @arg {A | B} fieldsOrValidate
  * @arg {B} [fields]
  */
 export function object(fieldsOrValidate, fields) {
@@ -11,9 +21,19 @@ export function object(fieldsOrValidate, fields) {
 }
 
 /**
- * @template {FieldSchema.ObjectInput | Validate<FieldSchema.ToValue<B>[]>} const A
- * @template {FieldSchema.ObjectInput} [const B = {}]
+ * @template {Validate<FieldSchema.ToValue<B>[]>} const A
+ * @template {FieldSchema.ArrayInput} const B
+ *
+ * @overload
  * @arg {A} fieldsOrValidate
+ * @arg {B} fields
+ * @returns {ReturnType<typeof body<'array', A, B>>}
+ *
+ * @overload
+ * @arg {B} fieldsOrValidate
+ * @returns {ReturnType<typeof body<'array', B, undefined>>}
+ *
+ * @arg {A | B} fieldsOrValidate
  * @arg {B} [fields]
  */
 export function array(fieldsOrValidate, fields) {
@@ -29,7 +49,7 @@ export function array(fieldsOrValidate, fields) {
  * @arg {B} [fields]
  *
  * @returns {Expand<{ type: T } & (
- *   {} extends B ? { fields: A } :
+ *   B extends undefined ? { fields: A } :
  *   B extends infer X ? { fields: X, validate: A } :
  *   never
  * )>}

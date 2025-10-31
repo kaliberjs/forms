@@ -21,9 +21,10 @@ export type Validate<T = any> =
   ValidationFunction<T> |
   readonly ValidationFunction<T>[] |
   null
-export type ValidationFunction<T = any> = (value: T, context?: ValidationContext) => Falsy | ValidationError
-export type ValidationContext = { form: any, parents: Field.Object[] }
+export type ValidationFunction<T = any> = (value: T, context?: ValidationContext) => ValidationResult
+export type ValidationResult = Falsy | ValidationError
 export type ValidationError = { id: string, params?: any[] }
+export type ValidationContext = { form: any, parents: Field.Object[] }
 
 export type FieldSchema =
   Validate |
@@ -32,20 +33,25 @@ export type FieldSchema =
   { validate: Validate } |
   null
 
+export type InitialValue<T extends FieldSchema.ObjectInput | FieldSchema.ArrayInput> =
+  Partial<FieldSchema.ToValue<T>>
+
 export namespace FieldSchema {
 
   export type ToValue<T extends ObjectInput | FieldSchema | unknown> =
     T extends ObjectInput ? { [K in keyof T]: ToValue<T[K]> } :
     T extends Object ? { [K in keyof T['fields']]: ToValue<T['fields'][K]> } :
     T extends Array ? ToValue<{ type: 'object', fields: T['fields'], validate: T['validate'] }>[] :
-    T extends Validate ? T :
+    T extends Validate<infer X> ? X :
+    T extends HeterogeneousArrayInput ? ToValue<ReturnType<T>> :
     never
 
   export type ObjectInput = {
     [key: string]: Validate | FieldSchema.Object | FieldSchema.Array
   }
 
-  export type ArrayInput = ObjectInput | (<T extends ObjectInput>(initialValue: T) => ObjectInput)
+  export type ArrayInput = ObjectInput | HeterogeneousArrayInput
+  export type HeterogeneousArrayInput = (initialValue: unknown) => ObjectInput
 
   export type Object = {
     type: 'object',

@@ -1,11 +1,11 @@
 import { array, object } from './schema'
 import { asConst } from './type-helpers.js'
-import type { Validate } from './types.ts'
+import type { InitialValue, Validate } from './types.ts'
 
 const simpleObjectInput = asConst({
   noValidation: null,
-  singleValidation: validate,
-  multipleValidation: [validate, validate],
+  singleValidation: validate<string>,
+  multipleValidation: [validate<number>, validate<number>],
 })
 type ObjectSchema<Fields> = {
   type: 'object',
@@ -17,14 +17,14 @@ type ArraySchema<Fields> = {
 }
 type SimpleObjectSchema = ObjectSchema<SimpleObjectFields>
 type SimpleObjectFields = {
-  noValidation: Validate,
-  singleValidation: Validate,
-  multipleValidation: readonly [Validate, Validate],
+  noValidation: Validate<unknown>,
+  singleValidation: Validate<string>,
+  multipleValidation: readonly [Validate<number>, Validate<number>],
 }
 type SimpleObjectValues = {
-  noValidation: any,
-  singleValidation: any,
-  multipleValidation: any,
+  noValidation: unknown,
+  singleValidation: string,
+  multipleValidation: number,
 }
 
 {
@@ -46,7 +46,7 @@ type SimpleObjectValues = {
   )
   expectNotAny(simpleObjectWithValidationSchema)
   expectAssignable<
-    SimpleObjectSchema & { validate: Validate },
+    SimpleObjectSchema & { validate: Validate<SimpleObjectValues> },
     Prepared<typeof simpleObjectWithValidationSchema>
   >
 }
@@ -72,7 +72,7 @@ type NestedObjectSchema = ObjectSchema<{ nested: SimpleObjectSchema }>
   )
   expectNotAny(nestedObjectWithValidationSchema)
   expectAssignable<
-    NestedObjectSchema & { validate: Validate },
+    NestedObjectSchema & { validate: Validate<{ nested: SimpleObjectValues }> },
     Prepared<typeof nestedObjectWithValidationSchema>
   >
 }
@@ -96,14 +96,70 @@ type NestedObjectSchema = ObjectSchema<{ nested: SimpleObjectSchema }>
   )
   expectNotAny(simpleArrayWithValidationSchema)
   expectAssignable<
-    ArraySchema<SimpleObjectFields> & { validate: Validate },
+    ArraySchema<SimpleObjectFields> & { validate: Validate<SimpleObjectValues[]> },
     Prepared<typeof simpleArrayWithValidationSchema>
   >
 }
 
+const inputA = asConst({ type: validate<'a'>, a: object(simpleObjectInput) })
+const inputB = asConst({ type: validate<'b'>, b: object(simpleObjectInput) })
+type HeterogeneousInitialValues = InitialValue<typeof inputA | typeof inputB>
+
+{
+  const inputA = asConst({ type: validate<'a'>, a: object(simpleObjectInput) })
+  const inputB = asConst({ type: validate<'b'>, b: object(simpleObjectInput) })
+  type InitialValues = InitialValue<typeof inputA | typeof inputB>
+
+  const heterogeneousArraySchema = array(
+    (initialValue: InitialValues) =>
+      initialValue.type === 'a' ? inputA : inputB
+  )
+  expectNotAny(heterogeneousArraySchema)
+  expectAssignable<
+    ArraySchema<(initialValues: InitialValues) =>
+      { type: Validate<'a'>, a: SimpleObjectSchema } |
+      { type: Validate<'b'>, b: SimpleObjectSchema }
+    >,
+    Prepared<typeof heterogeneousArraySchema>
+  >
+}
+
+{
+  const heterogeneousArrayWithValidationSchema = array(
+    value => {
+      expectNotAny(value)
+      expectNotNever(value)
+      expectAssignable<
+        ({ type: 'a', a: SimpleObjectValues } | { type: 'b', b: SimpleObjectValues })[],
+        Prepared<typeof value>
+      >
+
+      return validate(value)
+    },
+    (initialValue: HeterogeneousInitialValues) =>
+      initialValue.type === 'a' ? inputA :
+      initialValue.type === 'b' ? inputB :
+      throwError(`Unknown type: '${initialValue.type}'`)
+  )
+  expectNotAny(heterogeneousArrayWithValidationSchema)
+  expectAssignable<
+    ArraySchema<(initialValues: HeterogeneousInitialValues) =>
+      { type: Validate<'a'>, a: SimpleObjectSchema } |
+      { type: Validate<'b'>, b: SimpleObjectSchema }
+    > & { validate: Validate<({ type: 'a', a: SimpleObjectValues } | { type: 'b', b: SimpleObjectValues })[]> },
+    Prepared<typeof heterogeneousArrayWithValidationSchema>
+  >
+}
+
 /** We need this because `never` matches all types (if we mistakenly infer an any or an infer type, we have problem) */
-function expectNotNever<T>(...expectNotNever: NotNever<T>) {}
-type NotNever<T> = T extends [never] ? [] : [T]
+function expectNotNever<T>(...expectNotNever: [T] & NotNever<T>) {}
+type NotNever<T> = CheckNever<T, [T]>
+
+type CheckNever<T, IfNotNever> =
+  T extends Array<infer X> ? CheckNever<X, IfNotNever> :
+  T extends Record<any, infer X> ? CheckNever<X, IfNotNever> :
+  T extends never ? [] :
+  IfNotNever
 
 /** We need this because `any` matches all types (if we mistakenly infer an any or an infer type, we have problem) */
 function expectNotAny<Expected>(actual: NotAny<Expected>) {}
@@ -140,8 +196,8 @@ type DeepPrepareTuple<T> = T extends [infer A, ...infer X]
   ? [ReplaceAnyWithUnknown<A>, ...DeepPrepareTuple<X>]
   : []
 
-
-
-function validate(value: any) {
+function validate<T>(value: T) {
   return value === 'failure' && { id: 'error' }
 }
+
+function throwError(m: string): never { throw new Error(m) }
