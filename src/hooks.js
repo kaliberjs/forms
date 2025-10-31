@@ -2,6 +2,7 @@ import isEqual from 'react-fast-compare'
 import { createObjectFormField } from './fields'
 import { normalize } from './normalize'
 import * as snapshot from './snapshot'
+import React from 'react'
 /** @import { FieldSchema, Validate, NormalizedField, Field } from './types.js' */
 
 let formCounter = 0 // This will stop working when we need a number greater than 9007199254740991
@@ -9,7 +10,7 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
 
 /**
  * @arg {{
- *   initialValues: Record<string, any>,
+ *   initialValues?: Record<string, any>,
  *   fields: FieldSchema.ObjectFields,
  *   validate?: Validate,
  *   onSubmit: (snapshot: any) => void,
@@ -18,7 +19,7 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
  */
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
   const initialValuesRef = React.useRef(null)
-  const formRef = React.useRef(/** @type {Field.Object} */ (null))
+  const formRef = React.useRef(/** @type {Field.Object} */ (/** @type {unknown} */ (null)))
 
   if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues

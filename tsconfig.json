@@ -1,8 +1,12 @@
 {
-  "typeAcquisition": {
-    "enable": true
-  },
-  "include": ["./components.js", "./index.js", "./validation.js", "./src/**/*"],
+  "include": [
+    "./components.js",
+    "./index.js",
+    "./validation.js",
+    "./types/**/*",
+    "./src/**/*",
+    "./typescript/**/*",
+  ],
   "compilerOptions": {
     "module": "node16",
     "moduleResolution": "node16",
@@ -15,6 +19,9 @@
     "noEmit": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "*": ["./typescript/*"]
+    }
   }
 }
