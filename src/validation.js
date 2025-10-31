@@ -1,22 +1,44 @@
 export const optional = null
-export const required = x => !x && x !== false && x !== 0 && error('required')
+export const required =
+  /** @template T @arg {T} x */
+  x => !x && x !== false && x !== 0 && error('required')
 
-export const number = x => Number(x) !== x && error('number')
-/** @param {number} min */
-export function min(min) { return x => (x || x === 0) && x < min && error('min', min) }
-/** @param {number} max */
-export function max(max) { return x => (x || x === 0) && x > max && error('max', max) }
+export const number =
+  /** @arg {number} x */
+  x => Number(x) !== x && error('number')
 
-/** @param {number} min */
-export function minLength(min) { return x => x && x.length < min && error('minLength', min) }
-/** @param {number} max */
-export function maxLength(max) { return x => x && x.length > max && error('maxLength', max) }
+/** @arg {number} min */
+export function min(min) {
+  /** @arg {number} x */
+  return x => (x || x === 0) && x < min && error('min', min)
+}
+
+/** @arg {number} max */
+export function max(max) {
+  /** @arg {number} x */
+  return x => (x || x === 0) && x > max && error('max', max)
+}
+
+/** @arg {number} min */
+export function minLength(min) {
+  /** @arg {{ length: number }} x */
+  return x => x && x.length < min && error('minLength', min)
+}
+/** @arg {number} max */
+export function maxLength(max) {
+  /** @arg {{ length: number }} x */
+  return x => x && x.length > max && error('maxLength', max)
+}
 
 const emailRegex = /.+@.+\..+/
-export const email = x => x && !emailRegex.test(x) && error('email')
+export const email =
+  /** @arg {string} x */
+  x => x && !emailRegex.test(x) && error('email')
 
 /**
  * @template {string} T
- * @param {T} id
+ * @template {[...any]} P
+ * @arg {T} id
+ * @arg {P} params
  */
 export function error(id, ...params) { return { id, params } }

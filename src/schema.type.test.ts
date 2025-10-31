@@ -1,11 +1,12 @@
+import { email, number, optional, required } from './validation'
 import { array, object } from './schema'
-import { asConst } from './type-helpers.js'
+import { asConst } from './type-helpers'
 import type { InitialValue, Validate } from './types.ts'
 
 const simpleObjectInput = asConst({
-  noValidation: null,
-  singleValidation: validate<string>,
-  multipleValidation: [validate<number>, validate<number>],
+  noValidation: optional,
+  singleValidation: email,
+  multipleValidation: [required, number],
 })
 type ObjectSchema<Fields> = {
   type: 'object',
@@ -19,7 +20,7 @@ type SimpleObjectSchema = ObjectSchema<SimpleObjectFields>
 type SimpleObjectFields = {
   noValidation: Validate<unknown>,
   singleValidation: Validate<string>,
-  multipleValidation: readonly [Validate<number>, Validate<number>],
+  multipleValidation: readonly [Validate<any>, Validate<number>],
 }
 type SimpleObjectValues = {
   noValidation: unknown,
@@ -182,7 +183,7 @@ type Prepared<T> =
   MarkedPrepared & ReplaceAnyWithUnknown<T>
 
 type ReplaceAnyWithUnknown<T> =
-  0 extends (1 & T) ? unknown :
+  0 extends (1 & T) ? unknown & Any :
   T extends ((...args: infer A) => infer R) ? ((...args: DeepPrepareTuple<A>) => ReplaceAnyWithUnknown<R>) :
   [T] extends [readonly (infer U)[]]
     ? { [K in keyof T]: ReplaceAnyWithUnknown<T[K]> }
@@ -191,6 +192,9 @@ type ReplaceAnyWithUnknown<T> =
     ? { [K in keyof T]: ReplaceAnyWithUnknown<T[K]> }
     :
   T
+
+// `any` matches with anything, so for better error reporting we replace it
+type Any = { __any__: any }
 
 type DeepPrepareTuple<T> = T extends [infer A, ...infer X]
   ? [ReplaceAnyWithUnknown<A>, ...DeepPrepareTuple<X>]
