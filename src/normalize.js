@@ -1,12 +1,23 @@
-/** @import { Falsy, FieldSchema, NormalizedField, ValidationFunction } from './types' */
+/** @import { Falsy, FieldSchema, NormalizedField, Validate, ValidationFunction } from './types.ts' */
 
 /**
- * @arg {FieldSchema} field
- * @arg {string} [name]
- * @returns {NormalizedField}
+ * @template {FieldSchema} T
+ * @typedef {T extends { type: infer X } ? X : 'basic'} ExtractTypeFromFieldSchema
  */
-export function normalize(field, name) {
-  return (
+
+/**
+ * @template {NormalizedField['type']} T
+ * @typedef {NormalizedField & { type: T }} SelectNormalizedField
+ */
+
+/**
+ * @template {FieldSchema} T
+ *
+ * @arg {T} field
+ * @arg {string} [name]
+ */
+export function normalize(field, name = '') {
+  return /** @type {SelectNormalizedField<ExtractTypeFromFieldSchema<T>>} */(
     convertValidationFunction(field, name) ||
     convertValidationArray(field, name) ||
     convertArrayField(field, name) ||
@@ -18,7 +29,7 @@ export function normalize(field, name) {
 /**
  * @arg {FieldSchema} x
  * @arg {string} name
- * @returns {NormalizedField.Basic}
+ * @returns {false | NormalizedField.Basic}
  */
 function convertValidationFunction(x, name) {
   return x instanceof Function &&
@@ -27,7 +38,7 @@ function convertValidationFunction(x, name) {
 /**
  * @arg {FieldSchema} x
  * @arg {string} name
- * @returns {NormalizedField.Basic}
+ * @returns {false | NormalizedField.Basic}
  */
 function convertValidationArray(x, name) {
   return x instanceof Array &&
@@ -36,7 +47,7 @@ function convertValidationArray(x, name) {
 /**
  * @arg {FieldSchema} x
  * @arg {string} name
- * @returns {NormalizedField.Array}
+ * @returns {null | false | NormalizedField.Array}
  */
 function convertArrayField(x, name) {
   return x && 'type' in x && x.type === 'array' &&
@@ -45,7 +56,7 @@ function convertArrayField(x, name) {
 /**
  * @arg {FieldSchema} x
  * @arg {string} name
- * @returns {NormalizedField.Object}
+ * @returns {null | false | NormalizedField.Object}
  */
 function convertObjectField(x, name) {
   return x && 'type' in x && x.type === 'object' &&
@@ -61,20 +72,22 @@ function convertSimpleField(x, name) {
 }
 
 /**
- * @arg {ValidationFunction | ValidationFunction[]} fOrArrayOfF
+ * @arg {false | undefined | Validate} fOrArrayOfF
  * @param {string} name
  * @returns {null | ValidationFunction}
  */
-function toValidationFunction(fOrArrayOfF = [], name) {
-  const result = [].concat(fOrArrayOfF).reduce(
+function toValidationFunction(fOrArrayOfF, name) {
+  const result = /** @type {(false | undefined | null | ValidationFunction)[]} */ ([]).concat(fOrArrayOfF).reduce(
+    /** @arg {null | ValidationFunction} previous */
     (previous, next) => {
-      const combined = previous && next && ((...args) => previous(...args) || next(...args))
+      const combined = previous && next &&
+        (/** @arg {[any, ...any]} args */ (...args) => previous(...args) || next(...args))
       return combined || next || previous
     },
     null
   )
 
-  return result && withBetterError(result, name)
+  return result ? withBetterError(result, name) : null
 }
 
 /**

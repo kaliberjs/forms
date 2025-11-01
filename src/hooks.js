@@ -3,30 +3,35 @@ import { createObjectFormField } from './fields'
 import { normalize } from './normalize'
 import * as snapshot from './snapshot'
 import React from 'react'
-/** @import { FieldSchema, Validate, NormalizedField, Field } from './types.js' */
+import { asAny } from './type-helpers'
+/** @import { FieldSchema, Validate, NormalizedField, Field, InitialValue } from './types.ts' */
 
 let formCounter = 0 // This will stop working when we need a number greater than 9007199254740991
 function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
 
 /**
+ * @template {FieldSchema.ObjectInput} const A
+ * @template {InitialValue<A>} const B
+ * @template {Validate<FieldSchema.ToValue<B>>} const C
+ *
  * @arg {{
- *   initialValues?: Record<string, any>,
- *   fields: FieldSchema.ObjectFields,
- *   validate?: Validate,
+ *   fields: A,
+ *   initialValues?: B,
+ *   validate?: C,
  *   onSubmit: (snapshot: any) => void,
  *   formId?: string,
  * }} props
  */
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
-  const initialValuesRef = React.useRef(null)
-  const formRef = React.useRef(/** @type {Field.Object} */ (/** @type {unknown} */ (null)))
+  const initialValuesRef = React.useRef(/** @type {InitialValue<A> | undefined} */ (asAny(null)))
+  const formRef = React.useRef(/** @type {Field.Object} */ (asAny(null)))
 
   if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues
     const form = createObjectFormField({
       name: formId,
       initialValue: initialValues,
-      field: /** @type {NormalizedField.Object} */ (normalize({ type: 'object', fields, validate }))
+      field: normalize({ type: 'object', fields, validate })
     })
     form.validate({ form: initialValues, parents: [] })
     form.value.subscribe(value => form.validate({ form: value, parents: [] }))
