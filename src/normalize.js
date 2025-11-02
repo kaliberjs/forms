@@ -1,14 +1,4 @@
-/** @import { Falsy, FieldSchema, NormalizedField, Validate, ValidationFunction } from './types.ts' */
-
-/**
- * @template {FieldSchema} T
- * @typedef {T extends { type: infer X } ? X : 'basic'} ExtractTypeFromFieldSchema
- */
-
-/**
- * @template {NormalizedField['type']} T
- * @typedef {NormalizedField & { type: T }} SelectNormalizedField
- */
+/** @import { FieldSchema, NormalizedField, Validate, ValidationFunction } from './types.ts' */
 
 /**
  * @template {FieldSchema} T
@@ -17,7 +7,7 @@
  * @arg {string} [name]
  */
 export function normalize(field, name = '') {
-  return /** @type {SelectNormalizedField<ExtractTypeFromFieldSchema<T>>} */(
+  return /** @type {NormalizedField.FromFieldSchema<T>} */ (
     convertValidationFunction(field, name) ||
     convertValidationArray(field, name) ||
     convertArrayField(field, name) ||

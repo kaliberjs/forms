@@ -5,7 +5,7 @@
 export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 
 export type Validate<T = any> =
-  [ValidationFunction<T>, ...ValidationFunction<T>[]] |
+  readonly [ValidationFunction<T>, ...ValidationFunction<T>[]] |
   ValidationFunction<T> |
   readonly ValidationFunction<T>[] |
   null
@@ -61,6 +61,48 @@ export namespace FieldSchema {
 
 export type NormalizedField = NormalizedField.Basic | NormalizedField.Object | NormalizedField.Array
 export namespace NormalizedField {
+
+  export type FromFieldSchema<T extends FieldSchema> =
+    T extends FieldSchema.Object ? (
+      {
+        type: 'object',
+        validate: T extends { validate: any } ? ValidateToValidationFunction<T['validate']> : null,
+        fields: T['fields']
+      }
+    ) :
+    T extends FieldSchema.Array ? (
+      {
+        type: 'array',
+        validate: ValidateToValidationFunction<T['validate']>,
+        fields: T['fields']
+      }
+    ) :
+    T extends null ? (
+      {
+        type: 'basic',
+        validate: null
+      }
+    ) :
+    T extends Validate<any> ? (
+      {
+        type: 'basic',
+        validate: ValidateToValidationFunction<T>
+      }
+    ) :
+    T extends { validate: infer X } ? (
+      {
+        type: 'basic',
+        validate: ValidateToValidationFunction<X>
+      }
+    ) :
+    never
+
+  export type ValidateToValidationFunction<T> =
+    T extends undefined ? null :
+    T extends null ? null :
+    T extends Validate<infer X> ? ValidationFunction<X> :
+    never
+
   export type Basic = {
     type: 'basic',
     validate: null | ValidationFunction,

@@ -16,7 +16,6 @@ const constructors = {
  *   initialValue?: { [name: string]: any },
  *   field: NormalizedField.Object,
  * }} props
- * @returns {Field.Object}
  */
 export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
@@ -39,7 +38,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     },
   }
 
-  return {
+  return /** @satisfies {Field.Object} */ ({
     type: 'object',
     name,
     validate(context) {
@@ -60,13 +59,12 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
     fields,
-  }
+  })
 
   /**
    * @arg {any} initialValues
    * @arg {NormalizedField.Object['fields']} fields
    * @arg {string} namePrefix
-   * @returns
    */
   function createFormFields(initialValues, fields, namePrefix = '') {
     return mapValues(fields, (field, name) => {
