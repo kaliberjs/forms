@@ -61,6 +61,16 @@ export namespace FieldSchema {
 
 export type NormalizedField = NormalizedField.Basic | NormalizedField.Object | NormalizedField.Array
 export namespace NormalizedField {
+  export type ToValue<T extends NormalizedField> =
+    T extends Object ? { [K in keyof T['fields']]: ToValue<NormalizedField.FromFieldSchema<T['fields'][K]>> } :
+    T extends Array ? { TODO: true }[] :
+    T extends Basic ? ValueFromValidationFunction<T['validate']> :
+    never
+
+  export type ValueFromValidationFunction<T> =
+    T extends null ? unknown :
+    T extends ValidationFunction<infer X> ? X :
+    never
 
   export type FromFieldSchema<T extends FieldSchema> =
     T extends FieldSchema.Object ? (
@@ -123,43 +133,54 @@ export namespace NormalizedField {
 
 export type Field = Field.Basic | Field.Object | Field.Array
 export namespace Field {
-  export type Basic = {
-    type: 'basic',
+  export type BaseFieldProperties<T extends 'object' | 'array' | 'basic'> = {
+    type: T,
     name: string,
     validate(context: ValidationContext): void,
     setSubmitted(isSubmitted: boolean): void,
     reset(): void,
-    value: State.Readonly,
-    state: State.Readonly<State.Basic>,
+  }
+
+  export type FromNormalizedField<T extends NormalizedField> =
+    T extends NormalizedField.Object ? (
+      BaseFieldProperties<'object'> & {
+        value: State.Readonly<NormalizedField.ToValue<T>>,
+        state: State.Readonly<State.Object>,
+        fields: { [K in keyof T['fields']]: FromNormalizedField<NormalizedField.FromFieldSchema<T['fields'][K]>> },
+      }
+    ) :
+    T extends NormalizedField.Array ? (
+      BaseFieldProperties<'array'> & {
+        TODO: true
+      }
+    ) :
+    T extends NormalizedField.Basic ? (
+      Basic<NormalizedField.ToValue<T>>
+    ) :
+    never
+
+  export type Basic<T = any> = BaseFieldProperties<'basic'> & {
+    value: State.Readonly<T>,
+    state: State.Readonly<State.Basic<T>>,
     eventHandlers: {
       onBlur(): void,
       onFocus(): void,
-      onChange(eOrValue: Event | any): void,
+      onChange(eOrValue: Event<T> | T): void,
     }
   }
-  export type Event = {
+  export type Event<T = any> = {
     target: {
-      value?: any
+      value?: T
     }
   }
 
-  export type Object = {
-    type: 'object',
-    name: string,
-    validate(context: ValidationContext): void,
-    setSubmitted(isSubmitted: boolean): void,
-    reset(): void,
+  export type Object = BaseFieldProperties<'object'> & {
     value: State.Readonly<{ [name: string]: any }>,
     state: State.Readonly<State.Object>,
     fields: { [name: string]: Field },
   }
 
-  export type Array = {
-    type: 'array',
-    name: string,
-    validate(context: ValidationContext): void,
-    setSubmitted(isSubmitted: boolean): void,
-    reset(): void,
+  export type Array = BaseFieldProperties<'array'> & {
     value: State.Readonly<Record<string, any>>,
     state: State.Readonly<State.Array>,
     helpers: {
@@ -180,8 +201,8 @@ export namespace State {
     showError: boolean,
   }
 
-  export type Basic = Common & {
-    value: any
+  export type Basic<T = any> = Common & {
+    value: T
   }
 
   export type Object = Common

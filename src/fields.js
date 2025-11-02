@@ -11,10 +11,12 @@ const constructors = {
 }
 
 /**
+ * @template {NormalizedField.Object} T
+ *
  * @arg {{
  *   name?: string,
- *   initialValue?: { [name: string]: any },
- *   field: NormalizedField.Object,
+ *   initialValue?: Partial<NormalizedField.ToValue<T>>,
+ *   field: T,
  * }} props
  */
 export function createObjectFormField({ name = '', initialValue = {}, field }) {
@@ -38,7 +40,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     },
   }
 
-  return /** @satisfies {Field.Object} */ ({
+  return /** @type {Field.FromNormalizedField<T>} */ ({
     type: 'object',
     name,
     validate(context) {
