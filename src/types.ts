@@ -87,7 +87,7 @@ export type NormalizedField = NormalizedField.Basic | NormalizedField.Object | N
 export namespace NormalizedField {
   export type ToValue<T extends NormalizedField> =
     T extends Object<infer X> ? FieldSchema.ObjectFieldsToValues<X> :
-    T extends Array<infer X> ? FieldSchema.ObjectFieldsToValues<FieldSchema.ExtractObjectFields<X>>[] :
+    T extends Array<infer X> ? FieldSchema.ArrayFieldsToValues<X> :
     T extends Basic<infer X> ? X :
     never
 

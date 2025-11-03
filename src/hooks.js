@@ -12,7 +12,7 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
 /**
  * @template {FieldInput.Object} const A
  * @template {InitialValue<A>} const B
- * @template {Validate<FieldInput.ToValue<A>>} const C
+ * @template {Validate<FieldInput.ObjectToValue<A>>} const C
  *
  * @arg {{
  *   fields: A,
