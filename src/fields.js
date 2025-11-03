@@ -2,7 +2,7 @@ import { normalize } from './normalize'
 import { createState, subscribeToAll, subscribeToChildren } from './state'
 import isEqual from 'react-fast-compare'
 
-/** @import { Falsy, Field, NormalizedField, State, ValidationError } from './types.ts' */
+/** @import { Expand, Falsy, Field, NormalizedField, State, Validate, ValidationError, ValidationFunction } from './types.ts' */
 
 const constructors = {
   basic: createBasicFormField,
@@ -11,7 +11,7 @@ const constructors = {
 }
 
 /**
- * @template {NormalizedField.Object} T
+ * @template {NormalizedField.Object} const T
  *
  * @arg {{
  *   name?: string,
@@ -40,7 +40,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     },
   }
 
-  return /** @type {Field.FromNormalizedField<T>} */ ({
+  return /** @type {Expand<Field.FromNormalizedField<T>>} */ ({
     type: 'object',
     name,
     validate(context) {
@@ -293,8 +293,14 @@ function mapValues(o, f) {
   )
 }
 
+/**
+ * @template {{ error: Falsy | ValidationError }} T
+ * @arg {null | ValidationFunction<T>} f
+ * @arg {State.ReadWrite<T>} state
+ */
 function bindValidate(f, state) {
   return f && (
+    /** @arg {Parameters<ValidationFunction<T>>} args */
     (...args) => {
       const error = (f && f(...args)) || false
       return state.update(x => isEqual(error, x.error) ? x : updateState(x, { error }))

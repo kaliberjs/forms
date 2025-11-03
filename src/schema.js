@@ -1,8 +1,8 @@
-/** @import { Expand, FieldSchema, Validate } from './types.ts' */
+/** @import { Expand, FieldInput, Validate } from './types.ts' */
 
 /**
- * @template {Validate<FieldSchema.ToValue<B>>} const A
- * @template {FieldSchema.ObjectInput} const B
+ * @template {Validate<FieldInput.ToValue<B>>} const A
+ * @template {FieldInput.Object} const B
  *
  * @overload
  * @arg {A} fieldsOrValidate
@@ -21,8 +21,8 @@ export function object(fieldsOrValidate, fields) {
 }
 
 /**
- * @template {Validate<FieldSchema.ToValue<B>[]>} const A
- * @template {FieldSchema.ArrayInput} const B
+ * @template {Validate<FieldInput.ToValue<B>[]>} const A
+ * @template {FieldInput.Array} const B
  *
  * @overload
  * @arg {A} fieldsOrValidate

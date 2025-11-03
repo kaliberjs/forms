@@ -4,15 +4,15 @@ import { normalize } from './normalize'
 import * as snapshot from './snapshot'
 import React from 'react'
 import { asAny } from './type-helpers'
-/** @import { FieldSchema, Validate, NormalizedField, Field, InitialValue } from './types.ts' */
+/** @import { FieldSchema, Validate, NormalizedField, Field, InitialValue, Expand, Prettify, FieldInput } from './types.ts' */
 
 let formCounter = 0 // This will stop working when we need a number greater than 9007199254740991
 function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
 
 /**
- * @template {FieldSchema.ObjectInput} const A
+ * @template {FieldInput.Object} const A
  * @template {InitialValue<A>} const B
- * @template {Validate<FieldSchema.ToValue<B>>} const C
+ * @template {Validate<FieldInput.ToValue<A>>} const C
  *
  * @arg {{
  *   fields: A,
@@ -24,14 +24,14 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
  */
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
   const initialValuesRef = React.useRef(/** @type {InitialValue<A> | undefined} */ (asAny(null)))
-  const formRef = React.useRef(/** @type {Field.Object} */ (asAny(null)))
+  const formRef = React.useRef(/** @type {Field.FromNormalizedField<NormalizedField.FromFieldSchema<{ type: 'object', fields: A, validate?: C | undefined }>>} */ (asAny(null)))
 
   if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues
     const form = createObjectFormField({
       name: formId,
       initialValue: initialValues,
-      field: normalize({ type: 'object', fields, validate })
+      field: toNormalizedField(fields, validate)
     })
     form.validate({ form: initialValues, parents: [] })
     form.value.subscribe(value => form.validate({ form: value, parents: [] }))
@@ -66,6 +66,22 @@ function useFormFieldState(state) {
   )
 
   return formFieldState
+}
+
+/**
+ * @template {FieldInput.Object} A
+ * @template {Validate<FieldInput.ToValue<A>>} B
+ *
+ * @arg {A} fields
+ * @arg {B | undefined} validate
+ *
+ * @returns {B extends undefined
+ *   ? NormalizedField.FromFieldSchema<{ type: 'object', fields: A }>
+ *   : NormalizedField.FromFieldSchema<{ type: 'object', fields: A, validate?: B }>
+ * }
+ */
+function toNormalizedField(fields, validate) {
+  return normalize({ type: 'object', fields, validate })
 }
 
 function useFieldStates(states) {

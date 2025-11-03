@@ -14,32 +14,40 @@ export type ValidationResult = Falsy | ValidationError
 export type ValidationError = { id: string, params?: any[] }
 export type ValidationContext = { form: any, parents: Field.Object[] }
 
+export type InitialValue<T extends FieldInput.Object | FieldInput.Array> =
+  Partial<FieldInput.ToValue<T>>
+
+export type FieldInput = FieldInput.Object | Validate
+
+export namespace FieldInput {
+
+  export type ToValue<T extends Object | FieldSchema | unknown> =
+    T extends Object ? { [K in keyof T]: ToValue<T[K]> } :
+    T extends FieldSchema.Object ? { [K in keyof T['fields']]: ToValue<T['fields'][K]> } :
+    T extends FieldSchema.Array ? ToValue<{ type: 'object', fields: T['fields'], validate: T['validate'] }>[] :
+    T extends Validate<infer X> ? X :
+    T extends HeterogeneousArrayInput ? ToValue<ReturnType<T>> :
+    never
+
+  export type Object = {
+    [key: string]: Validate | FieldSchema.Object | FieldSchema.Array
+  }
+
+  export type Array = Object | HeterogeneousArrayInput
+  export type HeterogeneousArrayInput = (initialValue: unknown) => Object
+}
+
 export type FieldSchema =
   Validate |
   FieldSchema.Object |
   FieldSchema.Array |
   { validate: Validate } |
   null
-
-export type InitialValue<T extends FieldSchema.ObjectInput | FieldSchema.ArrayInput> =
-  Partial<FieldSchema.ToValue<T>>
-
 export namespace FieldSchema {
 
-  export type ToValue<T extends ObjectInput | FieldSchema | unknown> =
-    T extends ObjectInput ? { [K in keyof T]: ToValue<T[K]> } :
-    T extends Object ? { [K in keyof T['fields']]: ToValue<T['fields'][K]> } :
-    T extends Array ? ToValue<{ type: 'object', fields: T['fields'], validate: T['validate'] }>[] :
-    T extends Validate<infer X> ? X :
-    T extends HeterogeneousArrayInput ? ToValue<ReturnType<T>> :
-    never
-
-  export type ObjectInput = {
-    [key: string]: Validate | FieldSchema.Object | FieldSchema.Array
-  }
-
-  export type ArrayInput = ObjectInput | HeterogeneousArrayInput
-  export type HeterogeneousArrayInput = (initialValue: unknown) => ObjectInput
+  export type FromFieldInput<T extends FieldInput> =
+    T extends FieldInput.Object ? { type: 'object', fields: T } :
+    T
 
   export type Object = {
     type: 'object',
@@ -63,7 +71,11 @@ export type NormalizedField = NormalizedField.Basic | NormalizedField.Object | N
 export namespace NormalizedField {
   export type ToValue<T extends NormalizedField> =
     T extends Object ? { [K in keyof T['fields']]: ToValue<NormalizedField.FromFieldSchema<T['fields'][K]>> } :
-    T extends Array ? { TODO: true }[] :
+    T extends Array ? (
+      T['fields'] extends FieldSchema.ArrayFieldsConstructor ? FieldInput.ToValue<ReturnType<T['fields']>>[] :
+      T['fields'] extends FieldSchema.ObjectFields ? FieldInput.ToValue<T['fields']>[] :
+      never
+    ) :
     T extends Basic ? ValueFromValidationFunction<T['validate']> :
     never
 
@@ -83,7 +95,7 @@ export namespace NormalizedField {
     T extends FieldSchema.Array ? (
       {
         type: 'array',
-        validate: ValidateToValidationFunction<T['validate']>,
+        validate: T extends { validate: any } ? ValidateToValidationFunction<T['validate']> : null,
         fields: T['fields']
       }
     ) :
@@ -146,18 +158,34 @@ export namespace Field {
       BaseFieldProperties<'object'> & {
         value: State.Readonly<NormalizedField.ToValue<T>>,
         state: State.Readonly<State.Object>,
-        fields: { [K in keyof T['fields']]: FromNormalizedField<NormalizedField.FromFieldSchema<T['fields'][K]>> },
+        fields: {
+          [K in keyof T['fields']]: FromNormalizedField<NormalizedField.FromFieldSchema<T['fields'][K]>>
+        },
       }
     ) :
     T extends NormalizedField.Array ? (
       BaseFieldProperties<'array'> & {
-        TODO: true
+        value: State.Readonly<NormalizedField.ToValue<T>>,
+        state: State.Readonly<State.Array<FromArrayFields<T['fields']>>>,
+        helpers: {
+          add(initialValue: NormalizedField.ToValue<T> extends (infer X)[] ? Partial<X> : never): void,
+          remove(entry: FromArrayFields<T['fields']>): void,
+        }
       }
     ) :
     T extends NormalizedField.Basic ? (
       Basic<NormalizedField.ToValue<T>>
     ) :
     never
+
+  export type FromArrayFields<T extends FieldSchema.ArrayFields> =
+    FromNormalizedField<NormalizedField.FromFieldSchema<{
+      type: 'object',
+      fields:
+        T extends FieldSchema.ArrayFieldsConstructor ? ReturnType<T> :
+        T extends FieldSchema.ObjectFields ? T :
+        never
+    }>>
 
   export type Basic<T = any> = BaseFieldProperties<'basic'> & {
     value: State.Readonly<T>,
@@ -181,7 +209,7 @@ export namespace Field {
   }
 
   export type Array = BaseFieldProperties<'array'> & {
-    value: State.Readonly<Record<string, any>>,
+    value: State.Readonly<{ [name: string]: any }[]>,
     state: State.Readonly<State.Array>,
     helpers: {
       add(initialValue: any): void,
@@ -207,8 +235,8 @@ export namespace State {
 
   export type Object = Common
 
-  export type Array = Common & {
-    children: Field.Object[]
+  export type Array<T = Field.Object> = Common & {
+    children: T[]
   }
 
   export type Readonly<T = any> = {

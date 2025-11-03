@@ -1,9 +1,9 @@
 import { optional, email, required, number } from './validation';
 import { object, array } from './schema'
-import { normalize } from './normalize';
-import { ValidationFunction } from './types';
-import { expectAssignable, expectNotAny, expectNotNever, Prepared } from './type.test.helpers';
-import { asConst } from './type-helpers';
+import { normalize } from './normalize'
+import { ValidationFunction } from './types'
+import { expectAssignable, expectNotAny, expectNotNever, Prepared } from './type.test.helpers'
+import { asConst } from './type-helpers'
 
 const noValidation = asConst(optional)
 const singleValidation = asConst(email)
