@@ -1,4 +1,4 @@
-/** @import { Expand, FieldInput, Validate } from './types.ts' */
+/** @import { FieldInput, Validate } from './types.ts' */
 
 /**
  * @template {Validate<FieldInput.ObjectToValue<B>>} const A
@@ -48,11 +48,11 @@ export function array(fieldsOrValidate, fields) {
  * @arg {A} fieldsOrValidate
  * @arg {B} [fields]
  *
- * @returns {Expand<{ type: T } & (
+ * @returns {{ type: T } & (
  *   B extends undefined ? { fields: A } :
  *   B extends infer X ? { fields: X, validate: A } :
  *   never
- * )>}
+ * )}
  */
 function body(type, fieldsOrValidate, fields) {
   // @ts-expect-error - if you want to remove this @ts-ignore: good luck and please leave a comment afterwards *

@@ -10,6 +10,18 @@ let formCounter = 0 // This will stop working when we need a number greater than
 function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
 
 /**
+ * @template {FieldInput.Object} T
+ *
+ * @typedef {(
+ *   Field.FromNormalizedField<
+ *    NormalizedField.FromFieldSchema<
+ *      { type: 'object', fields: T }
+ *    >
+ *   >
+ * )} ObjectFieldInputToObjectField
+ */
+
+/**
  * @template {FieldInput.Object} const A
  * @template {InitialValue<A>} const B
  * @template {Validate<FieldInput.ObjectToValue<A>>} const C
@@ -24,14 +36,14 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
  */
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
   const initialValuesRef = React.useRef(/** @type {InitialValue<A> | undefined} */ (asAny(null)))
-  const formRef = React.useRef(/** @type {Field.FromNormalizedField<NormalizedField.FromFieldSchema<{ type: 'object', fields: A, validate?: C | undefined }>>} */ (asAny(null)))
+  const formRef = React.useRef(/** @type {ObjectFieldInputToObjectField<A>} */ (asAny(null)))
 
   if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues
     const form = createObjectFormField({
       name: formId,
       initialValue: initialValues,
-      field: toNormalizedField(fields, validate)
+      field: normalize({ type: 'object', fields, validate })
     })
     form.validate({ form: initialValues, parents: [] })
     form.value.subscribe(value => form.validate({ form: value, parents: [] }))
@@ -43,6 +55,7 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
 
   return { form: formRef.current, submit, reset }
 
+  /** @arg {React.FormEvent<HTMLFormElement>} e */
   function handleSubmit(e) {
     if (e) e.preventDefault()
     formRef.current.setSubmitted(true)
@@ -66,22 +79,6 @@ function useFormFieldState(state) {
   )
 
   return formFieldState
-}
-
-/**
- * @template {FieldInput.Object} A
- * @template {Validate<FieldInput.ToValue<A>>} B
- *
- * @arg {A} fields
- * @arg {B | undefined} validate
- *
- * @returns {B extends undefined
- *   ? NormalizedField.FromFieldSchema<{ type: 'object', fields: A }>
- *   : NormalizedField.FromFieldSchema<{ type: 'object', fields: A, validate?: B }>
- * }
- */
-function toNormalizedField(fields, validate) {
-  return normalize({ type: 'object', fields, validate })
 }
 
 function useFieldStates(states) {

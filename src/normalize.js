@@ -1,4 +1,4 @@
-/** @import { Expand, FieldSchema, NormalizedField, Validate, ValidationFunction } from './types.ts' */
+/** @import { FieldSchema, NormalizedField, Validate, ValidationFunction } from './types.ts' */
 
 /**
  * @template {FieldSchema} T
@@ -7,7 +7,7 @@
  * @arg {string} [name]
  */
 export function normalize(field, name = '') {
-  return /** @type {Expand<NormalizedField.FromFieldSchema<T>>} */ (
+  return /** @type {NormalizedField.FromFieldSchema<T>} */ (
     convertValidationFunction(field, name) ||
     convertValidationArray(field, name) ||
     convertArrayField(field, name) ||

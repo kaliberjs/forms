@@ -2,7 +2,7 @@ import { normalize } from './normalize'
 import { createState, subscribeToAll, subscribeToChildren } from './state'
 import isEqual from 'react-fast-compare'
 
-/** @import { Expand, Falsy, Field, NormalizedField, State, Validate, ValidationError, ValidationFunction } from './types.ts' */
+/** @import { Falsy, Field, NormalizedField, PartialWithStringKey, State, Validate, ValidationError, ValidationFunction } from './types.ts' */
 
 const constructors = {
   basic: createBasicFormField,
@@ -15,7 +15,7 @@ const constructors = {
  *
  * @arg {{
  *   name?: string,
- *   initialValue?: Partial<NormalizedField.ToValue<T>>,
+ *   initialValue?: PartialWithStringKey<NormalizedField.ToValue<T>>,
  *   field: T,
  * }} props
  */
@@ -40,7 +40,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     },
   }
 
-  return /** @type {Expand<Field.FromNormalizedField<T>>} */ ({
+  return /** @type {Field.FromNormalizedField<T>} */ ({
     type: 'object',
     name,
     validate(context) {

@@ -3,7 +3,8 @@
  * is used to make the types from this library, exposed to the developer more friendly.
  */
 // TODO: we need to make this better (more recursive)
-export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
+// export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
+export type PartialWithStringKey<T extends { [key: string]: any}> = { [P in keyof T & string]?: T[P] }
 
 export type Validate<T = any> =
   readonly [ValidationFunction<T>, ...ValidationFunction<T>[]] |
@@ -21,7 +22,7 @@ export type ValueFromValidationFunction<T> =
     never
 
 export type InitialValue<T extends FieldInput.Object> =
-  Partial<FieldInput.ObjectToValue<T>>
+  PartialWithStringKey<FieldInput.ObjectToValue<T>>
 
 export namespace FieldInput {
 
@@ -54,11 +55,11 @@ export namespace FieldSchema {
     T extends { validate: Validate<infer X> } ? X :
     never
 
-  export type ObjectFieldsToValues<O extends ObjectFields> =
-    { [K in keyof O]: ToValue<O[K]> }
+  export type ObjectFieldsToValues<T extends ObjectFields> =
+    { [K in keyof T & string]: ToValue<T[K]> }
 
-  export type ArrayFieldsToValues<O extends ArrayFields> =
-    ObjectFieldsToValues<ExtractObjectFields<O>>[]
+  export type ArrayFieldsToValues<T extends ArrayFields> =
+    ObjectFieldsToValues<ExtractObjectFields<T>>[]
 
   export type Object<T extends ObjectFields = ObjectFields> = {
     type: 'object',
@@ -118,7 +119,7 @@ export namespace NormalizedField {
         validate: ValidateToValidationFunction<T>
       }
     ) :
-    T extends { validate: infer X } ? (
+    T extends { validate: infer X, type?: Exclude<infer Y, 'object' | 'array'> } ? (
       {
         type: 'basic',
         validate: ValidateToValidationFunction<X>
@@ -159,7 +160,7 @@ export namespace Field {
     never
 
   export type ObjectFieldsToValues<T extends ObjectFields> =
-    { [K in keyof T]: ToValue<T[K]> }
+    { [K in keyof T & string]: ToValue<T[K]> }
 
   export type FromNormalizedField<T extends NormalizedField> =
     T extends NormalizedField.Object ? Object<MapObjectFieldsToFields<T['fields']>> :
@@ -168,7 +169,7 @@ export namespace Field {
     never
 
   export type MapObjectFieldsToFields<T extends FieldSchema.ObjectFields> =
-    { [K in keyof T]: FromNormalizedField<NormalizedField.FromFieldSchema<T[K]>>}
+    { [K in keyof T & string]: FromNormalizedField<NormalizedField.FromFieldSchema<T[K]>>}
 
   export type ArrayFieldsToObjectFields<T extends FieldSchema.ArrayFields> =
     FromNormalizedField<NormalizedField.FromFieldSchema<{
@@ -228,7 +229,7 @@ export namespace Field {
       value: State.Readonly<ObjectValues<T>[]>,
       state: State.Readonly<State.Array<Object<T>>>,
       helpers: {
-        add(initialValue: Partial<ObjectValues<T>>): void,
+        add(initialValue: PartialWithStringKey<ObjectValues<T>>): void,
         remove(entry: Object<T>): void,
       }
     }
@@ -236,7 +237,7 @@ export namespace Field {
   export type ObjectFields = { [name: string]: Field }
 
   export type ObjectValues<T extends ObjectFields> =
-    { [K in keyof T]: ToValue<T[K]> }
+    { [K in keyof T & string]: ToValue<T[K]> }
 }
 
 export type State = State.Basic | State.Object | State.Array
@@ -270,5 +271,5 @@ export namespace State {
   export type Unsubscribe = () => void
 }
 
-export type Falsy = false | '' | 0 | 0n | null | undefined
+export type Falsy = false | '' | 0 | 0n | null | undefined | void
 
