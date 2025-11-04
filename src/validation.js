@@ -1,3 +1,23 @@
+/**
+ * @overload
+ * @arg {'number'} type
+ * @returns {((x: number) => never)}
+ *
+ * @overload
+ * @arg {'boolean'} type
+ * @returns {((x: boolean) => never)}
+ *
+ * @overload
+ * @arg {'string'} type
+ * @returns {((x: string) => never)}
+ *
+ * @arg {any} type
+ * @returns {null | ((x: any) => never)}
+ */
+export function optionalT(type) {
+  return null
+}
+
 export const optional = null
 export const required =
   /** @template T @arg {T} x */
