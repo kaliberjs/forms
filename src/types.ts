@@ -56,7 +56,7 @@ export namespace FieldSchema {
     never
 
   export type ObjectFieldsToValues<T extends ObjectFields> =
-    { [K in keyof T & string]: ToValue<T[K]> }
+    T extends any ? { [K in keyof T & string]: ToValue<T[K]> } : never
 
   export type ArrayFieldsToValues<T extends ArrayFields> =
     ObjectFieldsToValues<ExtractObjectFields<T>>[]
@@ -160,7 +160,7 @@ export namespace Field {
     never
 
   export type ObjectFieldsToValues<T extends ObjectFields> =
-    { [K in keyof T & string]: ToValue<T[K]> }
+    T extends any ? { [K in keyof T & string]: ToValue<T[K]> } : never
 
   export type FromNormalizedField<T extends NormalizedField> =
     T extends NormalizedField.Object ? Object<MapObjectFieldsToFields<T['fields']>> :
@@ -169,7 +169,7 @@ export namespace Field {
     never
 
   export type MapObjectFieldsToFields<T extends FieldSchema.ObjectFields> =
-    { [K in keyof T & string]: FromNormalizedField<NormalizedField.FromFieldSchema<T[K]>>}
+    T extends any ? { [K in keyof T & string]: FromNormalizedField<NormalizedField.FromFieldSchema<T[K]>>} : never
 
   export type ArrayFieldsToObjectFields<T extends FieldSchema.ArrayFields> =
     FromNormalizedField<NormalizedField.FromFieldSchema<{
@@ -237,7 +237,7 @@ export namespace Field {
   export type ObjectFields = { [name: string]: Field }
 
   export type ObjectValues<T extends ObjectFields> =
-    { [K in keyof T & string]: ToValue<T[K]> }
+    T extends any ? { [K in keyof T & string]: ToValue<T[K]> } : never
 }
 
 export type State = State.Basic | State.Object | State.Array
