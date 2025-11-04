@@ -3,7 +3,7 @@
  * is used to make the types from this library, exposed to the developer more friendly.
  */
 // TODO: we need to make this better (more recursive)
-// export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
+export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never
 export type PartialWithStringKey<T extends { [key: string]: any}> = { [P in keyof T & string]?: T[P] }
 
 export type Validate<T = any> =

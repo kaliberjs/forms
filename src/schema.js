@@ -1,4 +1,4 @@
-/** @import { FieldInput, Validate } from './types.ts' */
+/** @import { Expand, FieldInput, Validate } from './types.ts' */
 
 /**
  * @template {Validate<FieldInput.ObjectToValue<B>>} const A
@@ -21,7 +21,7 @@ export function object(fieldsOrValidate, fields) {
 }
 
 /**
- * @template {Validate<FieldInput.ArrayToValue<B>>} const A
+ * @template {Validate<Expand<FieldInput.ArrayToValue<B>>>} const A
  * @template {FieldInput.Array} const B
  *
  * @overload

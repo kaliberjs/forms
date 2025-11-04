@@ -4,6 +4,10 @@
  * @returns {((x: number) => never)}
  *
  * @overload
+ * @arg {`number | string`} type
+ * @returns {((x: number | string) => never)}
+ *
+ * @overload
  * @arg {'boolean'} type
  * @returns {((x: boolean) => never)}
  *

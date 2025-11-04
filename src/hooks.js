@@ -4,7 +4,7 @@ import { normalize } from './normalize'
 import * as snapshot from './snapshot'
 import React from 'react'
 import { asAny } from './type-helpers'
-/** @import { FieldSchema, Validate, NormalizedField, Field, InitialValue, Expand, Prettify, FieldInput } from './types.ts' */
+/** @import { Validate, NormalizedField, Field, InitialValue, FieldInput, State } from './types.ts' */
 
 let formCounter = 0 // This will stop working when we need a number greater than 9007199254740991
 function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
@@ -67,6 +67,11 @@ export function useForm({ initialValues = undefined, fields, validate = undefine
   }
 }
 
+/**
+ * @template {State.Readonly} T
+ * @arg {T} state
+ * @returns {T extends State.Readonly<infer X> ? X : never}
+ */
 function useFormFieldState(state) {
   const [formFieldState, setFormFieldState] = React.useState(state.get)
 
@@ -81,6 +86,10 @@ function useFormFieldState(state) {
   return formFieldState
 }
 
+/**
+ * @template {State.Readonly[]} const T
+ * @arg {[...T]} states
+ */
 function useFieldStates(states) {
   const [fieldStates, setFieldStates] = React.useState(getStates)
 
@@ -103,7 +112,18 @@ function useFieldStates(states) {
 
   return fieldStates
 
-  function getStates() { return states.map(x => x.get()) }
+  /**
+   * @template {[...unknown[]]} T
+   * @typedef {(
+   *   T extends [State.Readonly<infer X>, ...infer Rest]
+   *     ? [X, ...StatesToValues<Rest>]
+   *     : []
+   * )} StatesToValues
+   */
+
+  function getStates() {
+    return /** @type {StatesToValues<T>}*/ (states.map(x => x.get()))
+  }
 }
 
 export function useFormFieldSnapshot(field) {
@@ -117,14 +137,38 @@ export function useFormFieldSnapshot(field) {
   return useFormFieldState(state)
 }
 
+/**
+ * @template {Field} T
+ * @arg {T} field
+ * @returns {ReturnType<typeof useFormFieldState<T['value']>>}
+ */
 export function useFormFieldValue(field) {
   return useFormFieldState(field.value)
 }
 
+/**
+ * @template {Field[]} T
+ * @arg {[...T]} fields
+ */
 export function useFormFieldsValues(fields) {
-  return useFieldStates(fields.map(x => x.value))
+  /**
+   * @template {[...unknown[]]} T
+   * @typedef {(
+   *   T extends [infer X extends Field, ...infer Rest]
+   *     ? [X['value'], ...FieldsToValueStates<Rest>]
+   *     : []
+   * )} FieldsToValueStates
+   */
+
+  return /** @type {ReturnType<typeof useFieldStates<FieldsToValueStates<T>>>} */ (
+    useFieldStates(fields.map(x => x.value))
+  )
 }
 
+/**
+ * @template T
+ * @arg {Field.Basic<T>} field
+ */
 export function useFormField(field) {
   if (!field) throw new Error('No field was passed in')
   const { name, eventHandlers } = field
@@ -133,12 +177,16 @@ export function useFormField(field) {
   return { name, state, eventHandlers }
 }
 
+/**
+ * @arg {Field.Basic<number | string>} field
+ */
 export function useNumberFormField(field) {
   const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
   const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
 
   return { name, state, eventHandlers }
 
+  /** @arg {React.ChangeEvent<HTMLInputElement>} e */
   function handleChange(e) {
     const userValue = e.target.value
     const value = Number(userValue)
@@ -146,17 +194,23 @@ export function useNumberFormField(field) {
   }
 }
 
+/** @arg {Field.Basic<boolean>} field */
 export function useBooleanFormField(field) {
   const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
   const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
 
   return { name, state, eventHandlers }
 
+  /** @arg {React.ChangeEvent<HTMLInputElement>} e */
   function handleChange(e) {
     onChange(e.target.checked)
   }
 }
 
+/**
+ * @template {Field.ObjectFields} T
+ * @arg {Field.Array<T>} field
+ */
 export function useArrayFormField(field) {
   const { name, helpers } = field
   const state = useFormFieldState(field.state)
@@ -164,6 +218,10 @@ export function useArrayFormField(field) {
   return { name, state, helpers }
 }
 
+/**
+ * @template {Field.ObjectFields} T
+ * @arg {Field.Object<T>} field
+ */
 export function useObjectFormField(field) {
   const { name, fields } = field
   const state = useFormFieldState(field.state)
