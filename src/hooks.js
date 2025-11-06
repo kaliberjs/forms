@@ -4,7 +4,7 @@ import { normalize } from './normalize'
 import * as snapshot from './snapshot'
 import React from 'react'
 import { asAny } from './type-helpers'
-/** @import { Validate, NormalizedField, Field, InitialValue, FieldInput, State } from './types.ts' */
+/** @import { Validate, NormalizedField, Field, InitialValue, FieldInput, State, Snapshot, Expand } from './types.ts' */
 
 let formCounter = 0 // This will stop working when we need a number greater than 9007199254740991
 function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
@@ -126,9 +126,14 @@ function useFieldStates(states) {
   }
 }
 
+/**
+ * @template {Field} T
+ * @arg {T} field
+ * @returns {Expand<Snapshot.FromField<T>>}
+ */
 export function useFormFieldSnapshot(field) {
   const state = React.useMemo(
-    () => ({
+    () => /** @satisfies {State.Readonly} */ ({
       get() { return snapshot.get(field) },
       subscribe(f) { return snapshot.subscribe(field, f) }
     }),

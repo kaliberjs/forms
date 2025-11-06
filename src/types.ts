@@ -140,13 +140,13 @@ export namespace NormalizedField {
 
   export type Object<T extends FieldSchema.ObjectFields = FieldSchema.ObjectFields> = {
     type: 'object',
-    validate: null | ValidationFunction,
+    validate: null | ValidationFunction<FieldSchema.ObjectFieldsToValues<T>>,
     fields: T,
   }
 
   export type Array<T extends FieldSchema.ArrayFields = FieldSchema.ArrayFields> = {
     type: 'array',
-    validate: null | ValidationFunction,
+    validate: null | ValidationFunction<FieldSchema.ArrayFieldsToValues<T>>,
     fields: T,
   }
 }
@@ -200,8 +200,8 @@ export namespace Field {
   export type Basic<T = any> =
     BaseFieldProperties<'basic'> &
     {
-      value: State.Readonly<T>,
-      state: State.Readonly<State.Basic<T>>,
+      value: State.ReadonlyWithHistory<T>,
+      state: State.ReadonlyWithHistory<State.Basic<T>>,
       eventHandlers: {
         onBlur(): void,
         onFocus(): void,
@@ -219,7 +219,7 @@ export namespace Field {
     BaseFieldProperties<'object'> &
     {
       value: State.Readonly<ObjectValues<T>>,
-      state: State.Readonly<State.Object>,
+      state: State.ReadonlyWithHistory<State.Object>,
       fields: T,
     }
 
@@ -227,7 +227,7 @@ export namespace Field {
     BaseFieldProperties<'array'> &
     {
       value: State.Readonly<ObjectValues<T>[]>,
-      state: State.Readonly<State.Array<Object<T>>>,
+      state: State.ReadonlyWithHistory<State.Array<Object<T>>>,
       helpers: {
         add(initialValue: PartialWithStringKey<ObjectValues<T>>): void,
         remove(entry: Object<T>): void,
@@ -263,12 +263,55 @@ export namespace State {
 
   export type Readonly<T = any> = {
     get(): T,
-    subscribe(f: (newValue: T, oldValue?: T) => void): Unsubscribe,
+    subscribe(f: Subscription<T>): Unsubscribe,
   }
-  export type ReadWrite<T = any> = Readonly<T> & {
+  export type ReadonlyWithHistory<T = any> = {
+    get(): T,
+    subscribe(f: SubscriptionWithHistory<T>): Unsubscribe,
+  }
+  export type ReadWrite<T = any> = ReadonlyWithHistory<T> & {
     update(f: (oldValue: T) => T): T
   }
+  export type Subscription<T> = (newValue: T) => void
+  export type SubscriptionWithHistory<T> = (newValue: T, oldValue: T) => void
   export type Unsubscribe = () => void
+}
+
+export type Snapshot = Snapshot.Basic | Snapshot.Object | Snapshot.Array
+export namespace Snapshot {
+  export type FromField<T extends Field> =
+    T extends Field.Object<infer X> ? Object<X> :
+    T extends Field.Array<infer X> ? Array<X> :
+    T extends Field.Basic<infer X> ? Basic<X> :
+    never
+
+  export type Basic<T = any> =
+    Pick<State.Basic<T>, 'value' | 'invalid' | 'error'>
+
+  export type Object<T extends Field.ObjectFields = Field.ObjectFields> =
+    {
+      invalid: boolean,
+      value: MapToValues<T>,
+      error: {
+        self: Falsy | ValidationError,
+        children: MapToErrors<T>,
+      }
+    }
+  export type Array<T extends Field.ObjectFields = Field.ObjectFields> =
+    {
+      invalid: boolean,
+      value: MapToValues<T>[],
+      error: {
+        self: Falsy | ValidationError,
+        children: Object<T>['error'][],
+      }
+    }
+
+  export type MapToValues<T extends Field.ObjectFields> =
+    T extends any ? { [K in keyof T & string]: FromField<T[K]>['value'] } : never
+
+  export type MapToErrors<T extends Field.ObjectFields> =
+    T extends any ? { [K in keyof T & string]: FromField<T[K]>['error'] } : never
 }
 
 export type Falsy = false | '' | 0 | 0n | null | undefined | void

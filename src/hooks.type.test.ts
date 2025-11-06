@@ -1,8 +1,8 @@
-import { useForm, useFormFieldValue, useFormFieldsValues, useFormField, useNumberFormField, useBooleanFormField, useArrayFormField, useObjectFormField } from './hooks'
+import { useForm, useFormFieldValue, useFormFieldsValues, useFormField, useNumberFormField, useBooleanFormField, useArrayFormField, useObjectFormField, useFormFieldSnapshot } from './hooks'
 import { expectAssignable, expectNotAny, expectNotNever, Prepared } from './type.test.helpers.ts'
 import { optionalT } from './validation'
 import { object, array } from './schema'
-import { Field, State } from './types.ts'
+import { Field, Snapshot, State } from './types.ts'
 
 const { form } = useForm({
   fields: {
@@ -129,4 +129,26 @@ expectAssignable<
     }
   },
   Prepared<typeof arrayFormField>
+>
+
+const formFieldSnapshot = useFormFieldSnapshot(form)
+expectNotAny(formFieldSnapshot)
+expectNotNever(formFieldSnapshot)
+expectAssignable<
+  Snapshot.Object<{
+    a: Field.Basic<string>,
+    b: Field.Basic<number>,
+    c: Field.Basic<boolean>,
+    d: Field.Object<{
+      a: Field.Basic<string>,
+      b: Field.Basic<number>,
+      c: Field.Basic<boolean>,
+    }>,
+    e: Field.Array<{
+      a: Field.Basic<string>,
+      b: Field.Basic<number>,
+      c: Field.Basic<boolean>,
+    }>
+  }>,
+  Prepared<typeof formFieldSnapshot>
 >

@@ -2,7 +2,7 @@ import { normalize } from './normalize'
 import { createState, subscribeToAll, subscribeToChildren } from './state'
 import isEqual from 'react-fast-compare'
 
-/** @import { Falsy, Field, NormalizedField, PartialWithStringKey, State, Validate, ValidationError, ValidationFunction } from './types.ts' */
+/** @import { Falsy, Field, NormalizedField, PartialWithStringKey, State, Validate, ValidationContext, ValidationError, ValidationFunction } from './types.ts' */
 
 const constructors = {
   basic: createBasicFormField,
@@ -28,17 +28,17 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
 
-  /** @type {State.Readonly<{ [name: string]: any }>} */
-  const value = {
-    get() { return mapValues(fields, child => child.value.get()) },
+  const value = /** @satisfies {State.Readonly} */ ({
+    get() { return mapValues(fields, /** @arg {Field} child */ child => child.value.get()) },
     subscribe(f) {
       return subscribeToChildren({
         children,
+        /** @arg {unknown} _ */
         notify: _ => f(value.get()),
         subscribeToChild: (x, f) => x.value.subscribe(f),
       })
     },
-  }
+  })
 
   return /** @type {Field.FromNormalizedField<T>} */ ({
     type: 'object',
@@ -111,7 +111,7 @@ function createArrayFormField({ name = '', initialValue = [], field }) {
       return subscribeToAll({
         state: internalState,
         childrenFromState: x => x.children,
-        notify:_ => f(value.get()),
+        notify: _ => f(value.get()),
         subscribeToChild: (x, f) => x.value.subscribe(f),
         onlyNotifyOnChildChange: true,
       })
@@ -168,7 +168,7 @@ function createArrayFormField({ name = '', initialValue = [], field }) {
 
 /**
  * @arg {{
-*   name?: string,
+*   name: string,
 *   initialValue?: any,
 *   field: NormalizedField.Basic,
 * }} props
@@ -180,7 +180,7 @@ function createBasicFormField({ name, initialValue, field }) {
   const internalState = createState(initialFormFieldState)
   const validate = bindValidate(field.validate, internalState)
 
-  const value = {
+  const value = /** @satisfies {State.ReadonlyWithHistory} */ ({
     get() { return internalState.get().value },
     subscribe(f) {
       return internalState.subscribe(({ value: newValue }, { value: oldValue }) => {
@@ -188,7 +188,7 @@ function createBasicFormField({ name, initialValue, field }) {
         f(newValue, oldValue)
       })
     },
-  }
+  })
 
   return {
     type: 'basic',
@@ -250,7 +250,7 @@ function pick(o, properties) {
 }
 
 /**
- * @template {Record<string, any>} T
+ * @template {Record<string, any>} const T
  * @arg {{
  *   error?: Falsy | ValidationError,
  *   isSubmitted?: boolean,
@@ -294,13 +294,17 @@ function mapValues(o, f) {
 }
 
 /**
- * @template {{ error: Falsy | ValidationError }} T
+ * @template T
+ * @template {State.ReadWrite} S
  * @arg {null | ValidationFunction<T>} f
- * @arg {State.ReadWrite<T>} state
+ * @arg {S} state
  */
 function bindValidate(f, state) {
   return f && (
-    /** @arg {Parameters<ValidationFunction<T>>} args */
+    /**
+     * @arg {Parameters<ValidationFunction<T>>} args
+     * @returns {S extends State.ReadWrite<infer X> ? X : never}
+     */
     (...args) => {
       const error = (f && f(...args)) || false
       return state.update(x => isEqual(error, x.error) ? x : updateState(x, { error }))
@@ -308,6 +312,10 @@ function bindValidate(f, state) {
   )
 }
 
+/**
+ * @arg {ValidationContext} context
+ * @arg {any} parent
+ */
 function addParent(context, parent) {
   return { ...context, parents: [...context.parents, parent] }
 }

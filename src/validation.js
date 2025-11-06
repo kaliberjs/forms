@@ -1,3 +1,4 @@
+/** @import { ValidationFunction } from './types.ts' */
 /**
  * @overload
  * @arg {'number'} type
@@ -20,6 +21,30 @@
  */
 export function optionalT(type) {
   return null
+}
+
+/**
+ * @overload
+ * @arg {'number'} type
+ * @returns {ValidationFunction<number>}
+ *
+ * @overload
+ * @arg {`number | string`} type
+ * @returns {ValidationFunction<number | string>}
+ *
+ * @overload
+ * @arg {'boolean'} type
+ * @returns {ValidationFunction<boolean>}
+ *
+ * @overload
+ * @arg {'string'} type
+ * @returns {ValidationFunction<string>}
+ *
+ * @arg {string} type
+ * @returns {ValidationFunction<any>}
+ */
+export function requiredT(type) {
+  return required
 }
 
 export const optional = null
