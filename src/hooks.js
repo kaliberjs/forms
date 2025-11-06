@@ -4,22 +4,10 @@ import { normalize } from './normalize'
 import * as snapshot from './snapshot'
 import React from 'react'
 import { asAny } from './type-helpers'
-/** @import { Validate, NormalizedField, Field, InitialValue, FieldInput, State, Snapshot, Expand } from './types.ts' */
+/** @import { Validate, NormalizedField, Field, InitialValue, FieldInput, State, Snapshot, Expand, MapTuple } from './types.ts' */
 
 let formCounter = 0 // This will stop working when we need a number greater than 9007199254740991
 function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
-
-/**
- * @template {FieldInput.Object} T
- *
- * @typedef {(
- *   Field.FromNormalizedField<
- *    NormalizedField.FromFieldSchema<
- *      { type: 'object', fields: T }
- *    >
- *   >
- * )} ObjectFieldInputToObjectField
- */
 
 /**
  * @template {FieldInput.Object} const A
@@ -36,7 +24,7 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
  */
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
   const initialValuesRef = React.useRef(/** @type {InitialValue<A> | undefined} */ (asAny(null)))
-  const formRef = React.useRef(/** @type {ObjectFieldInputToObjectField<A>} */ (asAny(null)))
+  const formRef = React.useRef(/** @type {Field.ObjecFromObjectInput<A>} */ (asAny(null)))
 
   if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues
@@ -87,8 +75,8 @@ function useFormFieldState(state) {
 }
 
 /**
- * @template {State.Readonly[]} const T
- * @arg {[...T]} states
+ * @template {[...State.Readonly[]]} const T
+ * @arg {T} states
  */
 function useFieldStates(states) {
   const [fieldStates, setFieldStates] = React.useState(getStates)
@@ -107,22 +95,13 @@ function useFieldStates(states) {
         () => {}
       )
     },
-    states // explanation below
+    states // explanation below on why we supply the array directly
   )
 
   return fieldStates
 
-  /**
-   * @template {[...unknown[]]} T
-   * @typedef {(
-   *   T extends [State.Readonly<infer X>, ...infer Rest]
-   *     ? [X, ...StatesToValues<Rest>]
-   *     : []
-   * )} StatesToValues
-   */
-
   function getStates() {
-    return /** @type {StatesToValues<T>}*/ (states.map(x => x.get()))
+    return /** @type {State.StateTupleToValueTuple<T>}*/ (states.map(x => x.get()))
   }
 }
 
@@ -152,22 +131,11 @@ export function useFormFieldValue(field) {
 }
 
 /**
- * @template {Field[]} T
- * @arg {[...T]} fields
+ * @template {[...Field[]]} const T
+ * @arg {T} fields
  */
 export function useFormFieldsValues(fields) {
-  /**
-   * @template {[...unknown[]]} T
-   * @typedef {(
-   *   T extends [infer X extends Field, ...infer Rest]
-   *     ? [X['value'], ...FieldsToValueStates<Rest>]
-   *     : []
-   * )} FieldsToValueStates
-   */
-
-  return /** @type {ReturnType<typeof useFieldStates<FieldsToValueStates<T>>>} */ (
-    useFieldStates(fields.map(x => x.value))
-  )
+  return useFieldStates(/** @type {MapTuple<T, 'value'>} */ (fields.map(x => x.value)))
 }
 
 /**

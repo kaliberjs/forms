@@ -2,7 +2,7 @@
 
 /**
  * @template T
- * @param {T} initialState
+ * @arg {T} initialState
  * @returns {State.ReadWrite<T>}
  */
 export function createState(initialState) {
@@ -38,6 +38,7 @@ export function createState(initialState) {
  *   subscribeToChild: (child: R, notify: State.Subscription<S>) => State.Unsubscribe,
  *   onlyNotifyOnChildChange?: boolean,
  * }} props
+ * @returns {State.Unsubscribe}
  */
 export function subscribeToAll({
   state,
@@ -73,6 +74,7 @@ export function subscribeToAll({
 *   notify: N,
 *   subscribeToChild: (child: R, notify: N) => State.Unsubscribe,
 * }} props
+* @returns {State.Unsubscribe}
 */
 export function subscribeToChildren({ children, notify, subscribeToChild }) {
   return children.reduce(

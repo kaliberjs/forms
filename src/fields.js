@@ -1,7 +1,6 @@
 import { normalize } from './normalize'
 import { createState, subscribeToAll, subscribeToChildren } from './state'
 import isEqual from 'react-fast-compare'
-
 /** @import { Falsy, Field, NormalizedField, PartialWithStringKey, State, Validate, ValidationContext, ValidationError, ValidationFunction } from './types.ts' */
 
 const constructors = {
@@ -65,7 +64,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   /**
    * @arg {any} initialValues
-   * @arg {NormalizedField.Object['fields']} fields
+   * @arg {T['fields']} fields
    * @arg {string} namePrefix
    */
   function createFormFields(initialValues, fields, namePrefix = '') {
@@ -75,7 +74,7 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
       const constructor = constructors[normalizedField.type]
       return constructor({
         name: fullName,
-        // @ts-expect-error
+        // @ts-expect-error - If you know how to fix this, please let me know
         field: normalizedField,
         initialValue: initialValues[name]
       })
@@ -161,19 +160,19 @@ function createArrayFormField({ name = '', initialValue = [], field }) {
     return createObjectFormField({
       name: fullName,
       initialValue,
-      field: /** @type {NormalizedField.Object} */ (normalize({ type: 'object', fields }, fullName)),
+      field: normalize({ type: 'object', fields }, fullName),
     })
   }
 }
 
 /**
  * @arg {{
-*   name: string,
-*   initialValue?: any,
-*   field: NormalizedField.Basic,
-* }} props
-* @returns {Field.Basic}
-*/
+ *   name: string,
+ *   initialValue?: any,
+ *   field: NormalizedField.Basic,
+ * }} props
+ * @returns {Field.Basic}
+ */
 function createBasicFormField({ name, initialValue, field }) {
 
   const initialFormFieldState = deriveFormFieldState({ value: initialValue })
@@ -277,8 +276,8 @@ function deriveFormFieldState({
 }
 
 /**
- * @template {{ [key: string | number | symbol]: any }} O
- * @template {(v: O[keyof O], k: keyof O, o: O) => any} F
+ * @template {{ [key: string]: any }} O
+ * @template {(v: O[keyof O], k: keyof O & string, o: O) => any} F
  *
  * @param {O} o
  * @param {F} f

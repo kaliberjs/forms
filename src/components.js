@@ -23,7 +23,7 @@ export function FormFieldValue({ field, render }) {
  */
 export function FormFieldsValues({ fields, render }) {
   const values = useFormFieldsValues(fields)
-  return valueOrNull(render(/** @type {any} */ (values)))
+  return valueOrNull(render(values))
 }
 
 /**

@@ -109,8 +109,6 @@ const inputB = asConst({ type: validate<'b'>, b: object(simpleObjectInput) })
 type HeterogeneousInitialValues = InitialValue<typeof inputA | typeof inputB>
 
 {
-  const inputA = asConst({ type: validate<'a'>, a: object(simpleObjectInput) })
-  const inputB = asConst({ type: validate<'b'>, b: object(simpleObjectInput) })
   type InitialValues = InitialValue<typeof inputA | typeof inputB>
 
   const heterogeneousArraySchema = array(

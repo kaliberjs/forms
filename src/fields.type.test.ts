@@ -1,10 +1,10 @@
-import { email, number, optional, required } from './validation'
-import { normalize } from './normalize'
-import { object, array } from './schema'
-import { asConst } from './type-helpers'
 import { createObjectFormField } from './fields'
+import { normalize } from './normalize'
+import { array, object } from './schema'
+import { asConst } from './type-helpers'
 import { expectAssignable, expectNotAny, expectNotNever, Prepared } from './type.test.helpers.ts'
 import { Field, State, ValidationContext } from './types.ts'
+import { email, number, optional, required } from './validation'
 
 const simpleObjectInput = asConst({
   noValidation: optional,

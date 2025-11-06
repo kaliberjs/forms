@@ -1,6 +1,4 @@
-import { unsubscribe } from 'diagnostics_channel'
 import { subscribeToAll, subscribeToChildren } from './state'
-import { asAny, asConst } from './type-helpers'
 /** @import { State, Expand, Falsy, Field, Snapshot, ValidationError } from './types.ts' */
 
 /**
@@ -58,21 +56,14 @@ function getForObject(field) {
         childValues: { ...childValues, [name]: value },
       }
     },
-    /**
-     * @type {{
-     *   childrenInvalid: boolean,
-     *   childErrors: { [K in keyof T['fields']]: Falsy | ValidationError }
-     *   childValues: { [K in keyof T['fields']]: any }
-     * }}
-     */
-    ({ childrenInvalid: false, childErrors: {}, childValues: {} })
+    { childrenInvalid: false, childErrors: {}, childValues: {} }
   )
 
-  return asAny(/** @satisfies {Snapshot.Object} */ ({
+  return /** @type {Snapshot.FromField<T>} */ ({
     invalid: invalid || childrenInvalid,
     value: childValues,
     error: { self: error, children: childErrors },
-  }))
+  })
 }
 
 /**
@@ -91,20 +82,13 @@ function getForArray(field) {
         childErrors: [...childErrors, error],
       }
     },
-    /**
-     * @type {{
-    *   childrenInvalid: boolean
-    *   childValues: Snapshot.Object['value'][]
-    *   childErrors: Snapshot.Object['error'][]
-    * }}
-    */
-    ({ childrenInvalid: false, childValues: [], childErrors: [] })
+    { childrenInvalid: false, childValues: [], childErrors: [] }
   )
-  return asAny(/** @satisfies {Snapshot.Array} */ ({
+  return /** @type {Snapshot.FromField<T>} */ ({
     invalid: invalid || childrenInvalid,
     value: childValues,
     error: { self: error, children: childErrors },
-  }))
+  })
 }
 
 /**
@@ -114,7 +98,7 @@ function getForArray(field) {
  */
 function getForBasic(field) {
   const { value, error, invalid } = field.state.get()
-  return asAny(/** @satisfies {Snapshot.Basic} */ ({ value, error, invalid }))
+  return /** @type {Snapshot.FromField<T>} */ ({ value, error, invalid })
 }
 
 /**
