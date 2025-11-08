@@ -24,7 +24,7 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
  */
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
   const initialValuesRef = React.useRef(/** @type {InitialValue<A> | undefined} */ (asAny(null)))
-  const formRef = React.useRef(/** @type {Field.ObjecFromObjectInput<A>} */ (asAny(null)))
+  const formRef = React.useRef(/** @type {Field.ObjectFromObjectInput<A>} */ (asAny(null)))
 
   if (!isEqual(initialValuesRef.current, initialValues)) {
     initialValuesRef.current = initialValues

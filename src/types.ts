@@ -171,7 +171,7 @@ export namespace Field {
   export type ObjectFieldsToValues<T extends ObjectFields> =
     T extends any ? { [K in keyof T & string]: ToValue<T[K]> } : never
 
-  export type ObjecFromObjectInput<T extends FieldInput.Object> =
+  export type ObjectFromObjectInput<T extends FieldInput.Object> =
     FromNormalizedField<NormalizedField.FromFieldSchema<FieldSchema.Object<T>>>
 
   export type FromNormalizedField<T extends NormalizedField> =
