@@ -256,6 +256,7 @@ function pick(o, properties) {
  *   isVisited?: boolean,
  *   hasFocus?: boolean,
  * } & T} state
+ * @return {T & State.Common}
  */
 function deriveFormFieldState({
   error = false,
@@ -264,7 +265,7 @@ function deriveFormFieldState({
   hasFocus = false,
   ...rest
 }) {
-  return {
+  return /** @type {T & State.Common} */ ({
     ...rest,
     error,
     isSubmitted,
@@ -272,7 +273,7 @@ function deriveFormFieldState({
     hasFocus,
     invalid: !!error,
     showError: !!error && !hasFocus && (isVisited || isSubmitted)
-  }
+  })
 }
 
 /**

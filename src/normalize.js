@@ -1,4 +1,4 @@
-/** @import { FieldSchema, NormalizedField, Validate, ValidationFunction } from './types.ts' */
+/** @import { FieldSchema, NormalizedField, Validate, ValidationContext, ValidationFunction } from './types.ts' */
 
 /**
  * @template {FieldSchema} T
@@ -77,8 +77,8 @@ function toValidationFunction(fOrArrayOfF, name) {
       /** @arg {null | ValidationFunction} previous */
       (previous, next) => {
         const combined = previous && next && (
-          /** @arg {[any, ...any]} args */
-          (...args) => previous(...args) || next(...args)
+          /** @arg {any} value @arg {ValidationContext} context */
+          (value, context) => previous(value, context) || next(value, context)
         )
         return combined || next || previous
       },

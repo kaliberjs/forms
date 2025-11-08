@@ -9,8 +9,17 @@ export type Expand<T> =
  * Typescript will (sometimes) forget the keys are strings when using `keyof T`, so this is
  * Partial for keys that we need to be strings.
  */
-export type PartialWithStringKey<T extends { [key: string]: any}> =
-  { [P in keyof T & string]?: T[P] }
+  export type PartialWithStringKey<T extends { [key: string]: any}> =
+  {
+    [K in keyof T & string]?:
+      T[K] extends (infer U)[] ? (
+        U extends object ? PartialWithStringKey<U>[] : T[K]
+      ) :
+      T[K] extends object ? (
+        PartialWithStringKey<T[K]>
+      ) :
+      T[K]
+  }
 
 export type Falsy = false | '' | 0 | 0n | null | undefined | void
 
@@ -25,13 +34,16 @@ export type Validate<T = any> =
   ValidationFunction<T> |
   readonly ValidationFunction<T>[] |
   null
-export type ValidationFunction<T = any> = (value: T, context?: ValidationContext) => ValidationResult
+export type ValidationFunction<T = any> = (value: T, context: ValidationContext) => ValidationResult
 export type ValidationResult = Falsy | ValidationError
 export type ValidationError = { id: string, params?: any[] }
 export type ValidationContext = { form: any, parents: Field.Object[] }
 
 export type InitialValue<T extends FieldInput.Object> =
-  PartialWithStringKey<FieldInput.ObjectToValue<T>>
+  PartialWithStringKey<NormalizedField.ToValue<NormalizedInitialValue<T>>>
+
+export type NormalizedInitialValue<T extends FieldInput.Object> =
+  NormalizedField.FromFieldSchema<FieldSchema.Object<T>>
 
 export namespace FieldInput {
 
@@ -221,7 +233,7 @@ export namespace Field {
   export type Object<T extends ObjectFields = ObjectFields> =
     BaseFieldProperties<'object'> &
     {
-      value: State.Readonly<ObjectValues<T>>,
+      value: State.Readonly<ObjectFieldsToValues<T>>,
       state: State.ReadonlyWithHistory<State.Object>,
       fields: T,
     }
@@ -229,29 +241,35 @@ export namespace Field {
   export type Array<T extends ObjectFields = ObjectFields> =
     BaseFieldProperties<'array'> &
     {
-      value: State.Readonly<ObjectValues<T>[]>,
+      value: State.Readonly<ObjectFieldsToValues<T>[]>,
       state: State.ReadonlyWithHistory<State.Array<Object<T>>>,
       helpers: {
-        add(initialValue: PartialWithStringKey<ObjectValues<T>>): void,
+        add(initialValue: PartialWithStringKey<ObjectFieldsToValues<T>>): void,
         remove(entry: Object<T>): void,
       }
     }
 
   export type ObjectFields = { [name: string]: Field }
-
-  export type ObjectValues<T extends ObjectFields> =
-    T extends any ? { [K in keyof T & string]: ToValue<T[K]> } : never
 }
 
 export type State = State.Basic | State.Object | State.Array
 
 export namespace State {
   export type Common = {
-    error: Falsy | ValidationError,
     isSubmitted: boolean,
     isVisited: boolean,
     hasFocus: boolean,
-    invalid: boolean,
+  } & (Valid | Invalid)
+
+  export type Valid = {
+    error: Falsy,
+    invalid: false,
+    showError: false,
+  }
+
+  export type Invalid = {
+    error: ValidationError,
+    invalid: true,
     showError: boolean,
   }
 
@@ -294,6 +312,9 @@ export namespace Snapshot {
     T extends Field.Array<infer X> ? Array<X> :
     T extends Field.Basic<infer X> ? Basic<X> :
     never
+
+  export type FromObjectFields<T extends FieldSchema.ObjectFields> =
+    Snapshot.Object<Field.ObjectFieldsToFields<T>>
 
   export type Basic<T = any> =
     Pick<State.Basic<T>, 'value' | 'invalid' | 'error'>

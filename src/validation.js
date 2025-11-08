@@ -24,6 +24,8 @@ export function optionalT(type) {
 }
 
 /**
+ * @template {string} const T
+ *
  * @overload
  * @arg {'number'} type
  * @returns {ValidationFunction<number>}
@@ -39,6 +41,10 @@ export function optionalT(type) {
  * @overload
  * @arg {'string'} type
  * @returns {ValidationFunction<string>}
+ *
+ * @overload
+ * @arg {T} type
+ * @returns {ValidationFunction<T>}
  *
  * @arg {string} type
  * @returns {ValidationFunction<any>}

@@ -10,6 +10,8 @@
     "preserveSymlinks": true,
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     "lib": ["dom", "esnext"],
     "jsx": "react",
     "baseUrl": ".",

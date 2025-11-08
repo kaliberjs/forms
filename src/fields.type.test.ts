@@ -3,7 +3,7 @@ import { normalize } from './normalize'
 import { array, object } from './schema'
 import { asConst } from './type-helpers'
 import { expectAssignable, expectNotAny, expectNotNever, Prepared } from './type.test.helpers.ts'
-import { Field, State, ValidationContext } from './types.ts'
+import { Field, PartialWithStringKey, State, ValidationContext } from './types.ts'
 import { email, number, optional, required } from './validation'
 
 const simpleObjectInput = asConst({
@@ -50,7 +50,7 @@ type ObjectFieldType<Fields, Value> = {
   fields: Fields
 }
 
-type ArrayFieldType<Field, Value> = {
+type ArrayFieldType<Field, Value extends Array<any>> = {
   type: 'array',
   name: string,
   validate(context: ValidationContext): void,
@@ -59,7 +59,7 @@ type ArrayFieldType<Field, Value> = {
   value: State.Readonly<Value>,
   state: State.Readonly<State.Array<Field>>,
   helpers: {
-    add(initialValue: Partial<Value extends Array<infer X> ? X : never>): void,
+    add(initialValue: PartialWithStringKey<Value extends Array<infer X> ? X : never>): void,
     remove(entry: Field): void,
   }
 }

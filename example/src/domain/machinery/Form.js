@@ -1,5 +1,7 @@
 import { useFormFieldSnapshot, useFormField, useNumberFormField, useBooleanFormField, useArrayFormField, useObjectFormField } from '@kaliber/forms'
 import { Code } from './Code'
+import React from 'react'
+/** @import { Field, InitialValue, PartialWithStringKey } from '@kaliber/forms/types' */
 
 export function FormValues({ form }) {
   const formState = useFormFieldSnapshot(form)
@@ -73,6 +75,15 @@ export function FormCheckboxGroupField({ field, options, label }) {
   }
 }
 
+/**
+ * @template {Field.ObjectFields} T
+ * @template {React.ReactNode} R
+ * @arg {{
+ *   field: Field.Array<T>,
+ *   render: (props: { name: string, fields: T }) => R,
+ *   initialValue: PartialWithStringKey<Field.ObjectFieldsToValues<T>>
+ * }} props
+ */
 export function FormArrayField({ field, render, initialValue }) {
   const { name, state: { children, error, showError }, helpers } = useArrayFormField(field)
 
@@ -95,6 +106,15 @@ export function FormArrayField({ field, render, initialValue }) {
   )
 }
 
+/**
+ * @template {Field.ObjectFields} T
+ * @template {React.ReactNode} R
+ * @arg {{
+*   field: Field.Array<T>,
+*   render: (props: { name: string, fields: T, value: Field.ObjectFieldsToValues<T> }) => R,
+*   types: { name: string, initialValue: PartialWithStringKey<Field.ObjectFieldsToValues<T>> }[]
+* }} props
+*/
 export function FormHeterogeneousArrayField({ field, render, types }) {
   const { name, state: { children, error, showError }, helpers } = useArrayFormField(field)
 
@@ -120,6 +140,11 @@ export function FormHeterogeneousArrayField({ field, render, types }) {
   )
 }
 
+/**
+ * @template {Field.ObjectFields} T
+ * @template {React.ReactNode} R
+ * @arg {{ field: Field.Object<T>, render: (props: { fields: T }) => R }} props
+ */
 export function FormObjectField({ field, render }) {
   const { name, state: { error, showError }, fields } = useObjectFormField(field)
 

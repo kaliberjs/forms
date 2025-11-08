@@ -2,6 +2,7 @@
   "include": [
     "./components.js",
     "./index.js",
+    "./types.ts",
     "./validation.js",
     "./types/**/*",
     "./src/**/*",
