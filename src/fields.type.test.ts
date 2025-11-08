@@ -111,20 +111,20 @@ type ArrayFieldType<Field, Value> = {
   expectNotNever(objectWithSubFields)
   expectAssignable<
     ObjectFieldType<
-    {
-      object: ObjectFieldType<
-        SimpleObjectFieldsType,
-        SimpleObjectValueType
-      >,
-      array: ArrayFieldType<
-        ObjectFieldType<
+      {
+        object: ObjectFieldType<
           SimpleObjectFieldsType,
           SimpleObjectValueType
         >,
-        SimpleObjectValueType[]
-      >,
-    },
-    { object: SimpleObjectValueType }
+        array: ArrayFieldType<
+          ObjectFieldType<
+            SimpleObjectFieldsType,
+            SimpleObjectValueType
+          >,
+          SimpleObjectValueType[]
+        >,
+      },
+      { object: SimpleObjectValueType, array: SimpleObjectValueType[] }
     >,
     Prepared<typeof objectWithSubFields>
   >
