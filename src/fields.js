@@ -71,8 +71,8 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     return mapValues(fields, (field, name) => {
       const fullName = `${namePrefix}${name}`
       const normalizedField = normalize(field, fullName)
-      const constructor = constructors[normalizedField.type]
-      return constructor({
+      const createFormField = constructors[normalizedField.type]
+      return createFormField({
         name: fullName,
         // @ts-expect-error - If you know how to fix this, please let me know
         field: normalizedField,
