@@ -12,11 +12,11 @@ import React from 'react'
  */
 
 const fields = {
-  naam: optional,
+  naam: optionalT('string'),
   email: [required, email],
   geboortedatum: [required, date],
-  kortingscode: optional,
-  betaalNu: required,
+  kortingscode: optionalT('string'),
+  betaalNu: requiredT('boolean'),
   betaalInfo: object(
     // custom validation
     x => x.andereNaam && !x.rekeninghouder && error('rekeninghouderIsVerplicht'),
@@ -35,12 +35,12 @@ const fields = {
       email: [ifParentHasValue(x => !x.anoniem, required), ifParentHasValue(x => !x.anoniem, email)],
     })
   ),
-  gevondenVia: [required, minLength(1)],
+  gevondenVia: [requiredT('string[]'), minLength(1)],
   specialeToevoeging: array(
     /** @arg {{ type: string }} x */
     x =>
-      x.type === 'rood' ? asConst({ type: requiredT('rood'), roodInfo: required }) :
-      x.type === 'groen' ? asConst({ type: requiredT('groen'), groenInfo: required }) :
+      x.type === 'rood' ? asConst({ type: requiredT('rood'), roodInfo: requiredT('string') }) :
+      x.type === 'groen' ? asConst({ type: requiredT('groen'), groenInfo: requiredT('string') }) :
       throwError('Only `rood` and `groen` are acceptable types')
   ),
   voorwaarden: [required, /** @arg {boolean} x */ x => !x && error('voorwaardenVerplicht')],

@@ -1,20 +1,23 @@
 /** @import { ValidationFunction } from './types.ts' */
+
 /**
- * @overload
- * @arg {'number'} type
- * @returns {((x: number) => never)}
+ * @template {string} T
+ * @typedef {(
+ *   T extends 'string' ? string :
+ *   T extends 'number' ? number :
+ *   T extends 'number | string' ? number | string :
+ *   T extends 'boolean' ? boolean :
+ *   T extends `${infer X}[]` ? TypeLookup<X>[] :
+ *   T
+ * )} TypeLookup
+ */
+
+/**
+ * @template {string} const T
  *
  * @overload
- * @arg {`number | string`} type
- * @returns {((x: number | string) => never)}
- *
- * @overload
- * @arg {'boolean'} type
- * @returns {((x: boolean) => never)}
- *
- * @overload
- * @arg {'string'} type
- * @returns {((x: string) => never)}
+ * @arg {T} type
+ * @returns {((x: TypeLookup<T>) => never)}
  *
  * @arg {any} type
  * @returns {null | ((x: any) => never)}
@@ -26,28 +29,8 @@ export function optionalT(type) {
 /**
  * @template {string} const T
  *
- * @overload
- * @arg {'number'} type
- * @returns {ValidationFunction<number>}
- *
- * @overload
- * @arg {`number | string`} type
- * @returns {ValidationFunction<number | string>}
- *
- * @overload
- * @arg {'boolean'} type
- * @returns {ValidationFunction<boolean>}
- *
- * @overload
- * @arg {'string'} type
- * @returns {ValidationFunction<string>}
- *
- * @overload
  * @arg {T} type
- * @returns {ValidationFunction<T>}
- *
- * @arg {string} type
- * @returns {ValidationFunction<any>}
+ * @returns {ValidationFunction<TypeLookup<T>>}
  */
 export function requiredT(type) {
   return required
