@@ -1,10 +1,9 @@
 import { object, array, useForm, useFormFieldValue, snapshot } from '@kaliber/forms'
-import { optional, required, minLength, error, email, optionalT, requiredT } from '@kaliber/forms/validation'
+import { required, minLength, error, email, optionalT, requiredT } from '@kaliber/forms/validation'
 import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
 import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField, FormHeterogeneousArrayField, FormCheckboxGroupField } from './machinery/Form'
 import { Code } from './machinery/Code'
-import React from 'react'
 /** @import { Field, Snapshot } from '@kaliber/forms/types' */
 
 /**

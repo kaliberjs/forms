@@ -1,11 +1,13 @@
 {
   "typeAcquisition": {
-    "enable": true
+    "enable": true,
+    "exclude": ["@kaliber/forms"]
   },
-  "include": ["./src/**/*", "./types/**/*", "./node_modules/@kaliber/**/*", "./config/**/*"],
-  "exclude": ["./node_modules/**/*", "./node_modules/@kaliber/build/**/*"],
+  "include": ["./src/**/*", "./types/**/*", "./config/**/*"],
+  "exclude": ["./node_modules/**/*"],
   "compilerOptions": {
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "target": "ESNext",
     "resolveJsonModule": true,
     "preserveSymlinks": true,
@@ -23,6 +25,7 @@
     "paths": {
       "/*?universal": ["src/*"],
       "/*": ["src/*"]
-    }
+    },
+    "maxNodeModuleJsDepth": 10
   }
 }
