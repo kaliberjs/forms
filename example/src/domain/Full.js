@@ -55,7 +55,8 @@ const gevondenViaOptions = [
 ]
 
 export function Full() {
-  const [submitted, setSubmitted] = React.useState(/** @type {boolean | null} */ (null))
+  const [submitted, setSubmitted] = React.useState(
+    /** @type {Snapshot.FromField<FormType>['value'] | null} */ (null))
   const { form, submit, reset } = useForm({
     initialValues: { betaalNu: false, betaalInfo: { andereNaam: false } },
     fields,
@@ -78,10 +79,10 @@ export function Full() {
     </>
   )
 
-  /** @arg {Snapshot.FromObjectFields<typeof fields>} snapshot */
+  /** @arg {Snapshot.FromField<FormType>} snapshot */
   function handleSubmit(snapshot) {
     if (snapshot.invalid) return
-    setSubmitted(Boolean(snapshot.value))
+    setSubmitted(snapshot.value)
   }
 
   function handleReset() {
@@ -165,7 +166,7 @@ function Formulier({ form, onSubmit }) {
   )
 }
 
-/** @arg {{ submitted: boolean, onReset: () => void }} props */
+/** @arg {{ submitted: Snapshot.FromField<FormType>['value'], onReset: () => void }} props */
 function Bedankt({ submitted, onReset }) {
   return (
     <>
