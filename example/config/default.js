@@ -7,8 +7,9 @@ module.exports = {
     includeInServerCompilation: [
       /^@kaliber\/forms/
     ],
+    /** @arg {Error} e */
     reportError(e) {
-      console.error(es)
+      console.error(e)
     }
   }
 }

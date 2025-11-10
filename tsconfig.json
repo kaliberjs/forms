@@ -5,8 +5,7 @@
     "./types.ts",
     "./validation.js",
     "./types/**/*",
-    "./src/**/*",
-    "./typescript/**/*",
+    "./src/**/*"
   ],
   "compilerOptions": {
     "module": "node16",
@@ -22,7 +21,7 @@
     "strictNullChecks": true,
     "allowImportingTsExtensions": true,
     "paths": {
-      "*": ["./typescript/*"]
+      "*": ["./typescript/node_modules/@types/*", "./typescript/node_modules/*", "*"]
     }
   }
 }
