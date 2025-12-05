@@ -7,18 +7,18 @@ export function FormValues({ form }) {
 }
 
 export function FormTextInput({ field, label }) {
-  const { name, state, eventHandlers } = useFormField(field)
-  return <InputBase type='text' {...{ name, label, state, eventHandlers }} />
+  const { name, state, eventHandlers, ref } = useFormField(field)
+  return <InputBase type='text' {...{ name, label, state, eventHandlers, ref }} />
 }
 
 export function FormNumberInput({ field, label }) {
-  const { name, state, eventHandlers } = useNumberFormField(field)
+  const { name, state, eventHandlers, ref } = useNumberFormField(field)
   // We use type='text' to show `number` validation
-  return <InputBase type='text' {...{ name, label, state, eventHandlers }} />
+  return <InputBase type='text' {...{ name, label, state, eventHandlers, ref }} />
 }
 
 export function FormCheckbox({ field, label }) {
-  const { name, state, eventHandlers } = useBooleanFormField(field)
+  const { name, state, eventHandlers, ref } = useBooleanFormField(field)
   const { value } = state
   console.log(`[${name}] render checkbox field`)
   return (
@@ -27,7 +27,7 @@ export function FormCheckbox({ field, label }) {
         id={name}
         type='checkbox'
         checked={value || false}
-        {...{ name }}
+        {...{ ref, name }}
         {...eventHandlers}
       />
     </LabelAndError>
@@ -133,7 +133,7 @@ export function FormObjectField({ field, render }) {
   )
 }
 
-function InputBase({ type, name, label, state, eventHandlers }) {
+function InputBase({ type, name, label, state, eventHandlers, ref }) {
   const { value } = state
   console.log(`[${name}] render ${type} field`)
   return (
@@ -141,7 +141,7 @@ function InputBase({ type, name, label, state, eventHandlers }) {
       <input
         id={name}
         value={value === undefined ? '' : value}
-        {...{ name, type }}
+        {...{ ref, name, type }}
         {...eventHandlers}
       />
     </LabelAndError>

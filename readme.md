@@ -198,7 +198,7 @@ const {
 |`- onBlur`      | Handler for `onBlur` events|
 |`- onFocus`     | Handler for `onFocus` events|
 |`- onChange`    | handler for `onChange` events, accepts DOM event or value|
-|`ref`           | A ref object `{ current: null }` that should be passed to the form field element to support `focusFirstError` (when used)|
+|`ref`           | A ref object `{ current: null }` that should be passed to the form field element to support `focusFirstError` (when used). Note that this is only available for basic fields. Objects and arrays do not have a ref, as `focusFirstError` will traverse them to find the first invalid basic field.|
 
 #### useNumberFormField
 

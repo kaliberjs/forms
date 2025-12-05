@@ -106,10 +106,10 @@ export function useFormField(field) {
 }
 
 export function useNumberFormField(field) {
-  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
+  const { name, state, eventHandlers: { onChange, ...originalEventHandlers }, ref } = useFormField(field)
   const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
 
-  return { name, state, eventHandlers }
+  return { name, state, eventHandlers, ref }
 
   function handleChange(e) {
     const userValue = e.target.value
@@ -119,10 +119,10 @@ export function useNumberFormField(field) {
 }
 
 export function useBooleanFormField(field) {
-  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
+  const { name, state, eventHandlers: { onChange, ...originalEventHandlers }, ref } = useFormField(field)
   const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
 
-  return { name, state, eventHandlers }
+  return { name, state, eventHandlers, ref }
 
   function handleChange(e) {
     onChange(e.target.checked)
