@@ -110,9 +110,9 @@ _See the example for use cases_
   - [FormFieldValue](#FormFieldValue)
   - [FormFieldsValues](#FormFieldsValues)
   - [FormFieldValid](#FormFieldValid)
-  - [FormErrorRegion](#FormErrorRegion)
+  - [FormErrorRegion](#formerrorregion)
 - [Accessibility](#accessibility)
-  - [focusFirstError](#focusFirstError)
+  - [focusFirstError](#focusfirsterror)
 
 
 ### Hooks

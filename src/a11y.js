@@ -25,7 +25,7 @@ export function focusFirstError(form) {
   const sortedFields = errorFields.sort(byDomOrder)
   const firstErrorField = getFirstItem(sortedFields)
 
-  firstErrorField?.ref.current.focus()
+  firstErrorField?.ref.current?.focus()
 }
 
 function findAllErrorFields(field) {

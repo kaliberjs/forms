@@ -7,27 +7,28 @@ export function FormValues({ form }) {
 }
 
 export function FormTextInput({ field, label }) {
-  const { name, state, eventHandlers, ref } = useFormField(field)
-  return <InputBase type='text' {...{ name, label, state, eventHandlers, ref }} />
+  const { name, state, eventHandlers, ref: inputRef } = useFormField(field)
+  return <InputBase type='text' {...{ name, label, state, eventHandlers, inputRef }} />
 }
 
 export function FormNumberInput({ field, label }) {
-  const { name, state, eventHandlers, ref } = useNumberFormField(field)
+  const { name, state, eventHandlers, ref: inputRef } = useNumberFormField(field)
   // We use type='text' to show `number` validation
-  return <InputBase type='text' {...{ name, label, state, eventHandlers, ref }} />
+  return <InputBase type='text' {...{ name, label, state, eventHandlers, inputRef }} />
 }
 
 export function FormCheckbox({ field, label }) {
-  const { name, state, eventHandlers, ref } = useBooleanFormField(field)
+  const { name, state, eventHandlers, ref: inputRef } = useBooleanFormField(field)
   const { value } = state
   console.log(`[${name}] render checkbox field`)
   return (
     <LabelAndError {...{ name, label, state }}>
       <input
         id={name}
+        ref={inputRef}
         type='checkbox'
         checked={value || false}
-        {...{ ref, name }}
+        {...{ name }}
         {...eventHandlers}
       />
     </LabelAndError>
@@ -35,7 +36,7 @@ export function FormCheckbox({ field, label }) {
 }
 
 export function FormCheckboxGroupField({ field, options, label }) {
-  const { name, state, eventHandlers: { onChange, ...eventHandlers } } = useFormField(field)
+  const { name, state, eventHandlers: { onChange, ...eventHandlers }, ref: inputRef } = useFormField(field)
   const { value } = state
 
   console.log(`[${name}] render checkbox group field`)
@@ -49,6 +50,7 @@ export function FormCheckboxGroupField({ field, options, label }) {
             <label htmlFor={id}>{option.label}</label>
             <input
               type='checkbox'
+              ref={inputRef}
               value={option.value}
               checked={Array.isArray(value) && value.includes(option.value)}
               onChange={handleChangeFor(option.value)}
@@ -133,15 +135,16 @@ export function FormObjectField({ field, render }) {
   )
 }
 
-function InputBase({ type, name, label, state, eventHandlers, ref }) {
+function InputBase({ type, name, label, state, eventHandlers, inputRef }) {
   const { value } = state
   console.log(`[${name}] render ${type} field`)
   return (
     <LabelAndError {...{ name, label, state }}>
       <input
         id={name}
+        ref={inputRef}
         value={value === undefined ? '' : value}
-        {...{ ref, name, type }}
+        {...{ name, type }}
         {...eventHandlers}
       />
     </LabelAndError>
