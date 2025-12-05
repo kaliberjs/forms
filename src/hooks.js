@@ -99,10 +99,10 @@ export function useFormFieldsValues(fields) {
 
 export function useFormField(field) {
   if (!field) throw new Error('No field was passed in')
-  const { name, eventHandlers } = field
+  const { name, eventHandlers, ref } = field
   const state = useFormFieldState(field.state)
 
-  return { name, state, eventHandlers }
+  return { name, state, eventHandlers, ref }
 }
 
 export function useNumberFormField(field) {

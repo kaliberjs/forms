@@ -14,3 +14,7 @@ export {
 export {
   array, object,
 } from './src/schema'
+export {
+  FormErrorRegion,
+  focusFirstError,
+} from './src/a11y'
