@@ -21,44 +21,42 @@ export function FormErrorRegion({ form, renderError = defaultRenderError }) {
  * @param {object} form - The form object returned by useForm
  */
 export function focusFirstError(form) {
-  const firstErrorField = findFirstErrorField(form)
+  const errorFields = findAllErrorFields(form)
+  const sortedFields = errorFields.sort(byDomOrder)
+  const firstErrorField = getFirstItem(sortedFields)
 
-  if (firstErrorField && firstErrorField.ref?.current?.focus) {
-    firstErrorField.ref.current.focus()
-  }
+  firstErrorField?.ref.current.focus()
 }
 
-function findFirstErrorField(field) {
+function findAllErrorFields(field) {
   const state = field.state.get()
 
-  if (!state.invalid) return null
+  if (field.type === 'basic' && state.error && field.ref?.current) return [field]
 
-  // If this is a basic field with an error, return it
-  if (field.type === 'basic' && state.error && field.ref) {
-    return field
-  }
+  return [
+    ...(field.fields ? Object.values(field.fields) : []),
+    ...(state.children || [])
+  ].flatMap(findAllErrorFields)
+}
 
-  // Traverse object field children
-  if (field.fields) {
-    for (const childField of Object.values(field.fields)) {
-      const errorField = findFirstErrorField(childField)
-      if (errorField) return errorField
-    }
-  }
+function byDomOrder(a, b) {
+  const nodeA = a.ref.current
+  const nodeB = b.ref.current
+  if (!nodeA || !nodeB) return 0
+  return nodeAPrecedesNodeB(nodeA, nodeB) ? -1 : 1
+}
 
-  // Traverse array field children (stored in state)
-  if (state.children) {
-    for (const childField of state.children) {
-      const errorField = findFirstErrorField(childField)
-      if (errorField) return errorField
-    }
-  }
+function nodeAPrecedesNodeB(nodeA, nodeB) {
+  return nodeB.compareDocumentPosition(nodeA) & Node.DOCUMENT_POSITION_PRECEDING
+}
 
-  return null
+function getFirstItem(array) {
+  return array?.[0] ?? undefined
 }
 
 function flattenErrors(errorTree) {
   if (!errorTree) return []
+  
   if (typeof errorTree !== 'object' || (!errorTree.self && !errorTree.children)) {
     return errorTree ? [errorTree] : []
   }
