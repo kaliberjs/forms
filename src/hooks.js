@@ -99,17 +99,17 @@ export function useFormFieldsValues(fields) {
 
 export function useFormField(field) {
   if (!field) throw new Error('No field was passed in')
-  const { name, eventHandlers } = field
+  const { name, eventHandlers, ref } = field
   const state = useFormFieldState(field.state)
 
-  return { name, state, eventHandlers }
+  return { name, state, eventHandlers, ref }
 }
 
 export function useNumberFormField(field) {
-  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
+  const { name, state, eventHandlers: { onChange, ...originalEventHandlers }, ref } = useFormField(field)
   const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
 
-  return { name, state, eventHandlers }
+  return { name, state, eventHandlers, ref }
 
   function handleChange(e) {
     const userValue = e.target.value
@@ -119,10 +119,10 @@ export function useNumberFormField(field) {
 }
 
 export function useBooleanFormField(field) {
-  const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
+  const { name, state, eventHandlers: { onChange, ...originalEventHandlers }, ref } = useFormField(field)
   const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
 
-  return { name, state, eventHandlers }
+  return { name, state, eventHandlers, ref }
 
   function handleChange(e) {
     onChange(e.target.checked)

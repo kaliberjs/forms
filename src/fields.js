@@ -140,6 +140,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
 }
 
 function createBasicFormField({ name, initialValue, field }) {
+  const ref = createStableRef()
 
   const initialFormFieldState = deriveFormFieldState({ value: initialValue })
   const internalState = createState(initialFormFieldState)
@@ -158,6 +159,7 @@ function createBasicFormField({ name, initialValue, field }) {
   return {
     type: 'basic',
     name,
+    ref,
     validate(context) {
       if (validate) validate(value.get(), context)
     },
@@ -236,4 +238,24 @@ function bindValidate(f, state) {
 
 function addParent(context, parent) {
   return { ...context, parents: [...context.parents, parent] }
+}
+
+/**
+ * Creates a stable ref object for use outside of React components.
+ * 
+ * This is equivalent to what React.useRef() returns, but can be called
+ * outside of React's component lifecycle. It works because:
+ * 
+ * 1. A React ref is just an object with a `current` property
+ * 2. React.useRef() only guarantees stable identity across re-renders
+ * 3. Since field objects are created once and persist, a plain object
+ *    achieves the same stability
+ * 
+ * When passed to a DOM element's `ref` prop, React will assign the
+ * DOM node to the `current` property automatically.
+ * 
+ * @returns {{ current: null }} A ref-compatible object
+ */
+function createStableRef() {
+  return { current: null }
 }

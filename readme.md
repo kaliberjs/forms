@@ -110,6 +110,9 @@ _See the example for use cases_
   - [FormFieldValue](#FormFieldValue)
   - [FormFieldsValues](#FormFieldsValues)
   - [FormFieldValid](#FormFieldValid)
+  - [FormErrorRegion](#formerrorregion)
+- [Accessibility](#accessibility)
+  - [focusFirstError](#focusfirsterror)
 
 
 ### Hooks
@@ -176,6 +179,7 @@ const {
   name, // the fully qualified name of the form field
   state, // 'object' that contains the form field state
   eventHandlers, // 'object' that contains handlers which can be used by form elements
+  ref, // 'object' that contains the ref for the form field element
 } = useFormField(field)
 ```
 
@@ -194,6 +198,7 @@ const {
 |`- onBlur`      | Handler for `onBlur` events|
 |`- onFocus`     | Handler for `onFocus` events|
 |`- onChange`    | handler for `onChange` events, accepts DOM event or value|
+|`ref`           | A ref object `{ current: null }` that should be passed to the form field element to support `focusFirstError` (when used). Note that this is only available for basic fields. Objects and arrays do not have a ref, as `focusFirstError` will traverse them to find the first invalid basic field.|
 
 #### useNumberFormField
 
@@ -442,6 +447,41 @@ Because this is such a common usecase, we provide several of these components.
 <FormFieldValid field={form} render={valid => (
   <Button type="submit" disabled={!valid}>Verstuur</Button>
 )}>
+```
+
+#### FormErrorRegion
+
+A visually hidden live region that announces form errors to screen readers.
+
+| Props   |                                                                                      |
+|---------|--------------------------------------------------------------------------------------|
+|`form`   | The form object returned by `useForm`. |
+|`renderError` | (Optional) A function to render each error. Defaults to rendering the error message or id. |
+
+##### Example
+
+```jsx
+<FormErrorRegion form={form} />
+```
+
+### Accessibility
+
+#### focusFirstError
+
+Focuses the first invalid field in the form. This is useful to call when a form submission fails due to validation errors.
+
+```js
+import { focusFirstError } from '@kaliber/forms'
+
+// ...
+
+function handleSubmit(snapshot) {
+  if (snapshot.invalid) {
+    focusFirstError(form)
+    return
+  }
+  // ...
+}
 ```
 
 ## Missing feature?

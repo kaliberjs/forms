@@ -1,4 +1,4 @@
-import { object, array, useForm, useFormFieldValue, snapshot } from '@kaliber/forms'
+import { object, array, useForm, useFormFieldValue, snapshot, focusFirstError } from '@kaliber/forms'
 import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
 import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
@@ -78,7 +78,10 @@ export function Full() {
   )
 
   function handleSubmit(snapshot) {
-    if (snapshot.invalid) return
+    if (snapshot.invalid) {
+      focusFirstError(form)
+      return
+    }
     setSubmitted(snapshot.value)
   }
 
