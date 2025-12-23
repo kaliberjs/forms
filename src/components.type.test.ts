@@ -30,18 +30,18 @@ FormFieldValue({
     expectNotNever(value)
     expectAssignable<
       {
-        a: string
-        b: number
-        c: boolean
+        a: string | undefined
+        b: number | undefined
+        c: boolean | undefined
         d: {
-            a: string
-            b: number
-            c: boolean
+            a: string | undefined
+            b: number | undefined
+            c: boolean | undefined
         }
         e: {
-            a: string
-            b: number
-            c: boolean
+            a: string | undefined
+            b: number | undefined
+            c: boolean | undefined
         }[]
       },
       Prepared<typeof value>
@@ -55,7 +55,7 @@ FormFieldsValues({
     expectNotAny(value)
     expectNotNever(value)
     expectAssignable<
-      [string, number],
+      [string | undefined, number | undefined],
       Prepared<typeof value>
     >
   }

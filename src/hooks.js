@@ -150,7 +150,7 @@ export function useFormField(field) {
 }
 
 /**
- * @arg {Field.Basic<number | string>} field
+ * @arg {Field.Basic<number | string | undefined>} field
  */
 export function useNumberFormField(field) {
   const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
@@ -166,7 +166,7 @@ export function useNumberFormField(field) {
   }
 }
 
-/** @arg {Field.Basic<boolean>} field */
+/** @arg {Field.Basic<boolean | undefined>} field */
 export function useBooleanFormField(field) {
   const { name, state, eventHandlers: { onChange, ...originalEventHandlers } } = useFormField(field)
   const eventHandlers = { ...originalEventHandlers, onChange: handleChange }
