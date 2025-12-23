@@ -8,8 +8,8 @@
     "./src/**/*"
   ],
   "compilerOptions": {
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "preserveSymlinks": true,
     "lib": ["dom", "esnext"],
     "jsx": "react-jsx",
@@ -20,6 +20,7 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "allowImportingTsExtensions": true,
+    "allowUmdGlobalAccess": true,
     "paths": {
       "*": ["./typescript/node_modules/@types/*", "./typescript/node_modules/*", "*"]
     }

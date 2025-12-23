@@ -1,0 +1,14 @@
+autoInstallPeers: false
+
+nodeLinker: hoisted
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+
+overrides:
+  react: ^18.0.0
+  react-dom: ^18.0.0
+  react-is: ^18.0.0
+
+strictPeerDependencies: true

@@ -1,3 +1,4 @@
+/* eslint-disable @kaliber/naming-policy */
 import {
   useFormFieldValue, useFormFieldsValues,
   useFormFieldSnapshot

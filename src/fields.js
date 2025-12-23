@@ -156,7 +156,7 @@ function createArrayFormField({ name = '', initialValue = [], field }) {
   /** @arg {{ [name: string]: any }} initialValue */
   function createFormField(initialValue) {
     const fullName = `${name}[${index++}]`
-    const fields = typeof field.fields == 'function' ? field.fields(initialValue) : field.fields
+    const fields = typeof field.fields === 'function' ? field.fields(initialValue) : field.fields
     return createObjectFormField({
       name: fullName,
       initialValue,
@@ -288,6 +288,7 @@ function mapValues(o, f) {
   // @ts-expect-error
   return Object.entries(o).reduce(
     // @ts-expect-error
+    // eslint-disable-next-line no-return-assign
     (result, [k, v]) => (result[k] = f(v, k, o), result),
     {}
   )

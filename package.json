@@ -37,6 +37,7 @@
     "react": "^18.3.1"
   },
   "devDependencies": {
+    "@kaliber/eslint-plugin": "^1.0.0",
     "@types/node": "22",
     "typescript": "^5.8.2"
   }

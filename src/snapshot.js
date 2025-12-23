@@ -75,7 +75,7 @@ function getForArray(field) {
   const { children, error, invalid } = field.state.get()
   const { childrenInvalid, childValues, childErrors } = children.reduce(
     ({ childrenInvalid, childValues, childErrors }, child) => {
-      const { value, error, invalid} = get(child)
+      const { value, error, invalid } = get(child)
       return {
         childrenInvalid: childrenInvalid || invalid,
         childValues: [...childValues, value],

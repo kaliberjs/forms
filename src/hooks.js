@@ -2,7 +2,6 @@ import isEqual from 'react-fast-compare'
 import { createObjectFormField } from './fields'
 import { normalize } from './normalize'
 import * as snapshot from './snapshot'
-import React from 'react'
 import { asAny } from './type-helpers'
 /** @import { Validate, NormalizedField, Field, InitialValue, FieldInput, State, Snapshot, Expand, MapTuple } from './types.ts' */
 
@@ -21,6 +20,7 @@ function useFormId() { return React.useMemo(() => `form${++formCounter}`, []) }
  *   formId?: string,
  * }} props
  */
+// eslint-disable-next-line react-hooks/rules-of-hooks
 export function useForm({ initialValues = undefined, fields, validate = undefined, onSubmit, formId = useFormId() }) {
   const initialValuesRef = React.useRef(/** @type {InitialValue<A> | undefined} */ (asAny(null)))
   const formRef = React.useRef(/** @type {Field.ObjectFromObjectInput<A>} */ (asAny(null)))
@@ -94,6 +94,7 @@ function useFieldStates(states) {
         () => {}
       )
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     states // explanation below on why we supply the array directly
   )
 

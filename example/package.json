@@ -1,15 +1,15 @@
 {
   "dependencies": {
     "@kaliber/build": "^3.1.0",
+    "@kaliber/forms": "link:../",
     "@kaliber/serve": "^1.0.5"
   },
   "scripts": {
-    "start": "npm-run-all --parallel watch serve:dev",
-    "watch": "CONFIG_ENV=dev NODE_OPTIONS='--preserve-symlinks' kaliber-watch",
-    "serve:dev": "PORT=8000 CONFIG_ENV=dev NODE_OPTIONS='--preserve-symlinks' kaliber-serve"
+    "start": "npm run watch & npm run serve.dev & wait",
+    "watch": "CONFIG_ENV=dev NODE_OPTIONS='--enable-source-maps --preserve-symlinks' kaliber-watch",
+    "serve.dev": "PORT=8000 CONFIG_ENV=dev NODE_OPTIONS='--enable-source-maps --preserve-symlinks' kaliber-serve"
   },
   "devDependencies": {
-    "@types/react": "^18.0.0",
-    "npm-run-all": "^4.1.5"
+    "@types/react": "^18.0.0"
   }
 }

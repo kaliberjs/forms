@@ -82,7 +82,7 @@ export function subscribeToChildren({ children, notify, subscribeToChild }) {
       const unsubscribe = subscribeToChild(x, notify)
 
       return () => {
-        unsubscribePrevious(),
+        unsubscribePrevious()
         unsubscribe()
       }
     },
