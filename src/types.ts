@@ -29,6 +29,13 @@ export type MapTuple<T extends [...unknown[]], prop extends string> =
       ? [X[prop], ...MapTuple<Rest, prop>]
       : []
 
+export type ValidateToValue<R> = 
+  R extends ValidationFunction<infer T> ? T :
+  R extends readonly [] | null ? unknown : 
+  R extends readonly [ValidationFunction<infer T>] ? T :
+  R extends readonly [ValidationFunction<infer T>, ...infer Rest] ? T & ValidateToValue<Rest> :
+  never
+
 export type Validate<T = any> =
   readonly [ValidationFunction<T>, ...ValidationFunction<T>[]] |
   ValidationFunction<T> |
@@ -70,9 +77,9 @@ export namespace FieldSchema {
   export type ToValue<T extends FieldSchema> =
     T extends Object<infer X> ? ObjectFieldsToValues<X> :
     T extends Array<infer X> ? ArrayFieldsToValues<X> :
-    T extends Validate<infer X> ? X :
-    T extends { validate: Validate<infer X> } ? X :
-    never
+    T extends { validate: infer V } ? (
+      V extends Validate ? ValidateToValue<V> : ValidateToValue<T>) : 
+    ValidateToValue<T>
 
   export type ObjectFieldsToValues<T extends ObjectFields> =
     T extends any ? { [K in keyof T & string]: ToValue<T[K]> } : never
@@ -150,7 +157,7 @@ export namespace NormalizedField {
   export type ValidateToValidationFunction<T> =
     T extends undefined ? null :
     T extends null ? null :
-    T extends Validate<infer X> ? ValidationFunction<X> :
+    T extends Validate ? ValidationFunction<ValidateToValue<T>> :
     never
 
   export type Basic<T = unknown> = {

@@ -1,5 +1,5 @@
 export {
-  required, requiredT, optional, optionalT,
+  required, requiredT, optional, optionalT, withT,
   number, min, max,
   minLength, maxLength,
   email,
