@@ -38,7 +38,7 @@ const { form } = useForm({
   expectAssignable<
     {
       invalid: boolean,
-      value: string,
+      value: string | undefined,
       error: Falsy | ValidationError
     },
     Prepared<typeof result>
@@ -51,7 +51,7 @@ const { form } = useForm({
   expectAssignable<
     {
       invalid: boolean,
-      value: number,
+      value: number | undefined,
       error: Falsy | ValidationError
     },
     Prepared<typeof result>
@@ -65,8 +65,8 @@ const { form } = useForm({
     {
       invalid: boolean,
       value: {
-        a: string,
-        b: number,
+        a: string | undefined,
+        b: number | undefined,
       },
       error: {
         self: Falsy | ValidationError,
@@ -87,8 +87,8 @@ const { form } = useForm({
     {
       invalid: boolean,
       value: {
-        a: string,
-        b: number,
+        a: string | undefined,
+        b: number | undefined,
       }[],
       error: {
         self: Falsy | ValidationError,
@@ -111,7 +111,7 @@ const { form } = useForm({
   expectAssignable<
     {
       invalid: boolean,
-      value: ({ type: string, a: string } | { type: string, b: number })[],
+      value: ({ type: string, a: string | undefined } | { type: string, b: number | undefined })[],
       error: {
         self: Falsy | ValidationError,
         children: (

@@ -37,18 +37,18 @@ expectNotAny(form)
 expectNotNever(form)
 expectAssignable<
   Field.Object<{
-    a: Field.Basic<string>,
-    b: Field.Basic<number>,
-    c: Field.Basic<boolean>,
+    a: Field.Basic<string | undefined>,
+    b: Field.Basic<number | undefined>,
+    c: Field.Basic<boolean | undefined>,
     d: Field.Object<{
-      a: Field.Basic<string>,
-      b: Field.Basic<number>,
-      c: Field.Basic<boolean>,
+      a: Field.Basic<string | undefined>,
+      b: Field.Basic<number | undefined>,
+      c: Field.Basic<boolean | undefined>,
     }>,
     e: Field.Array<{
-      a: Field.Basic<string>,
-      b: Field.Basic<number>,
-      c: Field.Basic<boolean>,
+      a: Field.Basic<string | undefined>,
+      b: Field.Basic<number | undefined>,
+      c: Field.Basic<boolean | undefined>,
     }>
   }>,
   Prepared<typeof form>
@@ -58,13 +58,13 @@ const formFieldValue = useFormFieldValue(form.fields.a)
 expectAssignable<string, Prepared<typeof formFieldValue>>
 
 const formFieldsValues = useFormFieldsValues([form.fields.a, form.fields.b])
-expectAssignable<[string, number], Prepared<typeof formFieldsValues>>
+expectAssignable<[string | undefined, number | undefined], Prepared<typeof formFieldsValues>>
 
 const formField = useFormField(form.fields.a)
 expectAssignable<
   {
     name: string
-    state: State.Basic<string>
+    state: State.Basic<string | undefined>
     eventHandlers: {
         onBlur(): void
         onFocus(): void
@@ -78,7 +78,7 @@ const numberFormField = useNumberFormField(form.fields.b)
 expectAssignable<
   {
     name: string
-    state: State.Basic<string | number>
+    state: State.Basic<string | number | undefined>
     eventHandlers: {
         onBlur(): void
         onFocus(): void
@@ -92,7 +92,7 @@ const booleanFormField = useBooleanFormField(form.fields.c)
 expectAssignable<
   {
     name: string
-    state: State.Basic<boolean>
+    state: State.Basic<boolean | undefined>
     eventHandlers: {
         onBlur(): void
         onFocus(): void
@@ -108,9 +108,9 @@ expectAssignable<
     name: string
     state: State.Common
     fields: {
-        a: Field.Basic<string>
-        b: Field.Basic<number>
-        c: Field.Basic<boolean>
+        a: Field.Basic<string | undefined>
+        b: Field.Basic<number | undefined>
+        c: Field.Basic<boolean | undefined>
     }
   },
   Prepared<typeof objectFormField>
@@ -121,9 +121,9 @@ expectAssignable<
   {
     name: string
     state: State.Array<Field.Object<{
-        a: Field.Basic<string>
-        b: Field.Basic<number>
-        c: Field.Basic<boolean>
+        a: Field.Basic<string | undefined>
+        b: Field.Basic<number | undefined>
+        c: Field.Basic<boolean | undefined>
     }>>
     helpers: {
         add(initialValue: {
@@ -146,18 +146,18 @@ expectNotAny(formFieldSnapshot)
 expectNotNever(formFieldSnapshot)
 expectAssignable<
   Snapshot.Object<{
-    a: Field.Basic<string>,
-    b: Field.Basic<number>,
-    c: Field.Basic<boolean>,
+    a: Field.Basic<string | undefined>,
+    b: Field.Basic<number | undefined>,
+    c: Field.Basic<boolean | undefined>,
     d: Field.Object<{
-      a: Field.Basic<string>,
-      b: Field.Basic<number>,
-      c: Field.Basic<boolean>,
+      a: Field.Basic<string | undefined>,
+      b: Field.Basic<number | undefined>,
+      c: Field.Basic<boolean | undefined>,
     }>,
     e: Field.Array<{
-      a: Field.Basic<string>,
-      b: Field.Basic<number>,
-      c: Field.Basic<boolean>,
+      a: Field.Basic<string | undefined>,
+      b: Field.Basic<number | undefined>,
+      c: Field.Basic<boolean | undefined>,
     }>
   }>,
   Prepared<typeof formFieldSnapshot>
