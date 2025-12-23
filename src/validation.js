@@ -1,23 +1,47 @@
-/** @import { ValidationFunction } from './types.ts' */
+/** @import { Falsy, ValidationFunction } from './types.ts' */
+
+
+/** 
+ * @template {string | Constructable<any>} T
+ * @typedef {(
+ *   T extends Constructable<infer R> ? R : 
+ *   T extends string ? TypeLookup<T> :
+ *   never
+ * )} TypeFromLookupOrConstructable 
+ */
+
+/**
+ * @template T
+ * @typedef {abstract new (...args: any) => T} Constructable
+ */
 
 /**
  * @template {string} T
  * @typedef {(
  *   T extends 'string' ? string :
  *   T extends 'number' ? number :
- *   T extends 'number | string' ? number | string :
+ *   T extends `${infer A} | ${infer B}` ? TypeLookup<A> | TypeLookup<B> :
  *   T extends 'boolean' ? boolean :
  *   T extends `${infer X}[]` ? TypeLookup<X>[] :
- *   T
+ *   never
  * )} TypeLookup
  */
 
 /**
- * @template {string} const T
+ * @template T
+ * @param {T} type 
+ * @returns {Constructable<T>} 
+ */
+export function withT(type) {
+  return /** @type {any} */(null)
+}
+
+/**
+ * @template const T
  *
  * @overload
  * @arg {T} type
- * @returns {((x: TypeLookup<T>) => never)}
+ * @returns {(x: TypeFromLookupOrConstructable<T> | undefined) => never}
  *
  * @arg {any} type
  * @returns {null | ((x: any) => never)}
@@ -27,10 +51,10 @@ export function optionalT(type) {
 }
 
 /**
- * @template {string} const T
+ * @template const T
  *
  * @arg {T} type
- * @returns {ValidationFunction<TypeLookup<T>>}
+ * @returns {ValidationFunction<TypeFromLookupOrConstructable<T> >}
  */
 export function requiredT(type) {
   return required
