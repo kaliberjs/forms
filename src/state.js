@@ -1,3 +1,10 @@
+/** @import { Field, State } from './types.ts' */
+
+/**
+ * @template T
+ * @arg {T} initialState
+ * @returns {State.ReadWrite<T>}
+ */
 export function createState(initialState) {
   let state = initialState
   let listeners = new Set()
@@ -20,6 +27,19 @@ export function createState(initialState) {
   }
 }
 
+/**
+ * @template T
+ * @template {Field} R
+ * @template S
+ * @arg {{
+ *   state: State.ReadonlyWithHistory<T>,
+ *   childrenFromState: (value: T) => R[],
+ *   notify: State.Subscription<T | S>,
+ *   subscribeToChild: (child: R, notify: State.Subscription<S>) => State.Unsubscribe,
+ *   onlyNotifyOnChildChange?: boolean,
+ * }} props
+ * @returns {State.Unsubscribe}
+ */
 export function subscribeToAll({
   state,
   childrenFromState,
@@ -37,7 +57,7 @@ export function subscribeToAll({
       unsubscribeChildren = subscribeToChildren({ children: newChildren, notify, subscribeToChild })
     }
     if (onlyNotifyOnChildChange && !childrenChanged) return
-    notify(newState, oldState)
+    notify(newState)
   })
 
   return () => {
@@ -46,6 +66,16 @@ export function subscribeToAll({
   }
 }
 
+/**
+ * @template {Field} R
+ * @template {State.SubscriptionWithHistory<any> | State.Subscription<any>} N
+ * @arg {{
+*   children: R[],
+*   notify: N,
+*   subscribeToChild: (child: R, notify: N) => State.Unsubscribe,
+* }} props
+* @returns {State.Unsubscribe}
+*/
 export function subscribeToChildren({ children, notify, subscribeToChild }) {
   return children.reduce(
     (unsubscribePrevious, x) => {

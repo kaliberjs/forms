@@ -1,19 +1,27 @@
 {
-  "typeAcquisition": {
-    "enable": true
-  },
-  "include": ["./src/**/*", "./types/**/*"],
+  "include": [
+    "./components.js",
+    "./index.js",
+    "./types.ts",
+    "./validation.js",
+    "./types/**/*",
+    "./src/**/*"
+  ],
   "compilerOptions": {
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
+    "module": "node16",
+    "moduleResolution": "node16",
     "preserveSymlinks": true,
-    "allowSyntheticDefaultImports": true,
     "lib": ["dom", "esnext"],
-    "jsx": "react",
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "target": "ESNext"
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "*": ["./typescript/node_modules/@types/*", "./typescript/node_modules/*", "*"]
+    }
   }
 }

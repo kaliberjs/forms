@@ -5,4 +5,4 @@ config/local.js
 node_modules
 sketch
 target
-.babelcache
+.kaliber-build

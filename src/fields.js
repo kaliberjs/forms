@@ -1,6 +1,7 @@
 import { normalize } from './normalize'
 import { createState, subscribeToAll, subscribeToChildren } from './state'
 import isEqual from 'react-fast-compare'
+/** @import { Falsy, Field, NormalizedField, PartialWithStringKey, State, Validate, ValidationContext, ValidationError, ValidationFunction } from './types.ts' */
 
 const constructors = {
   basic: createBasicFormField,
@@ -8,6 +9,15 @@ const constructors = {
   object: createObjectFormField,
 }
 
+/**
+ * @template {NormalizedField.Object} const T
+ *
+ * @arg {{
+ *   name?: string,
+ *   initialValue?: PartialWithStringKey<NormalizedField.ToValue<T>>,
+ *   field: T,
+ * }} props
+ */
 export function createObjectFormField({ name = '', initialValue = {}, field }) {
 
   const fields = createFormFields(initialValue, field.fields, name && `${name}.`)
@@ -17,18 +27,19 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
 
-  const value = {
-    get() { return mapValues(fields, child => child.value.get()) },
+  const value = /** @satisfies {State.Readonly} */ ({
+    get() { return mapValues(fields, /** @arg {Field} child */ child => child.value.get()) },
     subscribe(f) {
       return subscribeToChildren({
         children,
+        /** @arg {unknown} _ */
         notify: _ => f(value.get()),
         subscribeToChild: (x, f) => x.value.subscribe(f),
       })
     },
-  }
+  })
 
-  return {
+  return /** @type {Field.FromNormalizedField<T>} */ ({
     type: 'object',
     name,
     validate(context) {
@@ -49,15 +60,21 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
     value,
     state: { get: internalState.get, subscribe: internalState.subscribe },
     fields,
-  }
+  })
 
+  /**
+   * @arg {any} initialValues
+   * @arg {T['fields']} fields
+   * @arg {string} namePrefix
+   */
   function createFormFields(initialValues, fields, namePrefix = '') {
     return mapValues(fields, (field, name) => {
       const fullName = `${namePrefix}${name}`
       const normalizedField = normalize(field, fullName)
-      const constructor = constructors[normalizedField.type]
-      return constructor({
+      const createFormField = constructors[normalizedField.type]
+      return createFormField({
         name: fullName,
+        // @ts-expect-error - If you know how to fix this, please let me know
         field: normalizedField,
         initialValue: initialValues[name]
       })
@@ -65,7 +82,15 @@ export function createObjectFormField({ name = '', initialValue = {}, field }) {
   }
 }
 
-function createArrayFormField({ name, initialValue = [], field }) {
+/**
+ * @arg {{
+ *   name?: string,
+ *   initialValue?: { [name: string]: any }[],
+ *   field: NormalizedField.Array,
+ * }} props
+ * @returns {Field.Array}
+ */
+function createArrayFormField({ name = '', initialValue = [], field }) {
 
   let index = 0
 
@@ -76,7 +101,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
   const internalState = createState(initialState)
   const validate = bindValidate(field.validate, internalState)
 
-  const value = {
+  const value = /** @satisfies {State.Readonly} */ ({
     get() {
       const { children } = internalState.get()
       return children.map(child => child.value.get())
@@ -85,12 +110,12 @@ function createArrayFormField({ name, initialValue = [], field }) {
       return subscribeToAll({
         state: internalState,
         childrenFromState: x => x.children,
-        notify:_ => f(value.get()),
+        notify: _ => f(value.get()),
         subscribeToChild: (x, f) => x.value.subscribe(f),
         onlyNotifyOnChildChange: true,
       })
     },
-  }
+  })
 
   return {
     type: 'array',
@@ -128,6 +153,7 @@ function createArrayFormField({ name, initialValue = [], field }) {
     }
   }
 
+  /** @arg {{ [name: string]: any }} initialValue */
   function createFormField(initialValue) {
     const fullName = `${name}[${index++}]`
     const fields = typeof field.fields == 'function' ? field.fields(initialValue) : field.fields
@@ -139,13 +165,21 @@ function createArrayFormField({ name, initialValue = [], field }) {
   }
 }
 
+/**
+ * @arg {{
+ *   name: string,
+ *   initialValue?: any,
+ *   field: NormalizedField.Basic,
+ * }} props
+ * @returns {Field.Basic}
+ */
 function createBasicFormField({ name, initialValue, field }) {
 
   const initialFormFieldState = deriveFormFieldState({ value: initialValue })
   const internalState = createState(initialFormFieldState)
   const validate = bindValidate(field.validate, internalState)
 
-  const value = {
+  const value = /** @satisfies {State.ReadonlyWithHistory} */ ({
     get() { return internalState.get().value },
     subscribe(f) {
       return internalState.subscribe(({ value: newValue }, { value: oldValue }) => {
@@ -153,7 +187,7 @@ function createBasicFormField({ name, initialValue, field }) {
         f(newValue, oldValue)
       })
     },
-  }
+  })
 
   return {
     type: 'basic',
@@ -189,17 +223,41 @@ function createBasicFormField({ name, initialValue, field }) {
   }
 }
 
+/**
+ * @template {Record<string, any>} T1
+ * @template {Record<string, any>} T2
+ * @arg {T1} formFieldState
+ * @arg {T2} update
+ */
 function updateState(formFieldState, update) {
   return deriveFormFieldState({ ...formFieldState, ...update })
 }
 
+/**
+ * @template T
+ * @template {keyof T} K
+ * @arg {T} o
+ * @arg {K[]} properties
+ * @returns {Pick<T, K>}
+ */
 function pick(o, properties) {
+  // @ts-expect-error
   return properties.reduce(
     (result, property) => ({ ...result, [property]: o[property] }),
     {}
   )
 }
 
+/**
+ * @template {Record<string, any>} const T
+ * @arg {{
+ *   error?: Falsy | ValidationError,
+ *   isSubmitted?: boolean,
+ *   isVisited?: boolean,
+ *   hasFocus?: boolean,
+ * } & T} state
+ * @return {T & State.Common}
+ */
 function deriveFormFieldState({
   error = false,
   isSubmitted = false,
@@ -207,7 +265,7 @@ function deriveFormFieldState({
   hasFocus = false,
   ...rest
 }) {
-  return {
+  return /** @type {T & State.Common} */ ({
     ...rest,
     error,
     isSubmitted,
@@ -215,18 +273,38 @@ function deriveFormFieldState({
     hasFocus,
     invalid: !!error,
     showError: !!error && !hasFocus && (isVisited || isSubmitted)
-  }
+  })
 }
 
+/**
+ * @template {{ [key: string]: any }} O
+ * @template {(v: O[keyof O], k: keyof O & string, o: O) => any} F
+ *
+ * @param {O} o
+ * @param {F} f
+ * @returns {{ [key in keyof O]: ReturnType<F> }}
+ */
 function mapValues(o, f) {
+  // @ts-expect-error
   return Object.entries(o).reduce(
-    (result, [k, v]) => (result[k] = f(v, k), result),
+    // @ts-expect-error
+    (result, [k, v]) => (result[k] = f(v, k, o), result),
     {}
   )
 }
 
+/**
+ * @template T
+ * @template {State.ReadWrite} S
+ * @arg {null | ValidationFunction<T>} f
+ * @arg {S} state
+ */
 function bindValidate(f, state) {
   return f && (
+    /**
+     * @arg {Parameters<ValidationFunction<T>>} args
+     * @returns {S extends State.ReadWrite<infer X> ? X : never}
+     */
     (...args) => {
       const error = (f && f(...args)) || false
       return state.update(x => isEqual(error, x.error) ? x : updateState(x, { error }))
@@ -234,6 +312,10 @@ function bindValidate(f, state) {
   )
 }
 
+/**
+ * @arg {ValidationContext} context
+ * @arg {any} parent
+ */
 function addParent(context, parent) {
   return { ...context, parents: [...context.parents, parent] }
 }

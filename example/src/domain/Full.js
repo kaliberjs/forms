@@ -1,51 +1,51 @@
 import { object, array, useForm, useFormFieldValue, snapshot } from '@kaliber/forms'
-import { optional, required, minLength, error, email } from '@kaliber/forms/validation'
+import { required, minLength, error, email, optionalT, requiredT } from '@kaliber/forms/validation'
 import { FormFieldValue, FormFieldsValues, FormFieldValid } from '@kaliber/forms/components'
 import { date, ifParentHasValue, ifFormHasValue } from './machinery/validation'
 import { FormValues, FormTextInput, FormCheckbox, FormObjectField, FormArrayField, FormHeterogeneousArrayField, FormCheckboxGroupField } from './machinery/Form'
 import { Code } from './machinery/Code'
+/** @import { Field, Snapshot } from '@kaliber/forms/types' */
 
 /**
  * When you study this example, don't forget to check the components in the machinery directory
  */
 
 const fields = {
-  naam: optional,
+  naam: optionalT('string'),
   email: [required, email],
   geboortedatum: [required, date],
-  kortingscode: optional,
-  betaalNu: required,
+  kortingscode: optionalT('string'),
+  betaalNu: requiredT('boolean'),
   betaalInfo: object(
     // custom validation
     x => x.andereNaam && !x.rekeninghouder && error('rekeninghouderIsVerplicht'),
-    {
-      andereNaam: optional,
+    asConst({
+      andereNaam: optionalT('boolean'),
       rekeninghouder: ifParentHasValue(x => x.andereNaam, required),
       rekeningnummer: [ifFormHasValue(x => x.betaalNu, required), minLength(9)],
-    }
+    })
   ),
   extraKaartjes: array(
     // return a different validation error
     (x, { form }) => form.kortingscode && minLength(1)(x) && error('kortingMoetMetVrienden'),
-    {
-      anoniem: required,
+    asConst({
+      anoniem: requiredT('boolean'),
       naam: ifParentHasValue(x => !x.anoniem, required),
       email: [ifParentHasValue(x => !x.anoniem, required), ifParentHasValue(x => !x.anoniem, email)],
-    }
-  ),
-  gevondenVia: [required, minLength(1)],
-  specialeToevoeging: array(
-    x => ({
-      type: required,
-      ...(
-        x.type === 'rood' ? { roodInfo: required } :
-        x.type === 'groen' ? { groenInfo: required } :
-        {}
-      )
     })
   ),
-  voorwaarden: [required, x => !x && error('voorwaardenVerplicht')],
+  gevondenVia: [requiredT('string[]'), minLength(1)],
+  specialeToevoeging: array(
+    /** @arg {{ type: string }} x */
+    x =>
+      x.type === 'rood' ? asConst({ type: requiredT('rood'), roodInfo: requiredT('string') }) :
+      x.type === 'groen' ? asConst({ type: requiredT('groen'), groenInfo: requiredT('string') }) :
+      throwError('Only `rood` and `groen` are acceptable types')
+  ),
+  voorwaarden: [required, /** @arg {boolean} x */ x => !x && error('voorwaardenVerplicht')],
 }
+
+/** @typedef {Field.ObjectFromObjectInput<typeof fields>} FormType */
 
 const gevondenViaOptions = [
   { label: 'Vrienden', value: 'vrienden' },
@@ -54,7 +54,8 @@ const gevondenViaOptions = [
 ]
 
 export function Full() {
-  const [submitted, setSubmitted] = React.useState(null)
+  const [submitted, setSubmitted] = React.useState(
+    /** @type {Snapshot.FromField<FormType>['value'] | null} */ (null))
   const { form, submit, reset } = useForm({
     initialValues: { betaalNu: false, betaalInfo: { andereNaam: false } },
     fields,
@@ -77,6 +78,7 @@ export function Full() {
     </>
   )
 
+  /** @arg {Snapshot.FromField<FormType>} snapshot */
   function handleSubmit(snapshot) {
     if (snapshot.invalid) return
     setSubmitted(snapshot.value)
@@ -88,6 +90,12 @@ export function Full() {
   }
 }
 
+/**
+ * @arg {{
+ *   form: FormType,
+ *   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void,
+ * }} props
+ */
 function Formulier({ form, onSubmit }) {
   const { fields } = form
   return (
@@ -141,22 +149,23 @@ function Formulier({ form, onSubmit }) {
       <FormHeterogeneousArrayField
         field={fields.specialeToevoeging}
         types={[
-          { name: 'rood', initialValue: { type: 'rood', roodInfo: '' } },
-          { name: 'groen', initialValue: { type: 'groen', groenInfo: '' } }
+          { name: 'rood', initialValue: asConst({ type: 'rood', roodInfo: '' }) },
+          { name: 'groen', initialValue: asConst({ type: 'groen', groenInfo: '' }) },
         ]}
-        render={({ fields, value }) =>
-          'roodInfo' in value ? <FormTextInput label='Rood info' field={fields.roodInfo} /> :
-          'groenInfo' in value ? <FormTextInput label='Groen info' field={fields.groenInfo} /> :
+        render={({ fields }) =>
+          'roodInfo' in fields ? <FormTextInput label='Rood info' field={fields.roodInfo} /> :
+          'groenInfo' in fields ? <FormTextInput label='Groen info' field={fields.groenInfo} /> :
           null
         }
       />
       <FormFieldValid field={form} render={valid =>
-        <button type='submit' style={{ cursor: !valid && 'not-allowed' }} disabled={!valid}><b>| Aanmelden |</b></button>
+        <button type='submit' style={{ cursor: valid ? '' : 'not-allowed' }} disabled={!valid}><b>| Aanmelden |</b></button>
       } />
     </form>
   )
 }
 
+/** @arg {{ submitted: Snapshot.FromField<FormType>['value'], onReset: () => void }} props */
 function Bedankt({ submitted, onReset }) {
   return (
     <>
@@ -168,11 +177,16 @@ function Bedankt({ submitted, onReset }) {
   )
 }
 
+/** @arg {{ field: Field.Basic<boolean>, children: React.ReactNode, reverse?: boolean }} props */
 function Conditional({ field, children, reverse = false }) {
   const value = useFormFieldValue(field)
   return (reverse ? !value : value) && children
 }
 
+/**
+ * @arg {FormType} form
+ * @arg {() => void} f
+ */
 function useSendSignalWhenIsVisited(form, f) {
   const callbackRef = React.useRef(f)
   React.useEffect(
@@ -193,33 +207,53 @@ function useSendSignalWhenIsVisited(form, f) {
   )
 }
 
-
-
+/**
+ * @arg {Field} field
+ * @returns {boolean}
+ */
 function getIsVisited(field) {
   return {
     'object': getIsVisitedForObject,
     'array': getIsVisitedForArray,
     'basic': getIsVisitedForBasic,
+  // @ts-expect-error
   }[field.type](field)
 }
 
+/**
+ * @arg {Field.Object} field
+ */
 function getIsVisitedForObject(field) {
   const { isVisited } = field.state.get()
   return isVisited || Object.values(field.fields).reduce(
+    /** @arg {boolean} childrenVisited @arg {Field} child */
     (childrenVisited, child) => childrenVisited || getIsVisited(child),
     false
   )
 }
 
+/**
+ * @arg {Field.Array} field
+ */
 function getIsVisitedForArray(field) {
   const { children, isVisited } = field.state.get()
   return isVisited || children.reduce(
+    /** @arg {boolean} childrenVisited @arg {Field} child */
     (childrenVisited, child) => childrenVisited || getIsVisited(child),
     false
   )
 }
 
+/**
+ * @arg {Field.Basic} field
+ */
 function getIsVisitedForBasic(field) {
   const { isVisited } = field.state.get()
   return isVisited
 }
+
+/** @template const T @arg {T} x */
+function asConst(x) { return x }
+
+/** @arg {string} message @returns {never} */
+function throwError(message) { throw new Error(message) }

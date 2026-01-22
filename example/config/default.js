@@ -4,8 +4,12 @@ module.exports = {
     only use this for configuration that is the same across all config environments
   */
   kaliber: {
-    compileWithBabel: [
-      /@kaliber\/forms/
-    ]
+    includeInServerCompilation: [
+      /^@kaliber\/forms/
+    ],
+    /** @arg {Error} e */
+    reportError(e) {
+      console.error(e)
+    }
   }
 }

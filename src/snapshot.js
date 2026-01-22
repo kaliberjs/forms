@@ -1,6 +1,13 @@
 import { subscribeToAll, subscribeToChildren } from './state'
+/** @import { State, Expand, Falsy, Field, Snapshot, ValidationError } from './types.ts' */
 
+/**
+ * @template {Field} T
+ * @param {T} field
+ * @returns {Expand<Snapshot.FromField<T>>}
+ */
 export function get(field) {
+  // @ts-expect-error
   return {
     'object': getForObject,
     'array': getForArray,
@@ -8,11 +15,24 @@ export function get(field) {
   }[field.type](field)
 }
 
+/**
+ * @template {Field} T
+ * @arg {T} field
+ * @arg {(snapshot: ReturnType<typeof get<T>>) => void} f
+ * @returns {State.Unsubscribe}
+ */
 export function subscribe(field, f) {
   return subscribeToFieldState(field, x => f(get(x)))
 }
 
+/**
+ * @template {Field} T
+ * @arg {T} field
+ * @arg {(field: T) => void} f
+ * @returns {State.Unsubscribe}
+ */
 export function subscribeToFieldState(field, f) {
+  // @ts-expect-error
   return {
     'object': subscribeForObject,
     'array': subscribeForArray,
@@ -20,6 +40,11 @@ export function subscribeToFieldState(field, f) {
   }[field.type](field, f)
 }
 
+/**
+ * @template {Field.Object} T
+ * @arg {T} field
+ * @returns {Snapshot.FromField<T>}
+ */
 function getForObject(field) {
   const { error, invalid } = field.state.get()
   const { childrenInvalid, childErrors, childValues } =  Object.entries(field.fields).reduce(
@@ -34,13 +59,18 @@ function getForObject(field) {
     { childrenInvalid: false, childErrors: {}, childValues: {} }
   )
 
-  return {
+  return /** @type {Snapshot.FromField<T>} */ ({
     invalid: invalid || childrenInvalid,
     value: childValues,
     error: { self: error, children: childErrors },
-  }
+  })
 }
 
+/**
+ * @template {Field.Array} T
+ * @arg {T} field
+ * @returns {Snapshot.FromField<T>}
+ */
 function getForArray(field) {
   const { children, error, invalid } = field.state.get()
   const { childrenInvalid, childValues, childErrors } = children.reduce(
@@ -54,26 +84,44 @@ function getForArray(field) {
     },
     { childrenInvalid: false, childValues: [], childErrors: [] }
   )
-  return {
+  return /** @type {Snapshot.FromField<T>} */ ({
     invalid: invalid || childrenInvalid,
     value: childValues,
     error: { self: error, children: childErrors },
-  }
+  })
 }
 
+/**
+ * @template {Field.Basic} T
+ * @arg {T} field
+ * @returns {Snapshot.FromField<T>}
+ */
 function getForBasic(field) {
   const { value, error, invalid } = field.state.get()
-  return { value, error, invalid }
+  return /** @type {Snapshot.FromField<T>} */ ({ value, error, invalid })
 }
 
+/**
+ * @template {Field.Object} T
+ * @arg {T} field
+ * @arg {(field: T) => void} f
+ * @returns {State.Unsubscribe}
+ */
 function subscribeForObject(field, f) {
   return subscribeToChildren({
     children: Object.values(field.fields),
+    /** @arg {ReturnType<typeof get<T>>} _ */
     notify: _ => f(field),
     subscribeToChild: subscribe,
   })
 }
 
+/**
+ * @template {Field.Array} T
+ * @arg {T} field
+ * @arg {(field: T) => void} f
+ * @returns {State.Unsubscribe}
+ */
 function subscribeForArray(field, f) {
   return subscribeToAll({
     state: field.state,
@@ -83,6 +131,12 @@ function subscribeForArray(field, f) {
   })
 }
 
+/**
+ * @template {Field.Basic} T
+ * @arg {T} field
+ * @arg {(field: T) => void} f
+ * @returns {State.Unsubscribe}
+ */
 function subscribeForBasic(field, f) {
   return field.state.subscribe(_ => f(field))
 }

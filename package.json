@@ -25,7 +25,19 @@
   "private": false,
   "license": "MIT",
   "repository": "https://github.com/kaliberjs/forms.git",
+  "scripts": {
+    "postinstall": "if test -f ./scripts/install-peer-dependencies-for-typescript.js; then node ./scripts/install-peer-dependencies-for-typescript.js; fi",
+    "test.types": "tsc --project tsconfig.type.test.json"
+  },
   "dependencies": {
     "react-fast-compare": "^3.0.1"
+  },
+  "peerDependencies": {
+    "@types/react": "^18.0.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "22",
+    "typescript": "^5.8.2"
   }
 }

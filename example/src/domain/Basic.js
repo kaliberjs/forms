@@ -1,5 +1,6 @@
 import { useForm, useFormField } from '@kaliber/forms'
-import { required, email } from '@kaliber/forms/validation'
+import { required, email, requiredT } from '@kaliber/forms/validation'
+/** @import { Field } from '@kaliber/forms/types' */
 
 const validationErrors = {
   required: 'This field is required',
@@ -15,7 +16,7 @@ export function Basic() {
     },
     // create the form structure, fields are essentially their validation functions
     fields: {
-      name: required,
+      name: requiredT('string'),
       email: [required, email],
     },
     // handle form submit
@@ -30,12 +31,14 @@ export function Basic() {
     </form>
   )
 
+  /** @arg {any} snapshot */
   function handleSubmit(snapshot) {
     // note that the snapshot can still be invalid
     console.log(snapshot)
   }
 }
 
+/** @arg {{ label: string, field: Field.Basic<string> }} props */
 function TextInput({ label, field }) {
   const { name, state, eventHandlers } = useFormField(field)
   const { value = '', error, showError } = state
@@ -45,7 +48,12 @@ function TextInput({ label, field }) {
         <label htmlFor={name}>{label}</label>
         <input id={name} type='text' {...{ name, value }} {...eventHandlers} />
       </div>
-      {showError && <p>{validationErrors[error.id]}</p>}
+      {showError && <p>{hasKey(validationErrors, error.id) ? validationErrors[error.id] : 'unkown error'}</p>}
     </>
   )
+}
+
+/** @arg {object} o @arg {string} k @returns {k is keyof o} */
+function hasKey(o, k) {
+  return k in o
 }

@@ -10,10 +10,10 @@ html {
 }
 
 body {
-  color: var(--color-gray-90);
-  font-family: var(--font-family-base);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-base-400);
+  color: #1c1c1c;
+  font-family: 'Barlow', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
   line-height: 1.7;
 }
 
