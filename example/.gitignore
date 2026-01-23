@@ -1,8 +1,4 @@
-*.DS_Store
-*.log
-*.sublime-workspace
 config/local.js
-node_modules
-sketch
-target
-.kaliber-build
+node_modules/
+target/
+.kaliber-build/

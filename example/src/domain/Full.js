@@ -10,7 +10,7 @@ import { Code } from './machinery/Code'
  * When you study this example, don't forget to check the components in the machinery directory
  */
 
-const fields = {
+const fields = asConst({
   naam: optionalT('string'),
   email: [required, email],
   geboortedatum: [required, date],
@@ -43,7 +43,7 @@ const fields = {
       throwError('Only `rood` and `groen` are acceptable types')
   ),
   voorwaarden: [required, /** @arg {boolean} x */ x => !x && error('voorwaardenVerplicht')],
-}
+})
 
 /** @typedef {Field.ObjectFromObjectInput<typeof fields>} FormType */
 
@@ -177,7 +177,7 @@ function Bedankt({ submitted, onReset }) {
   )
 }
 
-/** @arg {{ field: Field.Basic<boolean>, children: React.ReactNode, reverse?: boolean }} props */
+/** @arg {{ field: Field.Basic<boolean | undefined>, children: React.ReactNode, reverse?: boolean }} props */
 function Conditional({ field, children, reverse = false }) {
   const value = useFormFieldValue(field)
   return (reverse ? !value : value) && children

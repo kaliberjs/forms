@@ -1,1 +1,1 @@
-In the library (parent) directory run `yarn link`. In this directory run `yarn link "@kaliber/forms"`
+The example code in `domain/Basic.js` and `domain/Full.js`

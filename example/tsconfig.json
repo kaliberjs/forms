@@ -6,8 +6,8 @@
   "include": ["./src/**/*", "./types/**/*", "./config/**/*"],
   "exclude": ["./node_modules/**/*"],
   "compilerOptions": {
-    "module": "node16",
-    "moduleResolution": "node16",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "target": "ESNext",
     "resolveJsonModule": true,
     "preserveSymlinks": true,
@@ -18,14 +18,13 @@
     "strictNullChecks": true,
     "lib": ["dom", "esnext"],
     "jsx": "react",
-    "baseUrl": ".",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
     "paths": {
-      "/*?universal": ["src/*"],
-      "/*": ["src/*"]
+      "/*?universal": ["./src/*"],
+      "/*": ["./src/*"]
     },
-    "maxNodeModuleJsDepth": 10
+    "maxNodeModuleJsDepth": 3
   }
 }

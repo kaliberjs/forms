@@ -12,7 +12,7 @@ export function FormValues({ form }) {
 }
 
 /**
- * @arg {{ label: string, field: Field.Basic<string> }} props
+ * @arg {{ label: string, field: Field.Basic<string | undefined> }} props
  */
 export function FormTextInput({ field, label }) {
   const { name, state, eventHandlers } = useFormField(field)
@@ -29,7 +29,7 @@ export function FormNumberInput({ field, label }) {
 }
 
 /**
- * @arg {{ label: string, field: Field.Basic<boolean> }} props
+ * @arg {{ label: string, field: Field.Basic<boolean | undefined> }} props
  */
 export function FormCheckbox({ field, label }) {
   const { name, state, eventHandlers } = useBooleanFormField(field)
@@ -184,7 +184,7 @@ export function FormObjectField({ field, render }) {
  *   type: string,
  *   name: string,
  *   label: string,
- *   state: State.Basic<string | number>,
+ *   state: State.Basic<string | number | undefined>,
  *   eventHandlers: Field.Basic<string>['eventHandlers'],
  * }} props
  */

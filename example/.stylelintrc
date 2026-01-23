@@ -1,4 +1,4 @@
 {
-  "extends": "./node_modules/@kaliber/build/.stylelintrc",
+  "extends": "./node_modules/@kaliber/stylelint-plugin/.stylelintrc",
   "ignoreFiles": ["node_modules/**/*", "**/*.js", "**/*.svg", "**/*.md"]
 }
