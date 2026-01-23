@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       react-fast-compare:
-        specifier: ^3.0.1
+        specifier: ^3.0.0
         version: 3.2.2
     devDependencies:
       '@kaliber/eslint-plugin':
         specifier: ^1.0.0
         version: 1.0.3
       '@types/node':
-        specifier: '22'
+        specifier: ^22.0.0
         version: 22.19.3
       typescript:
-        specifier: ^5.8.2
+        specifier: ^5.0.0
         version: 5.9.3
 
 packages:
