@@ -6,6 +6,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "type": "module",
   "keywords": [
     "react",
     "forms",
@@ -17,6 +18,7 @@
     "index.js",
     "validation.js",
     "components.js",
+    "types.ts",
     "src/**",
     "LICENSE",
     "readme.md",
@@ -30,15 +32,15 @@
     "test.types": "tsc --project tsconfig.type.test.json"
   },
   "dependencies": {
-    "react-fast-compare": "^3.0.1"
+    "react-fast-compare": "^3.0.0"
   },
   "peerDependencies": {
     "@types/react": "^18.0.0",
-    "react": "^18.3.1"
+    "react": "^18.0.0"
   },
   "devDependencies": {
     "@kaliber/eslint-plugin": "^1.0.0",
-    "@types/node": "22",
-    "typescript": "^5.8.2"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
   }
 }
