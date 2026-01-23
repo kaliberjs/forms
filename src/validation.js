@@ -1,13 +1,13 @@
 /** @import { Falsy, ValidationFunction } from './types.ts' */
 
 
-/** 
+/**
  * @template {string | Constructable<any>} T
  * @typedef {(
- *   T extends Constructable<infer R> ? R : 
+ *   T extends Constructable<infer R> ? R :
  *   T extends string ? TypeLookup<T> :
  *   never
- * )} TypeFromLookupOrConstructable 
+ * )} TypeFromLookupOrConstructable
  */
 
 /**
@@ -23,14 +23,14 @@
  *   T extends `${infer A} | ${infer B}` ? TypeLookup<A> | TypeLookup<B> :
  *   T extends 'boolean' ? boolean :
  *   T extends `${infer X}[]` ? TypeLookup<X>[] :
- *   never
+ *   T
  * )} TypeLookup
  */
 
 /**
  * @template T
- * @param {T} type 
- * @returns {Constructable<T>} 
+ * @param {T} type
+ * @returns {Constructable<T>}
  */
 export function withT(type) {
   return /** @type {any} */(null)

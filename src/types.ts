@@ -29,9 +29,9 @@ export type MapTuple<T extends [...unknown[]], prop extends string> =
       ? [X[prop], ...MapTuple<Rest, prop>]
       : []
 
-export type ValidateToValue<R> = 
+export type ValidateToValue<R> =
   R extends ValidationFunction<infer T> ? T :
-  R extends readonly [] | null ? unknown : 
+  R extends readonly [] | null ? unknown :
   R extends readonly [ValidationFunction<infer T>] ? T :
   R extends readonly [ValidationFunction<infer T>, ...infer Rest] ? T & ValidateToValue<Rest> :
   never
@@ -63,7 +63,7 @@ export namespace FieldInput {
   export type Object = FieldSchema.ObjectFields
 
   export type Array = Object | HeterogeneousArrayInput
-  export type HeterogeneousArrayInput = (initialValue: unknown) => Object
+  export type HeterogeneousArrayInput = (initialValue: any) => Object
 }
 
 export type FieldSchema =
@@ -78,7 +78,7 @@ export namespace FieldSchema {
     T extends Object<infer X> ? ObjectFieldsToValues<X> :
     T extends Array<infer X> ? ArrayFieldsToValues<X> :
     T extends { validate: infer V } ? (
-      V extends Validate ? ValidateToValue<V> : ValidateToValue<T>) : 
+      V extends Validate ? ValidateToValue<V> : ValidateToValue<T>) :
     ValidateToValue<T>
 
   export type ObjectFieldsToValues<T extends ObjectFields> =
@@ -160,7 +160,7 @@ export namespace NormalizedField {
     T extends Validate ? ValidationFunction<ValidateToValue<T>> :
     never
 
-  export type Basic<T = unknown> = {
+  export type Basic<T = any> = {
     type: 'basic',
     validate: null | ValidationFunction<T>,
   }

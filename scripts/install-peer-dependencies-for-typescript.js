@@ -1,7 +1,7 @@
-const path = require('node:path')
-const config = require('../package.json')
-const childProcess = require('node:child_process')
-const fs = require('node:fs')
+import path from 'node:path'
+import config from '../package.json' with { type: 'json' }
+import childProcess from 'node:child_process'
+import fs from 'node:fs'
 
 console.log('Installing peer dependencies for typescript')
 
@@ -16,12 +16,12 @@ const packageJson = path.join(targetDir, 'package.json')
 if (!fs.existsSync(packageJson))
   fs.writeFileSync(packageJson, '{}')
 
-const yarn = childProcess.spawn(
-  'yarn',
-  'add --pure-lockfile'.split(' ').concat(packages),
+const pnpm = childProcess.spawn(
+  'pnpm',
+  'add --lockfile=false'.split(' ').concat(packages),
   { env: { ...process.env, PREVENT_LOOP: 'true' }, cwd: targetDir }
 )
-yarn.stdout.on('data', data => process.stdout.write(data))
-yarn.stderr.on('data', data => process.stderr.write(data))
-yarn.on('error', e => { throw e })
-yarn.on('close', code => process.exit(code))
+pnpm.stdout.on('data', data => process.stdout.write(data))
+pnpm.stderr.on('data', data => process.stderr.write(data))
+pnpm.on('error', e => { throw e })
+pnpm.on('close', code => process.exit(code))

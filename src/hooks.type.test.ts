@@ -132,9 +132,9 @@ expectAssignable<
           c?: boolean
         }): void
         remove(entry: Field.Object<{
-          a: Field.Basic<string>
-          b: Field.Basic<number>
-          c: Field.Basic<boolean>
+          a: Field.Basic<string | undefined>
+          b: Field.Basic<number | undefined>
+          c: Field.Basic<boolean | undefined>
         }>): void
     }
   },

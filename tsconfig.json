@@ -4,25 +4,23 @@
     "./index.js",
     "./types.ts",
     "./validation.js",
-    "./types/**/*",
+    "./scripts/**/*",
     "./src/**/*"
   ],
   "compilerOptions": {
-    "module": "preserve",
-    "moduleResolution": "bundler",
-    "preserveSymlinks": true,
-    "lib": ["dom", "esnext"],
-    "jsx": "react-jsx",
-    "baseUrl": ".",
     "allowJs": true,
     "checkJs": true,
     "noEmit": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "lib": ["dom", "esnext"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "useUnknownInCatchVariables": false,
     "allowImportingTsExtensions": true,
     "allowUmdGlobalAccess": true,
     "paths": {
-      "*": ["./typescript/node_modules/@types/*", "./typescript/node_modules/*", "*"]
+      "*": ["./typescript/node_modules/@types/*", "./typescript/node_modules/*"]
     }
   }
 }

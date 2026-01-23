@@ -74,6 +74,10 @@ function getForObject(field) {
 function getForArray(field) {
   const { children, error, invalid } = field.state.get()
   const { childrenInvalid, childValues, childErrors } = children.reduce(
+    /**
+     * @arg {{ childrenInvalid: boolean, childValues: Record<string, any>[], childErrors: Snapshot.Object['error'][] }} result
+     * @arg {Field.Object<Field.ObjectFields>} child
+     */
     ({ childrenInvalid, childValues, childErrors }, child) => {
       const { value, error, invalid } = get(child)
       return {
@@ -110,9 +114,9 @@ function getForBasic(field) {
 function subscribeForObject(field, f) {
   return subscribeToChildren({
     children: Object.values(field.fields),
-    /** @arg {ReturnType<typeof get<T>>} _ */
+    /** @arg {ReturnType<typeof get<Field.ObjectFields[string]>>} _ */
     notify: _ => f(field),
-    subscribeToChild: subscribe,
+    subscribeToChild: /** @type {typeof subscribe<Field.ObjectFields[string]>} */ (subscribe),
   })
 }
 
